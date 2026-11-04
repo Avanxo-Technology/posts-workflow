@@ -84,6 +84,63 @@ function cmdInit(args) {
   console.log(`Listo. Raíz de posts: ${target}`);
 }
 
+
+// ---- brand: alta de marcas nuevas (todo lo necesario sale de _shared/base, sin descargas) ----
+const hex = v => /^#[0-9a-fA-F]{6}$/.test(v || '');
+const mix = (h, t, k) => '#' + [1, 3, 5].map(i => Math.round(parseInt(h.slice(i, i + 2), 16) * (1 - k) + t * k).toString(16).padStart(2, '0')).join('');
+function cmdBrand(args) {
+  const [sub, ...rest] = args;
+  if (sub === 'list' || sub === undefined) {
+    for (const id of brands()) { const b = brandOf(id); console.log(`${id.padEnd(14)} ${b.name}  ·  sonido: ${b.sound || 'synth'}  ·  diseño: ${b.designFile || '(sin archivo)'}`); }
+    return;
+  }
+  if (sub !== 'add') die('Uso: posts brand list | posts brand add <id> --name "Nombre" --dark #hex --light #hex --accent #hex --head "Fuente" [--body "Fuente"] [--short "SIGLA"] [--whatsapp ...] [--web ...] [--design ruta]');
+  const a = [...rest], id = a.shift();
+  const f = n => flag(a, n);
+  const o = {name: f('--name'), short: f('--short'), dark: f('--dark'), light: f('--light'), accent: f('--accent'), head: f('--head'),
+    body: f('--body') || 'Inter', wa: f('--whatsapp') || 'WhatsApp', web: f('--web') || 'tusitio.com', design: f('--design')};
+  if (!id || !/^[a-z0-9-]+$/.test(id)) die('El id de la marca va en minúsculas, sin espacios (ej. mimarca)');
+  if (existsSync(join(TOOL, 'brands', id + '.json'))) die(`La marca "${id}" ya existe`);
+  for (const [k, v] of [['--dark', o.dark], ['--light', o.light], ['--accent', o.accent]]) if (!hex(v)) die(`${k} debe ser un color #RRGGBB`);
+  if (!o.name || !o.head) die('Faltan --name y --head (fuente de Google Fonts para los títulos)');
+  o.short = o.short || o.name.toUpperCase();
+  const gf = n => 'family=' + n.replace(/ /g, '+') + ':wght@400;700';
+  const fonts = 'https://fonts.googleapis.com/css2?' + [...new Set([o.head, o.body])].map(gf).join('&') + '&display=swap';
+  const bg2 = mix(o.dark, 255, 0.1), accentDark = mix(o.accent, 0, 0.25);
+  const bdir = join(TOOL, 'brands', id, '_shared');
+  mkdirSync(bdir, {recursive: true});
+  const fill = t => t.replaceAll('__BRAND__', o.short).replaceAll('__FONTS__', fonts).replaceAll('__HEAD__', `'${o.head}'`).replaceAll('__BODY__', `'${o.body}'`)
+    .replaceAll('__WA__', o.wa).replaceAll('__WEB__', o.web)
+    .replaceAll('__VARS__', `  --bg:${o.dark};--bg2:${bg2};--accent:${o.accent};--accent-dark:${accentDark};--light:${o.light};`);
+  writeFileSync(join(bdir, 'video-template.html'), fill(read(join(TOOL, '_shared', 'base', 'video-template.html'))));
+  copyFileSync(join(TOOL, '_shared', 'base', 'synth.py'), join(bdir, 'synth.py'));
+  copyFileSync(join(TOOL, '_shared', 'base', 'gen_audio.template.py'), join(bdir, 'gen_audio.template.py'));
+  writeFileSync(join(TOOL, 'brands', id + '.json'), JSON.stringify({name: o.name, short: o.short, sound: 'synth (sin música)', designFile: o.design || null, designExtra: [],
+    fonts, headFont: o.head, bodyFont: o.body, dark: o.dark, light: o.light, accent: o.accent, legacyMonths: {}}, null, 2) + '\n');
+  writeFileSync(join(TOOL, 'brands', id + '.md'), `# Marca: ${id}
+
+${o.name}
+
+DATOS A COMPLETAR (verificar contra el sitio real antes de usarlos)
+  Sitio web:   ${o.web}
+  Contacto:    ${o.wa}
+  Logo:        (ruta de los archivos del logo)
+  Tipografía:  ${o.head} (títulos) + ${o.body} (texto)
+  Colores:     fondo oscuro ${o.dark}, claro ${o.light}, acento ${o.accent}
+  Diseño:      ${o.design || '(sin archivo de diseño: pedir la ruta al usuario o usar el CSS del sitio)'}
+
+RECURSOS
+  brands/${id}/_shared/: video-template.html, synth.py (sonido sintetizado, sin descargas ni música), gen_audio.template.py.
+  Sonido: SINTETIZADO (docs/audio.md, enfoque C).
+`);
+  console.log(`✓ Marca "${id}" creada en ${join(TOOL, 'brands')}`);
+  if (POSTS) {
+    const dest = join(POSTS, id, '_shared');
+    try { lstatSync(dest); } catch { mkdirSync(dirname(dest), {recursive: true}); symlinkSync(bdir, dest); console.log(`✓ Enlazada en ${dest}`); }
+  } else console.log('Falta definir la carpeta de posts: posts init <ruta> (enlaza los recursos de la marca).');
+  console.log(`Siguiente: completar brands/${id}.md · posts new ${id} carousel|video --title "Tema"`);
+}
+
 // ---- comandos ----
 function cmdNew(args) {
   const month = flag(args, '--month') || MESES[new Date().getMonth()];
@@ -249,6 +306,8 @@ function cmdCheck(args) {
 const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: ${TOOL} · Piezas: ${POSTS || '(sin definir: posts init <ruta>)'}
 
   posts init <carpeta-de-posts>                                     una vez: define dónde están las piezas y enlaza recursos
+  posts brand add <id> --name "Nombre" --dark #hex --light #hex --accent #hex --head "Fuente" [--body ...]   marca NUEVA (plantillas y sonido listos)
+  posts brand list                                                  marcas disponibles
   posts new <marca> carousel|video [--title "Tema"] [--month mes]   crea carpeta + plantilla (mes y número automáticos)
   posts list [marca] [mes]                                          lista las piezas y su estado
   posts preview <pieza> [N|segundo] [--open]                        URL de vista previa (lámina N / segundo t); --open la abre
@@ -262,5 +321,5 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   Marcas: ${brands().join(', ')}`;
 
 const [cmd, ...rest] = process.argv.slice(2);
-if (cmd !== 'init' && cmd && cmd !== 'help' && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
-({init: cmdInit, new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);
+if (!['init', 'brand', 'help'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
+({init: cmdInit, brand: cmdBrand, new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);

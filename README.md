@@ -14,8 +14,18 @@ cd ~/tools/posts-workflow
 ./posts init /ruta/a/la/carpeta/de/posts      # guarda la ruta (.posts-dir) y enlaza recursos dentro de esa carpeta
 ln -s ~/tools/posts-workflow/posts ~/.local/bin/posts   # opcional: usar `posts` desde cualquier carpeta
 ```
-Los efectos de sonido de AGA y GREMCO no se versionan: `python3 brands/aga/_shared/fetch_sfx.py` y
-`python3 brands/gremco/_shared/fetch_sfx.py` los descargan. La música de AGA (2 mp3 de Mixkit, #33 y #175) NO se versiona ni se descarga sola: copiarla a `brands/aga/_shared/music/33.mp3` y `175.mp3` (ver `CREDITOS-SONIDO.txt`); sin ella `posts audio` falla en AGA.
+Sonido: GMAQ, Pirotecnia y cualquier marca nueva usan sonido sintetizado (sin descargas). AGA trae sus 48 efectos en el repo
+(`brands/aga/_shared/sfx/`) y su música de fondo es OPCIONAL: sin `brands/aga/_shared/music/33.mp3` el video queda solo con efectos.
+Los efectos de GREMCO se descargan una vez: `python3 brands/gremco/_shared/fetch_sfx.py`.
+
+## Marca nueva (cualquier proyecto)
+```
+posts brand add mimarca --name "Mi Marca" --dark "#1A1A2E" --light "#F5F5F5" --accent "#E94560" --head "Montserrat" --body "Inter" \
+  --whatsapp "300 000 0000" --web mimarca.com [--short "MIMARCA"] [--design /ruta/DESIGN.md]
+posts new mimarca carousel --title "Tema"        # o: video
+```
+Crea `brands/mimarca.json/.md` y `brands/mimarca/_shared/` (plantilla de video con tus colores y fuentes, sonido sintetizado sin descargas)
+y lo enlaza en tu carpeta de posts. Luego se completa `brands/mimarca.md` (logo, contacto, sitio). `posts brand list` muestra las marcas.
 
 ## Uso
 ```

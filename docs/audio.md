@@ -1,5 +1,6 @@
 # Sonido de los videos (una paleta por marca)
 
+MÚSICA: solo AGA la usa y es OPCIONAL (si no existe brands/aga/_shared/music/33.mp3 el video queda solo con efectos). Marcas nuevas: sonido sintetizado (enfoque C), sin descargas.
 Las plantillas gen_audio.template.py de cada <marca>/_shared ya traen el esqueleto correcto; `posts new <marca> video` lo copia como gen_audio.py.
 Rutas de piezas nuevas: <marca>/<mes>/postVideos/postVideoN -> `../../../_shared` (la _shared de la marca).
 

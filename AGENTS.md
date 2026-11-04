@@ -18,5 +18,6 @@ Raíz: esta carpeta. CLI: `./posts help` (comandos: new, list, preview, audio, e
 | Carrusel | docs/carousel.md |
 | Video | docs/video.md + docs/audio.md |
 | Exportar, caption, revisar | docs/export.md |
+| Marca que no existe | `posts brand add` (README) + WORKFLOW.md |
 | Algo antiguo o raro | docs/legacy.md |
 | Prompt para pegar en otra IA | guia-posts.txt |

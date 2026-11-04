@@ -64,8 +64,13 @@ class Mix:
 
 
 def finish(raw, music, out, total, music_db=-13, start=0.0, fade_out=2.0, lufs=-15):
-    """música de fondo (fundido de entrada y salida) que se baja sola cuando suenan los efectos (sidechain) + normalización"""
+    """música de fondo OPCIONAL (si `music` es None o no existe, solo se normalizan los efectos); con música: fundido de entrada y salida que se baja sola cuando suenan los efectos (sidechain) + normalización"""
     T = total
+    if not music or not os.path.exists(music):   # sin música: solo efectos, normalizados
+        subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', raw, '-af',
+                        f"aformat=sample_fmts=fltp:channel_layouts=stereo,loudnorm=I={lufs}:TP=-1.5:LRA=9,atrim=duration={T}",
+                        '-ar', '44100', '-ac', '2', out], check=True)
+        return
     fc = (f"[0:a]atrim=start={start}:duration={T},asetpts=PTS-STARTPTS,volume={music_db}dB,afade=t=in:d=1.2,"
           f"afade=t=out:st={T - fade_out}:d={fade_out},aformat=sample_fmts=fltp:channel_layouts=stereo[m];"
           f"[1:a]aformat=sample_fmts=fltp:channel_layouts=stereo,asplit=2[sa][sb];"

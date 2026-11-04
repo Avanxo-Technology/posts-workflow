@@ -1,10 +1,11 @@
 # configuración local de cada equipo (ruta de las piezas)
 .posts-dir
-# audio pesado y regenerable (efectos: python3 brands/<marca>/_shared/fetch_sfx.py; música: ver CREDITOS-SONIDO.txt)
-brands/*/_shared/sfx/
+# música de AGA (opcional; licencia Mixkit) y efectos de GREMCO (se descargan con fetch_sfx.py)
 brands/*/_shared/music/
-# resultados y temporales
+brands/gremco/_shared/sfx/
+# salidas de cada pieza
 *.mp4
-*.wav
+sfx.wav
+_sfx_raw.wav
 __pycache__/
 node_modules/

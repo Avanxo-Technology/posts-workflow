@@ -22,7 +22,8 @@ Estructura: ver docs/legacy.md (piezas nuevas: <marca>/<mes>/postN y <marca>/<me
   NO volver a preguntar lo que ya está en brands/<marca>.md/.json ni la ubicación de los posts (la raíz es la carpeta de este archivo).
   Si la marca no tiene archivo de diseño (brands/<marca>.json -> designFile null, o el archivo no existe): pedir la ruta al usuario; si no la
   tiene, pedir PERMISO EXPRESO para buscarlo dentro de los proyectos de /home/guarapo/gosites y decir dónde se va a buscar. No buscar en otros sitios.
-  Marca nueva (sin brands/<marca>.json): pedir logo, colores, tipografías, contacto y sitio web.
+  Marca nueva (sin brands/<marca>.json): pedir nombre, 3 colores (#RRGGBB oscuro/claro/acento), fuente de títulos y de texto (Google Fonts), logo,
+  contacto y sitio web; luego `posts brand add <id> ...` (ver README) y completar brands/<id>.md.
 
 ## Aprobaciones (nunca saltarlas)
   Estructura -> construir. Vista previa -> export definitivo. Cambios posteriores -> avisar y regenerar solo si lo piden.
