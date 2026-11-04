@@ -1,6 +1,6 @@
 GUÍA DE POSTS (CARRUSELES Y VIDEOS/REELS) · ÍNDICE Y PROMPT
 ============================================================
-Marcas: GMAQ · AGA Growth Advisors · GREMCO · Pirotecnia (Favio Favio Domino). Carpeta raíz: /home/guarapo/gosites/posts
+Marcas: GMAQ · AGA Growth Advisors · GREMCO · Pirotecnia (Favio Favio Domino). Carpeta raíz: la carpeta de posts definida con `posts init` (ej. /ruta/a/tus/posts)
 Actualizada 2026-11-04. La guía ahora está dividida por tarea para que la IA lea solo lo que necesita.
 
 ARCHIVOS (todos dentro de la raíz)
@@ -33,7 +33,7 @@ PROMPT GENÉRICO
 Copiar y pegar en una IA con acceso a terminal y archivos. Reemplazar lo que está entre [corchetes]; lo que quede vacío la IA lo preguntará.
 
 ----- INICIO DEL PROMPT -----
-Trabaja en la carpeta de posts [/home/guarapo/gosites/posts  | otra ruta: ______] con el CLI `posts`. Lee AGENTS.md y sigue sus instrucciones (te indica qué otros
+Trabaja en la carpeta de posts [/ruta/a/tus/posts] con el CLI `posts`. Lee AGENTS.md y sigue sus instrucciones (te indica qué otros
 archivos leer según la tarea). Eres diseñador/a de contenido para redes. Crea una pieza para la marca
 [GMAQ | AGA | GREMCO | PIROTECNIA | otra] de tipo [carrusel de Instagram | video/reel vertical].
 
@@ -45,7 +45,7 @@ en la carpeta, y espera mis respuestas. No supongas ni inventes. Debes cubrir, s
  1. Marca y tipo de pieza. Si la marca no tiene brands/<marca>.json: logo, colores, tipografías, contacto y sitio web.
  2. Ubicación de los posts, solo si NO es la carpeta indicada arriba. Mes: el actual (automático) salvo que yo diga otro.
  3. Archivo de diseño (DESIGN.md / design.md): si la marca ya lo tiene configurado, úsalo sin preguntar. Si no lo tiene o no existe,
-    pídeme la ruta; si no la tengo, PÍDEME PERMISO EXPRESO para buscarlo dentro de los proyectos de /home/guarapo/gosites,
+    pídeme la ruta; si no la tengo, PÍDEME PERMISO EXPRESO para buscarlo dentro de los proyectos gosite (la carpeta que los contiene; ver PROJECTS_DIR en `posts help`),
     diciéndome dónde vas a buscar. No busques en otros lugares. Si no existe, dime cuál será tu fuente de diseño y confírmalo.
  4. Material: ruta exacta de fotos, logos, clips o flyers. Si no hay, pregunta si puedes tomar imágenes del sitio de la marca.
     Para clips: cuáles, de qué segundo a qué segundo y si conservar su audio. No uses imágenes que no hayas confirmado.
