@@ -14,7 +14,7 @@ AGA — asesoría financiera, tributaria y empresarial para pymes, Barranquilla
   Video:      sistema visual en _shared/aga.css; transiciones lima/navy (wipe, bars, iris); pastillas lima, hoja con ✓ lima.
 
 RECURSOS (piezas nuevas)
-  aga/_shared/: engine.js (motor), aga.css (sistema visual), sfxlib.py, fetch_sfx.py, sfx/ (52 efectos), music/, CREDITOS-SONIDO.txt,
+  aga/_shared/: engine.js (motor), aga.css (sistema visual), sfxlib.py, fetch_sfx.py, sfx/ (48 efectos), music/, CREDITOS-SONIDO.txt,
   video-template.html, gen_audio.template.py. (aga/noviembre/_shared es la copia ANTIGUA que usan los videos ya hechos.)
   Sonido: efectos REALES + música con ducking (docs/audio.md, enfoque A). Transiciones lima/navy en canvas (wipe, bars, iris).
   Los logos viven en el img/ de cada video (posts new aga video copia los del último video).
