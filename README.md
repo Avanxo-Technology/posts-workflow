@@ -38,9 +38,10 @@ y lo enlaza en tu carpeta de posts. Luego se completa `brands/mimarca.md` (logo,
 ```
 posts new <marca> carousel|video [--title "Tema"] [--month mes]   crea la carpeta con plantilla
 posts list [marca] [mes]          posts preview <pieza> [N|seg] [--open]      posts audio <video>
-posts export <carrusel> [N] [--out DIR]     posts export <video> [--frame seg salida.png]     posts check <pieza>
+posts sound <video> [on|off]      posts analyze <video.mp4> [--from s --to s]   (video de referencia para transiciones)
+posts export <carrusel> [N] [--out DIR]     posts export <video> --yes     posts export <video> --frame seg salida.png     posts check <pieza>
 ```
-`posts brand show <marca>` resume en pocas líneas lo que la IA necesita de una marca. `posts help` muestra el detalle. Los videos se graban solo con aprobación (`posts export <video>`).
+`posts brand show <marca>` resume en pocas líneas lo que la IA necesita de una marca. `posts help` muestra el detalle. El MP4 solo se graba con `--yes`, cuando el usuario lo indica. Cada video puede ir con o sin efectos de sonido (`--sound on|off`) y se puede pasar un video de referencia (`posts analyze`, `docs/reference-video.md`).
 
 ## Contenido
 | Ruta | Qué es |

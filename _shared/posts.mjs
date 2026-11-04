@@ -53,6 +53,11 @@ function piecesOf(name, b) {
   return out;
 }
 
+// ---- sonido por pieza: piece.json {"sound": true|false} (por defecto true) ----
+const soundOf = (dir, override) => override === 'on' ? true : override === 'off' ? false : (() => { try { return JSON.parse(read(join(dir, 'piece.json'))).sound !== false; } catch { return true; } })();
+function setSound(dir, on) { let j = {}; try { j = JSON.parse(read(join(dir, 'piece.json'))); } catch {} j.sound = on; writeFileSync(join(dir, 'piece.json'), JSON.stringify(j, null, 2) + '\n'); }
+const checkSoundArg = v => { if (v !== null && !['on', 'off'].includes(v)) die('--sound debe ser on u off'); return v; };
+
 // ---- localizar una pieza ----
 function resolvePiece(arg) {
   if (!arg) die('Falta la carpeta de la pieza (ej. aga/noviembre/postVideos/postVideo1)');
@@ -174,12 +179,67 @@ RECURSOS
   console.log(`Completa brands/${id}.md y contact en brands/${id}.json. Para subirla al repo: git add brands/${id}.* brands/${id}/ && git commit && git push (solo si el usuario lo pide).`);
 }
 
+// ---- sound: activar/desactivar el sonido de una pieza de video ----
+function cmdSound(args) {
+  const [p, v] = args; const dir = resolvePiece(p);
+  if (isCarousel(dir)) die('Un carrusel no tiene sonido');
+  if (!v) { console.log(soundOf(dir) ? 'on' : 'off'); return; }
+  if (!['on', 'off'].includes(v)) die('Uso: posts sound <video> [on|off]');
+  setSound(dir, v === 'on');
+  if (v === 'on') {
+    const tpl = join(POSTS, ctxOf(dir).brand, '_shared', 'gen_audio.template.py');
+    if (!existsSync(join(dir, 'gen_audio.py')) && existsSync(tpl)) { copyFileSync(tpl, join(dir, 'gen_audio.py')); console.log('Se copió gen_audio.py (plantilla): ajusta sus tiempos a index.html y corre posts audio'); }
+  }
+  console.log(`Sonido ${v === 'on' ? 'activado' : 'desactivado'}: el video se graba ${v === 'on' ? 'con sfx.wav' : 'sin audio'}`);
+}
+
+// ---- analyze: material para que la IA estudie un video de referencia (transiciones, ritmo) ----
+function cmdAnalyze(args) {
+  const outOpt = flag(args, '--out'), max = parseInt(flag(args, '--max') || '8'), thr = flag(args, '--threshold') || '0.12', from = flag(args, '--from'), to = flag(args, '--to');
+  const file = args[0] && resolve(args[0]);
+  if (!file || !existsSync(file)) die('Uso: posts analyze <video.mp4> [--from s --to s] [--out DIR] [--max N] [--threshold 0.12]');
+  const out = outOpt ? resolve(outOpt) : join(POSTS, '_refs', basename(file).replace(/\.[^.]+$/, ''));
+  mkdirSync(out, {recursive: true});
+  if (from !== null && to !== null) {   // zoom a un tramo: fotogramas cada 0.2 s (la forma de ver CÓMO es una transición)
+    const a = parseFloat(from), b = parseFloat(to), n = Math.max(1, Math.round((b - a) * 5)), cols = Math.min(8, n), rows = Math.ceil(n / cols);
+    const f = join(out, `window_${a}-${b}.png`);
+    run('ffmpeg', ['-v', 'error', '-y', '-ss', String(a), '-t', String(b - a), '-i', file, '-vf', `fps=5,scale=216:-2,tile=${cols}x${rows}`, '-frames:v', '1', f]);
+    console.log(existsSync(f) ? `tramo ${a}-${b} s: ${n} fotogramas (1 cada 0.2 s, de izquierda a derecha, arriba a abajo) -> ${f}` : 'No se pudo generar el tramo');
+    return;
+  }
+  const j = probe(file, 'stream=codec_type,codec_name,width,height,r_frame_rate:format=duration');
+  const v = j.streams?.find(x => x.codec_type === 'video'), au = j.streams?.find(x => x.codec_type === 'audio');
+  if (!v) die('El archivo no tiene pista de video');
+  const dur = parseFloat(j.format.duration), [fn, fd] = v.r_frame_rate.split('/').map(Number), fps = fd ? fn / fd : fn;
+  // cortes de escena (cambio brusco entre fotogramas); las transiciones animadas suelen producir 1-3 detecciones seguidas
+  const r = run('ffmpeg', ['-v', 'info', '-i', file, '-vf', `select='gt(scene,${thr})',showinfo`, '-an', '-f', 'null', '-'], {maxBuffer: 1 << 26});
+  const all = [...(r.stderr || '').matchAll(/pts_time:([\d.]+)/g)].map(m => parseFloat(m[1]));
+  const cuts = []; for (const t of all) if (!cuts.length || t - cuts.at(-1) > 0.6) cuts.push(t);
+  const pick = cuts.length > max ? Array.from({length: max}, (_, i) => cuts[Math.round(i * (cuts.length - 1) / (max - 1))]) : cuts;
+  const files = [];
+  pick.forEach((c, i) => {   // 6 fotogramas alrededor del corte (cada 0.2 s): ahí se ve el tipo de transición
+    const f = join(out, `cut_${String(i + 1).padStart(2, '0')}.png`), t0 = Math.max(0, c - 0.6);
+    run('ffmpeg', ['-v', 'error', '-y', '-ss', String(t0), '-t', '1.3', '-i', file, '-vf', 'fps=5,scale=270:-2,tile=6x1', '-frames:v', '1', f]);
+    if (existsSync(f)) files.push([c, f]);
+  });
+  const ov = join(out, 'overview.png');   // 10 fotogramas repartidos: composición y ritmo general
+  run('ffmpeg', ['-v', 'error', '-y', '-i', file, '-vf', `fps=10/${dur.toFixed(2)},scale=216:-2,tile=10x1`, '-frames:v', '1', ov]);
+  const lines = [`archivo: ${file}`, `video: ${v.width}x${v.height} · ${fps.toFixed(0)} fps · ${dur.toFixed(1)} s · audio: ${au ? au.codec_name : 'no'}`,
+    `cortes bruscos detectados: ${cuts.length} (umbral ${thr}; las transiciones animadas suelen NO detectarse: usar overview.png y --from/--to)` + (cuts.length ? ' en ' + cuts.map(t => t.toFixed(1) + 's').join(', ') : ''),
+    cuts.length ? `duración media por escena: ${(dur / (cuts.length + 1)).toFixed(1)} s` : 'sin cortes: video continuo o transiciones suaves (prueba --threshold 0.15)',
+    `imágenes (la IA debe MIRARLAS): ${existsSync(ov) ? ov : ''}`, ...files.map(([c, f]) => `  corte en ${c.toFixed(1)} s -> ${f}  (6 fotogramas de ${(Math.max(0, c - 0.6)).toFixed(1)} a ${(c + 0.6).toFixed(1)} s)`),
+    'Siguiente: ver el overview, localizar los cambios de escena y pedir el tramo: posts analyze <video> --from <seg> --to <seg>. Guía: docs/reference-video.md'];
+  writeFileSync(join(out, 'ref.txt'), lines.join('\n') + '\n');
+  console.log(lines.join('\n'));
+}
+
 // ---- comandos ----
 function cmdNew(args) {
   const month = flag(args, '--month') || MESES[new Date().getMonth()];
   const title = flag(args, '--title') || 'TÍTULO';
+  const sound = checkSoundArg(flag(args, '--sound')) || 'on';
   const [bn, kind] = args;
-  if (!bn || !['carousel', 'video'].includes(kind)) die('Uso: posts new <marca> carousel|video [--title "Tema"] [--month mes]');
+  if (!bn || !['carousel', 'video'].includes(kind)) die('Uso: posts new <marca> carousel|video [--title "Tema"] [--month mes] [--sound on|off]');
   const b = brandOf(bn), base = join(POSTS, bn), shared = join(base, '_shared');
   if (!MESES.includes(month)) die(`Mes inválido "${month}" (en español y minúsculas)`);
   const n = nextNumber(base, month, kind, b.legacyMonths);
@@ -199,8 +259,9 @@ function cmdNew(args) {
     const tpl = join(shared, 'video-template.html');
     if (!existsSync(tpl)) die(`Falta ${tpl}`);
     writeFileSync(join(dir, 'index.html'), read(tpl).replaceAll('__TOTAL__', '8').replace('– TÍTULO', '– ' + title));
+    setSound(dir, sound === 'on');
     const ga = join(shared, 'gen_audio.template.py');
-    if (existsSync(ga)) copyFileSync(ga, join(dir, 'gen_audio.py'));
+    if (sound === 'on' && existsSync(ga)) copyFileSync(ga, join(dir, 'gen_audio.py'));
     if (bn === 'aga') { // los logos viven en el img/ de cada video: heredar los del último video de AGA
       const old = [...dirs(base)].flatMap(m => dirs(join(base, m, 'postVideos')).map(v => join(base, m, 'postVideos', v)))
         .filter(v => v !== dir && existsSync(join(v, 'img', 'logo-white.png'))).sort((a, c) => mtime(c) - mtime(a))[0];
@@ -241,19 +302,25 @@ function cmdPreview(args) {
 
 function cmdAudio(args) {
   const dir = resolvePiece(args[0]);
+  if (!soundOf(dir)) { console.log('Sonido desactivado en esta pieza (piece.json). Actívalo con: posts sound <pieza> on'); return; }
   if (!existsSync(join(dir, 'gen_audio.py'))) die('No hay gen_audio.py en esa carpeta');
   const r = run('python3', ['gen_audio.py'], {cwd: dir, stdio: 'inherit'});
   process.exit(r.status ?? 1);
 }
 
 function cmdExport(args) {
-  const outDir = flag(args, '--out'), frame = flag(args, '--frame');
+  const outDir = flag(args, '--out'), frame = flag(args, '--frame'), yes = flag(args, '--yes', false), snd = checkSoundArg(flag(args, '--sound'));
   const dir = resolvePiece(args[0]);
   if (isCarousel(dir)) {
     const a = [join(HERE, 'export-carousel.mjs'), dir]; if (args[1]) a.push(args[1]); if (outDir) a.push('--out', outDir);
     process.exit(run('node', a, {stdio: 'inherit'}).status ?? 1);
   }
   const a = [join(HERE, 'render.mjs')];
+  if (frame === null && !yes) {
+    console.error('✗ Esto graba reel.mp4 (tarda varios minutos). Solo se hace cuando el usuario lo indica: repite con --yes.\n  Para revisar sin grabar: posts export <video> --frame <segundo> <salida.png>');
+    process.exit(2);
+  }
+  if (frame === null && !soundOf(dir, snd)) a.push('--no-audio');
   if (frame !== null) { const out = args[1]; if (!out) die('Uso: posts export <video> --frame <segundo> <salida.png>'); a.push('--frame', frame, resolve(out)); }
   process.exit(run('node', a, {cwd: dir, stdio: 'inherit'}).status ?? 1);
 }
@@ -272,7 +339,7 @@ function cmdCheck(args) {
   const refs = new Set();
   for (const m of html.matchAll(/(?:src|href)="([^"#?]+)[^"]*"/g)) refs.add(m[1]);
   for (const m of html.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)) refs.add(m[1]);
-  const missing = [...refs].filter(r => !/^(https?:|data:|\/\/|#|%23|mailto:)/.test(r) && !r.includes('__') && !existsSync(resolve(dir, decodeURI(r))));
+  const missing = [...refs].filter(r => !/^(https?:|data:|\/\/|#|%23|mailto:)/.test(r) && !r.includes('__') && r !== 'sfx.wav' && !existsSync(resolve(dir, decodeURI(r))));
   missing.length ? bad(`Archivos referenciados que no existen: ${missing.join(', ')}`) : ok(`Rutas relativas (${refs.size} referencias)`);
   if (/TÍTULO|__TOTAL__|Titular|Kicker de la portada/.test(html)) warn('index.html aún tiene textos de la plantilla (TÍTULO / Titular gigante / Kicker…)');
   // caption
@@ -299,13 +366,14 @@ function cmdCheck(args) {
     const T = html.match(/var TOTAL\s*=\s*([\d.]+)/) || html.match(/\btotal\s*:\s*([\d.]+)/);
     const total = T ? parseFloat(T[1]) : null;
     total ? ok(`Duración en el HTML: ${total}s`) : bad('No encuentro TOTAL/total en index.html');
-    const ga = join(dir, 'gen_audio.py');
-    if (existsSync(ga)) {
+    const snd = soundOf(dir), ga = join(dir, 'gen_audio.py'), wav = join(dir, 'sfx.wav');
+    if (!snd) ok('Sonido desactivado en esta pieza (video sin audio)');
+    else if (existsSync(ga)) {
       const g = read(ga).match(/TOTAL\s*=\s*([\d.]+)/) || read(ga).match(/Mix\(\s*([\d.]+)\s*\)/);
       if (g && total) Math.abs(parseFloat(g[1]) - total) > 0.01 ? bad(`TOTAL distinto: HTML ${total}s vs gen_audio.py ${g[1]}s`) : ok('TOTAL de gen_audio.py = HTML');
     } else warn('No hay gen_audio.py');
-    const wav = join(dir, 'sfx.wav');
-    if (!existsSync(wav)) warn('Falta sfx.wav (posts audio)');
+    if (!snd) {}
+    else if (!existsSync(wav)) warn('Falta sfx.wav (posts audio)');
     else {
       const d = parseFloat(probe(wav, 'format=duration').format?.duration);
       total && Math.abs(d - total) > 0.2 ? bad(`sfx.wav dura ${d.toFixed(2)}s y el HTML ${total}s`) : ok(`sfx.wav: ${d.toFixed(2)}s`);
@@ -318,7 +386,7 @@ function cmdCheck(args) {
       const v = j.streams?.find(s => s.codec_type === 'video'), a = j.streams?.find(s => s.codec_type === 'audio');
       v && v.width === 1080 && v.height === 1920 ? ok('Resolución 1080x1920') : bad(`Resolución ${v?.width}x${v?.height} (se espera 1080x1920)`);
       v && v.r_frame_rate === '30/1' ? ok('30 fps') : warn(`fps: ${v?.r_frame_rate}`);
-      a && a.codec_name === 'aac' ? ok('Audio AAC') : warn('reel.mp4 no tiene pista de audio AAC');
+      if (snd) a && a.codec_name === 'aac' ? ok('Audio AAC') : warn('reel.mp4 no tiene pista de audio AAC'); else a ? warn('reel.mp4 tiene audio pero la pieza está sin sonido') : ok('Sin pista de audio (como se eligió)');
       const d = parseFloat(j.format?.duration);
       total && Math.abs(d - total) > 0.2 ? bad(`reel.mp4 dura ${d.toFixed(2)}s y el HTML ${total}s`) : ok(`reel.mp4: ${d.toFixed(2)}s`);
       [join(dir, 'index.html'), wav].filter(existsSync).some(f => mtime(f) > mtime(mp4)) ? warn('reel.mp4 es más viejo que index.html/sfx.wav (desactualizado)') : ok('reel.mp4 al día');
@@ -336,12 +404,14 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   posts init <carpeta-de-posts>                                     una vez: define dónde están las piezas y enlaza recursos
   posts brand add <id> --name "Nombre" --dark #hex --light #hex --accent #hex --head "Fuente" [--body ...]   marca NUEVA (plantillas y sonido listos)
   posts brand list | show <marca>                                    marcas disponibles / datos compactos de una marca (colores, contacto, diseño, ideas ya hechas)
-  posts new <marca> carousel|video [--title "Tema"] [--month mes]   crea carpeta + plantilla (mes y número automáticos)
+  posts new <marca> carousel|video [--title "Tema"] [--month mes] [--sound on|off]   crea carpeta + plantilla (mes y número automáticos)
   posts list [marca] [mes]                                          lista las piezas y su estado
   posts preview <pieza> [N|segundo] [--open]                        URL de vista previa (lámina N / segundo t); --open la abre
-  posts audio <video>                                               corre gen_audio.py -> sfx.wav
+  posts sound <video> [on|off]                                      con/sin efectos de sonido (piece.json); sin argumento muestra el estado
+  posts audio <video>                                               corre gen_audio.py -> sfx.wav (omitido si el sonido está en off)
+  posts analyze <video.mp4> [--from s --to s] [--out DIR] [--max N]  estudia un video de referencia: resumen y, con --from/--to, fotogramas cada 0.2 s de un tramo (transiciones)
   posts export <pieza> [N] [--out DIR]                              carrusel -> PNG (Chrome, una sesión); N = una sola lámina
-  posts export <video>                                              video -> reel.mp4 (SOLO cuando se apruebe)
+  posts export <video> --yes [--sound on|off]                       video -> reel.mp4. SOLO cuando el usuario lo indica: sin --yes no graba
   posts export <video> --frame <seg> <salida.png>                   un fotograma de revisión (no toca reel.mp4)
   posts check <pieza> [-v]                                          validaciones automáticas (solo avisos/errores; -v muestra todo)
 
@@ -351,4 +421,4 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
 
 const [cmd, ...rest] = process.argv.slice(2);
 if (!['init', 'brand', 'help'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
-({init: cmdInit, brand: cmdBrand, new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);
+({init: cmdInit, sound: cmdSound, analyze: cmdAnalyze, brand: cmdBrand, new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);

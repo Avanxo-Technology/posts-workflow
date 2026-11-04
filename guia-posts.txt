@@ -17,9 +17,12 @@ CLI (desde la raíz: ./posts <comando>; `./posts help`)
   posts new <marca> carousel|video [--title "Tema"] [--month mes]   crea la carpeta con plantilla (mes y número automáticos)
   posts list [marca] [mes]                                          piezas existentes y su estado
   posts preview <pieza> [N|segundo] [--open]                        vista previa (lámina N / segundo t)
-  posts audio <video>                                               genera sfx.wav
+  posts sound <video> [on|off]                                      con/sin efectos de sonido
+  posts audio <video>                                               genera sfx.wav (si hay sonido)
+  posts analyze <video.mp4> [--from s --to s]                       estudia un video de referencia (transiciones, ritmo)
   posts export <carrusel> [N] [--out DIR]                           PNG 1080x1350 (Chrome, una sola sesión)
-  posts export <video> [--frame seg salida.png]                     reel.mp4 (solo con aprobación) / un fotograma de revisión
+  posts export <video> --yes                                        reel.mp4: SOLO cuando yo lo indique (sin --yes no graba)
+  posts export <video> --frame seg salida.png                       un fotograma de revisión
   posts brand show <marca>                                          datos compactos de una marca (usar SIEMPRE primero)
   posts brand add <id> --name ... --dark #hex --light #hex --accent #hex --head "Fuente"   marca nueva (ver README)
   posts check <pieza> [-v]                                          validaciones automáticas (solo avisos/errores)
@@ -46,7 +49,8 @@ en la carpeta, y espera mis respuestas. No supongas ni inventes. Debes cubrir, s
  4. Material: ruta exacta de fotos, logos, clips o flyers. Si no hay, pregunta si puedes tomar imágenes del sitio de la marca.
     Para clips: cuáles, de qué segundo a qué segundo y si conservar su audio. No uses imágenes que no hayas confirmado.
  5. Fuente del contenido: URL del artículo/página/catálogo real; si no la doy, pregunta si puedes consultar el sitio publicado.
- 6. Video: duración aproximada y texto que deba aparecer sí o sí. Carrusel: número de láminas (por defecto 3).
+ 6. Video: duración aproximada, texto que deba aparecer sí o sí, si lleva efectos de sonido o va sin sonido, y si hay un video de referencia
+    para inspirar las transiciones (ruta del .mp4; ver docs/reference-video.md). Carrusel: número de láminas (por defecto 3).
  7. Datos a confirmar: contacto, fechas, horas, lugares y cifras. Si el sitio muestra datos distintos entre sí, pregúntame cuál es el correcto.
  8. Confirma que NO generarás PNG ni reel.mp4 definitivos hasta que yo lo diga, y que me mostrarás antes la estructura y una vista previa.
 

@@ -68,6 +68,14 @@ Clips <video> dentro del HTML (GMAQ, GREMCO):
   GREMCO además usa data-d (duración en pantalla) y data-off (segundo del clip donde empieza).
   Los clips van SIEMPRE muteados en el HTML; su sonido original, si se quiere, entra por gen_audio.py (docs/audio.md).
 
+## Sonido opcional
+Cada video puede grabarse CON o SIN efectos de sonido (preguntar al usuario). `posts new <marca> video --sound off` (no crea gen_audio.py) o `posts sound <video> on|off`
+(guarda piece.json). Con sonido off: `posts audio` no hace nada, `posts check` no exige sfx.wav y el MP4 sale sin pista de audio.
+Para forzar en un export: `posts export <video> --yes --sound on|off`.
+
+## Video de referencia
+Si el usuario pasa un video para inspirar transiciones o ritmo: docs/reference-video.md (`posts analyze`).
+
 ## Clips y render
 Preparar un clip del cliente (de ~/Downloads u otra carpeta; confirmar la ruta con el usuario):
   - Formato usado hasta ahora: vertical 576x1024, 24-30 fps, H.264, 3-9 s, recortado a lo que se usará.
@@ -83,8 +91,8 @@ Revisar antes de grabar (no cuesta nada, no toca reel.mp4):
   Si el reproductor se abre con ?t=SEGUNDOS se ve lo mismo en el navegador.
 
 Grabar (SOLO cuando el usuario lo pida/apruebe; tarda varios minutos; el tiempo depende del equipo):
-    posts audio <video>                        # si no hay sfx.wav o cambió algo
-    posts export <video>                       # -> reel.mp4 (muestra el progreso fotograma a fotograma)
+    posts audio <video>                        # si no hay sfx.wav o cambió algo (omitir si el sonido está en off)
+    posts export <video> --yes                 # -> reel.mp4 (SOLO si el usuario lo indicó; sin --yes se niega)
     posts check <video>                        # duración, 1080x1920, 30 fps, AAC, tiempos del HTML = audio = video
   Si el render tarda más de 2 min en una herramienta con límite de tiempo, ejecutarlo en segundo plano y esperar.
   Después: ffprobe reel.mp4 -> 1080x1920, 30 fps, duración = REEL_TOTAL, con pista de audio AAC. Mirar 3-4 fotogramas.

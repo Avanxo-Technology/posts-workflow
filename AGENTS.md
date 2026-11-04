@@ -9,6 +9,7 @@ Primer paso con una marca: `posts brand show <marca>` (datos compactos; evita le
 - Todo sale del sitio real de la marca o del material que da el usuario. Nada de datos inventados ni promesas no verificadas.
 - Sin número de lámina, sin marcos de interfaz de Instagram. Estilo póster, no página web. Tipografía y colores de la marca.
 - NO generar PNG/MP4 definitivos sin que el usuario lo pida/apruebe. Mostrar estructura y vista previa antes.
+  El MP4 se graba SOLO con `posts export <video> --yes` y únicamente cuando el usuario lo indica expresamente (sin `--yes` el CLI se niega). Para revisar: `--frame`.
 - No modificar piezas existentes (PNG, reel.mp4, sfx.wav) salvo petición expresa. Probar siempre sobre copias o con --out.
 - En video los tiempos van en index.html y en gen_audio.py: deben coincidir.
 - No borrar, mover ni publicar nada (GitHub, redes sociales) sin confirmación expresa. Hoy no existe publicación automática (docs/roadmap.md).
@@ -19,7 +20,7 @@ Primer paso con una marca: `posts brand show <marca>` (datos compactos; evita le
 |---|---|
 | Cualquier pieza | WORKFLOW.md + brands/<marca>.md |
 | Carrusel | docs/carousel.md |
-| Video | docs/video.md + docs/audio.md |
+| Video | docs/video.md + docs/audio.md (si el usuario pasa un video de referencia: docs/reference-video.md) |
 | Exportar, caption, revisar | docs/export.md |
 | Contenido (artículo, imágenes) de un proyecto gosite/Cockpit | docs/source-gosite.md |
 | Marca que no existe | `posts brand add` (README) + WORKFLOW.md |
