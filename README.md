@@ -15,7 +15,7 @@ cd ~/tools/posts-workflow
 ln -s ~/tools/posts-workflow/posts ~/.local/bin/posts   # opcional: usar `posts` desde cualquier carpeta
 ```
 Los efectos de sonido de AGA y GREMCO no se versionan: `python3 brands/aga/_shared/fetch_sfx.py` y
-`python3 brands/gremco/_shared/fetch_sfx.py` los descargan. La música de AGA (2 mp3 de Mixkit) se indica en `brands/aga/_shared/CREDITOS-SONIDO.txt`.
+`python3 brands/gremco/_shared/fetch_sfx.py` los descargan. La música de AGA (2 mp3 de Mixkit, #33 y #175) NO se versiona ni se descarga sola: copiarla a `brands/aga/_shared/music/33.mp3` y `175.mp3` (ver `CREDITOS-SONIDO.txt`); sin ella `posts audio` falla en AGA.
 
 ## Uso
 ```
