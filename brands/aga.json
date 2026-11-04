@@ -1,7 +1,7 @@
 {
   "name": "AGA Growth Advisors",
   "sound": "sfxlib + música con ducking",
-  "designFile": "/home/guarapo/gosites/aga-growth-website/DESIGN.md",
+  "designFile": "aga-growth-website/DESIGN.md",
   "designExtra": [],
   "fonts": "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap",
   "headFont": "Inter",
@@ -10,5 +10,11 @@
   "light": "#F4F0E7",
   "accent": "#A8CB18",
   "legacyMonths": {},
-  "short": "AGA"
+  "short": "AGA",
+  "contact": {
+    "whatsapp": "+57 320 478 4126",
+    "email": "info@aga-growth.net",
+    "web": "aga-growth.com",
+    "address": "Carrera 64B #85-180, Of. 202, Barranquilla"
+  }
 }

@@ -20,18 +20,21 @@ CLI (desde la raíz: ./posts <comando>; `./posts help`)
   posts audio <video>                                               genera sfx.wav
   posts export <carrusel> [N] [--out DIR]                           PNG 1080x1350 (Chrome, una sola sesión)
   posts export <video> [--frame seg salida.png]                     reel.mp4 (solo con aprobación) / un fotograma de revisión
-  posts check <pieza>                                               validaciones automáticas
+  posts brand show <marca>                                          datos compactos de una marca (usar SIEMPRE primero)
+  posts brand add <id> --name ... --dark #hex --light #hex --accent #hex --head "Fuente"   marca nueva (ver README)
+  posts check <pieza> [-v]                                          validaciones automáticas (solo avisos/errores)
   Requisitos: Node 22+, Google Chrome, ffmpeg, Python 3.
 
 PROMPT GENÉRICO
 Copiar y pegar en una IA con acceso a terminal y archivos. Reemplazar lo que está entre [corchetes]; lo que quede vacío la IA lo preguntará.
 
 ----- INICIO DEL PROMPT -----
-Trabaja en la carpeta [/home/guarapo/gosites/posts  | otra ruta: ______]. Lee AGENTS.md y sigue sus instrucciones (te indica qué otros
+Trabaja en la carpeta de posts [/home/guarapo/gosites/posts  | otra ruta: ______] con el CLI `posts`. Lee AGENTS.md y sigue sus instrucciones (te indica qué otros
 archivos leer según la tarea). Eres diseñador/a de contenido para redes. Crea una pieza para la marca
 [GMAQ | AGA | GREMCO | PIROTECNIA | otra] de tipo [carrusel de Instagram | video/reel vertical].
 
 TEMA / IDEA: [la idea, el artículo, el evento o el servicio; si lo dejo vacío, propón ideas].
+FUENTE DEL CONTENIDO: [URL del artículo | "en este proyecto gosite ...: el artículo y las imágenes están en Cockpit" | archivos en una ruta] (ver docs/source-gosite.md).
 
 ANTES DE EMPEZAR, PREGÚNTAME en UN SOLO mensaje, numerado, únicamente lo que no esté ya arriba, en brands/<marca>.md o
 en la carpeta, y espera mis respuestas. No supongas ni inventes. Debes cubrir, si falta:
@@ -47,7 +50,7 @@ en la carpeta, y espera mis respuestas. No supongas ni inventes. Debes cubrir, s
  7. Datos a confirmar: contacto, fechas, horas, lugares y cifras. Si el sitio muestra datos distintos entre sí, pregúntame cuál es el correcto.
  8. Confirma que NO generarás PNG ni reel.mp4 definitivos hasta que yo lo diga, y que me mostrarás antes la estructura y una vista previa.
 
-DESPUÉS DE MIS RESPUESTAS: sigue WORKFLOW.md (resumen de 5 líneas de lo que entendiste -> ideas si faltan -> estructura y espera mi visto bueno
+DESPUÉS DE MIS RESPUESTAS: sigue WORKFLOW.md (empieza con `posts brand show <marca>`; resumen de 5 líneas de lo que entendiste -> ideas si faltan -> estructura y espera mi visto bueno
 -> posts new -> construir y vista previa -> posts check -> export solo cuando yo lo pida -> caption.txt -> checklist). Al terminar dime la ruta
 exacta de la pieza, los archivos creados y los datos que quedaron pendientes.
 ----- FIN DEL PROMPT -----

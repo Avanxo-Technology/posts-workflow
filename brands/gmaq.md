@@ -1,7 +1,7 @@
 # Marca: gmaq
 
 GMAQ — alquiler de maquinaria pesada, Barranquilla
-  Proyecto:   /home/guarapo/gosites/gmaq  (sitio local localhost:8000, página /equipos; artículos del blog)
+  Proyecto:   <PROJECTS_DIR>/gmaq  (sitio local localhost:8000, página /equipos; artículos del blog)
   Tipografía: Montserrat (títulos 800-900, mayúsculas, interletrado negativo) + Inter (texto).
   Colores:    cobre #C46A2B (principal; el sitio usa #B05E22 como --copper), cobre oscuro #9E4F1A, grafito #0E1111,
               crema #F7F7F5, durazno #F0A06A (acento sobre oscuro).

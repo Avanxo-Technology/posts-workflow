@@ -1,7 +1,7 @@
 # Marca: aga
 
 AGA — asesoría financiera, tributaria y empresarial para pymes, Barranquilla
-  Proyecto:   /home/guarapo/gosites/aga-growth-website  (DESIGN.md en la raíz). Sitio https://aga-growth.com
+  Proyecto:   <PROJECTS_DIR>/aga-growth-website  (DESIGN.md en la raíz). Sitio https://aga-growth.com
               (artículos en /noticias, herramienta en /diagnostico-financiero-empresarial).
   Tipografía: solo Inter (títulos 700-900 en carruseles y 900 en videos, interletrado muy negativo -.06em, interlineado ~.82-.9).
   Colores:    navy #0B2938, lima #A8CB18 (acento), papel #F4F0E7, sage #879E91, dorado #B28A35. Rojo #C4452F SOLO para
@@ -18,7 +18,7 @@ RECURSOS (piezas nuevas)
   video-template.html, gen_audio.template.py. (aga/noviembre/_shared es la copia ANTIGUA que usan los videos ya hechos.)
   Sonido: efectos REALES + música con ducking (docs/audio.md, enfoque A). Transiciones lima/navy en canvas (wipe, bars, iris).
   Los logos viven en el img/ de cada video (posts new aga video copia los del último video).
-DISEÑO: /home/guarapo/gosites/aga-growth-website/DESIGN.md
+DISEÑO: <PROJECTS_DIR>/aga-growth-website/DESIGN.md
 PIEZAS EXISTENTES: carruseles octubre/post1-3; videos noviembre/postVideos/postVideo1 y 2 (estructura modelo).
 
 Configuración leída por el CLI: brands/aga.json (fuentes, colores base, archivo de diseño).

@@ -18,6 +18,13 @@ Sonido: GMAQ, Pirotecnia y cualquier marca nueva usan sonido sintetizado (sin de
 (`brands/aga/_shared/sfx/`) y su música de fondo es OPCIONAL: sin `brands/aga/_shared/music/33.mp3` el video queda solo con efectos.
 Los efectos de GREMCO se descargan una vez: `python3 brands/gremco/_shared/fetch_sfx.py`.
 
+## Uso con Claude Code (la IA usa el CLI)
+Abre Claude Code en la carpeta de posts (o en tu proyecto gosite) tras `posts init`; lee `AGENTS.md` solo. Ejemplo de prompt:
+> En este proyecto gosite tengo el blog y las imágenes en Cockpit. Usa el artículo "…" para crear un video de la marca X; las imágenes
+> las encuentras en Cockpit. Sigue WORKFLOW.md y muéstrame la estructura antes de construir.
+
+La IA ya conoce gosite/Cockpit: el CLI, `docs/` y `brands/` le dan el resto (ver `docs/source-gosite.md`). Futuro: publicar en redes (`docs/roadmap.md`).
+
 ## Marca nueva (cualquier proyecto)
 ```
 posts brand add mimarca --name "Mi Marca" --dark "#1A1A2E" --light "#F5F5F5" --accent "#E94560" --head "Montserrat" --body "Inter" \
@@ -33,7 +40,7 @@ posts new <marca> carousel|video [--title "Tema"] [--month mes]   crea la carpet
 posts list [marca] [mes]          posts preview <pieza> [N|seg] [--open]      posts audio <video>
 posts export <carrusel> [N] [--out DIR]     posts export <video> [--frame seg salida.png]     posts check <pieza>
 ```
-`posts help` muestra el detalle. Los videos se graban solo con aprobación (`posts export <video>`).
+`posts brand show <marca>` resume en pocas líneas lo que la IA necesita de una marca. `posts help` muestra el detalle. Los videos se graban solo con aprobación (`posts export <video>`).
 
 ## Contenido
 | Ruta | Qué es |

@@ -5,7 +5,7 @@
 // POSTS = carpeta donde viven las piezas (<marca>/<mes>/...). Se define con: variable POSTS_DIR, o el archivo .posts-dir del repo
 //         (lo escribe `posts init <ruta>`).
 import {existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, copyFileSync, statSync, symlinkSync, lstatSync} from 'node:fs';
-import {dirname, join, resolve, basename, relative} from 'node:path';
+import {dirname, join, resolve, basename, relative, isAbsolute} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
 
@@ -14,6 +14,8 @@ const TOOL = resolve(HERE, '..');
 const cfg = join(TOOL, '.posts-dir');
 const POSTS_RAW = process.env.POSTS_DIR || (existsSync(cfg) ? read0(cfg).trim() : '');
 const POSTS = POSTS_RAW ? resolve(POSTS_RAW) : '';
+// Carpeta que contiene los proyectos (aga-growth-website, gmaq, ...). Los archivos de diseño de brands/*.json son relativos a ella.
+const PROJECTS = resolve(process.env.PROJECTS_DIR || (POSTS ? dirname(POSTS) : '.'));
 function read0(p) { return readFileSync(p, 'utf8'); }
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 const ls = d => (existsSync(d) ? readdirSync(d, {withFileTypes: true}) : []);
@@ -37,6 +39,19 @@ const probe = (f, entries) => {
   const r = run('ffprobe', ['-v', 'error', '-show_entries', entries, '-of', 'json', f]);
   try { return JSON.parse(r.stdout); } catch { return {}; }
 };
+
+function designOf(b) {
+  const r = p => { if (!p) return null; const abs = isAbsolute(p) ? p : join(PROJECTS, p); return {path: abs, exists: existsSync(abs)}; };
+  return {main: r(b.designFile), extra: (b.designExtra || []).map(r)};
+}
+function piecesOf(name, b) {
+  const base = join(POSTS, name), out = [];
+  for (const m of dirs(base).filter(d => d !== '_shared')) {
+    const scan = d => { for (const n of dirs(d)) if (existsSync(join(d, n, 'index.html'))) out.push(join(d, n)); };
+    scan(join(base, m)); scan(join(base, m, 'postVideos')); for (const r of dirs(join(base, m, 'reels'))) scan(join(base, m, 'reels', r));
+  }
+  return out;
+}
 
 // ---- localizar una pieza ----
 function resolvePiece(arg) {
@@ -90,15 +105,33 @@ const hex = v => /^#[0-9a-fA-F]{6}$/.test(v || '');
 const mix = (h, t, k) => '#' + [1, 3, 5].map(i => Math.round(parseInt(h.slice(i, i + 2), 16) * (1 - k) + t * k).toString(16).padStart(2, '0')).join('');
 function cmdBrand(args) {
   const [sub, ...rest] = args;
+  if (sub === 'show') {
+    const id = rest[0]; if (!id) die('Uso: posts brand show <marca>');
+    const b = brandOf(id), c = b.contact || {}, d = designOf(b);
+    const sh = join(TOOL, 'brands', id, '_shared'), sfx = join(sh, 'sfx');
+    const nsfx = existsSync(sfx) ? ls(sfx).filter(e => e.name.endsWith('.wav')).length : 0;
+    const ps = piecesOf(id, b), cars = ps.filter(isCarousel);
+    console.log(`${id}: ${b.name}`);
+    console.log(`colores: oscuro ${b.dark} · claro ${b.light} · acento ${b.accent}   fuentes: ${b.headFont} (títulos) + ${b.bodyFont} (texto)`);
+    console.log('contacto: ' + (Object.entries(c).map(([k, v]) => `${k} ${v}`).join(' · ') || '(sin datos: completar brands/' + id + '.json)'));
+    console.log(`sonido: ${b.sound}` + (existsSync(join(sh, 'fetch_sfx.py')) ? (nsfx ? ` (${nsfx} efectos)` : ` — FALTAN efectos: python3 brands/${id}/_shared/fetch_sfx.py`) : ''));
+    console.log('diseño: ' + (d.main ? `${d.main.path} ${d.main.exists ? '' : '(NO existe en este equipo: pedir la ruta al usuario)'}` : '(sin archivo: pedir la ruta al usuario o usar el CSS del sitio)') + (d.extra.length ? ' · extra: ' + d.extra.filter(e => e.exists).map(e => e.path).join(', ') : ''));
+    console.log(`datos y reglas de la marca: brands/${id}.md   plantilla de video: ${existsSync(join(sh, 'video-template.html')) ? 'sí' : 'NO'}`);
+    console.log(`piezas: ${ps.length} (${cars.length} carruseles, ${ps.length - cars.length} videos)`);
+    const caps = ps.map(p => join(p, 'caption.txt')).filter(existsSync).sort((a, z) => mtime(z) - mtime(a)).slice(0, 10);
+    if (caps.length) console.log('ideas ya hechas (primera línea de cada caption, recientes primero):');
+    for (const f of caps) console.log('  - ' + read(f).split('\n')[0].trim().slice(0, 110));
+    return;
+  }
   if (sub === 'list' || sub === undefined) {
     for (const id of brands()) { const b = brandOf(id); console.log(`${id.padEnd(14)} ${b.name}  ·  sonido: ${b.sound || 'synth'}  ·  diseño: ${b.designFile || '(sin archivo)'}`); }
     return;
   }
-  if (sub !== 'add') die('Uso: posts brand list | posts brand add <id> --name "Nombre" --dark #hex --light #hex --accent #hex --head "Fuente" [--body "Fuente"] [--short "SIGLA"] [--whatsapp ...] [--web ...] [--design ruta]');
+  if (sub !== 'add') die('Uso: posts brand list | posts brand show <marca> | posts brand add <id> --name "Nombre" --dark #hex --light #hex --accent #hex --head "Fuente" [--body "Fuente"] [--short "SIGLA"] [--whatsapp ...] [--web ...] [--design ruta]');
   const a = [...rest], id = a.shift();
   const f = n => flag(a, n);
   const o = {name: f('--name'), short: f('--short'), dark: f('--dark'), light: f('--light'), accent: f('--accent'), head: f('--head'),
-    body: f('--body') || 'Inter', wa: f('--whatsapp') || 'WhatsApp', web: f('--web') || 'tusitio.com', design: f('--design')};
+    body: f('--body') || 'Inter', wa: f('--whatsapp') || 'WhatsApp', web: f('--web') || 'tusitio.com', design: f('--design'), email: f('--email')};
   if (!id || !/^[a-z0-9-]+$/.test(id)) die('El id de la marca va en minúsculas, sin espacios (ej. mimarca)');
   if (existsSync(join(TOOL, 'brands', id + '.json'))) die(`La marca "${id}" ya existe`);
   for (const [k, v] of [['--dark', o.dark], ['--light', o.light], ['--accent', o.accent]]) if (!hex(v)) die(`${k} debe ser un color #RRGGBB`);
@@ -115,7 +148,7 @@ function cmdBrand(args) {
   writeFileSync(join(bdir, 'video-template.html'), fill(read(join(TOOL, '_shared', 'base', 'video-template.html'))));
   copyFileSync(join(TOOL, '_shared', 'base', 'synth.py'), join(bdir, 'synth.py'));
   copyFileSync(join(TOOL, '_shared', 'base', 'gen_audio.template.py'), join(bdir, 'gen_audio.template.py'));
-  writeFileSync(join(TOOL, 'brands', id + '.json'), JSON.stringify({name: o.name, short: o.short, sound: 'synth (sin música)', designFile: o.design || null, designExtra: [],
+  writeFileSync(join(TOOL, 'brands', id + '.json'), JSON.stringify({name: o.name, short: o.short, sound: 'synth (sin música)', designFile: o.design || null, designExtra: [], contact: {whatsapp: o.wa, ...(o.email ? {email: o.email} : {}), web: o.web},
     fonts, headFont: o.head, bodyFont: o.body, dark: o.dark, light: o.light, accent: o.accent, legacyMonths: {}}, null, 2) + '\n');
   writeFileSync(join(TOOL, 'brands', id + '.md'), `# Marca: ${id}
 
@@ -138,7 +171,7 @@ RECURSOS
     const dest = join(POSTS, id, '_shared');
     try { lstatSync(dest); } catch { mkdirSync(dirname(dest), {recursive: true}); symlinkSync(bdir, dest); console.log(`✓ Enlazada en ${dest}`); }
   } else console.log('Falta definir la carpeta de posts: posts init <ruta> (enlaza los recursos de la marca).');
-  console.log(`Siguiente: completar brands/${id}.md · posts new ${id} carousel|video --title "Tema"`);
+  console.log(`Completa brands/${id}.md y contact en brands/${id}.json. Para subirla al repo: git add brands/${id}.* brands/${id}/ && git commit && git push (solo si el usuario lo pide).`);
 }
 
 // ---- comandos ----
@@ -159,7 +192,6 @@ function cmdNew(args) {
       .replaceAll('__HEAD__', b.headFont).replaceAll('__BODY__', b.bodyFont);
     writeFileSync(join(dir, 'index.html'), t);
     console.log(dir);
-    console.log(`Siguiente: editar index.html (1080x1350 por lámina) · posts preview ${relative(POSTS, dir)} 1 · posts export ${relative(POSTS, dir)} · posts check ${relative(POSTS, dir)}`);
   } else {
     if (!existsSync(shared)) die(`Falta ${shared}: ejecuta "posts init" para enlazar los recursos de la marca`);
     const dir = join(base, month, 'postVideos', `postVideo${n}`);
@@ -175,9 +207,6 @@ function cmdNew(args) {
       if (old) for (const f of ['logo-white.png', 'logo-dark.png']) if (existsSync(join(old, 'img', f))) copyFileSync(join(old, 'img', f), join(dir, 'img', f));
     }
     console.log(dir);
-    const rel = relative(POSTS, dir);
-    console.log(`Siguiente: editar index.html y gen_audio.py (mismos tiempos; TOTAL en los dos) · posts audio ${rel} · posts export ${rel} --frame 1.5 f.png (revisar) · posts check ${rel}`);
-    console.log('Grabar el MP4 solo cuando se apruebe: posts export ' + rel);
   }
 }
 
@@ -231,6 +260,7 @@ function cmdExport(args) {
 
 // ---- check ----
 function cmdCheck(args) {
+  const verbose = flag(args, '-v', false);
   const dir = resolvePiece(args[0]);
   const rows = []; let errs = 0, warns = 0;
   const ok = m => rows.push(['OK', m]);
@@ -295,11 +325,9 @@ function cmdCheck(args) {
     }
   }
   const ctx = ctxOf(dir);
-  console.log(`PIEZA: ${relative(POSTS, dir)}  (${car ? 'carrusel' : 'video'}, marca ${ctx.brand})\n`);
-  for (const [s, m] of rows) console.log(`[${s}]`.padEnd(8) + m);
-  console.log('\n[REVISAR A MANO] textos cortados o montados · contacto y datos contra el sitio real · fotos nítidas y sin repetir');
-  console.log(car ? '  -> posts preview <pieza> N   /   abrir los PNG' : '  -> posts export <pieza> --frame <seg> f.png en varios segundos (entradas, transiciones, cierre)');
-  console.log(`\nResultado: ${errs} error(es), ${warns} aviso(s)`);
+  console.log(`${relative(POSTS, dir)} (${car ? 'carrusel' : 'video'}, ${ctx.brand}): ${errs} error(es), ${warns} aviso(s), ${rows.length - errs - warns} OK`);
+  for (const [st, m] of rows) if (verbose || st !== 'OK') console.log(`[${st}] ${m}`);
+  console.log('A mano: textos cortados/montados, datos y contacto (docs/export.md)' + (verbose ? '' : '. Detalle completo: posts check <pieza> -v'));
   process.exit(errs ? 1 : 0);
 }
 
@@ -307,7 +335,7 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
 
   posts init <carpeta-de-posts>                                     una vez: define dónde están las piezas y enlaza recursos
   posts brand add <id> --name "Nombre" --dark #hex --light #hex --accent #hex --head "Fuente" [--body ...]   marca NUEVA (plantillas y sonido listos)
-  posts brand list                                                  marcas disponibles
+  posts brand list | show <marca>                                    marcas disponibles / datos compactos de una marca (colores, contacto, diseño, ideas ya hechas)
   posts new <marca> carousel|video [--title "Tema"] [--month mes]   crea carpeta + plantilla (mes y número automáticos)
   posts list [marca] [mes]                                          lista las piezas y su estado
   posts preview <pieza> [N|segundo] [--open]                        URL de vista previa (lámina N / segundo t); --open la abre
@@ -315,10 +343,11 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   posts export <pieza> [N] [--out DIR]                              carrusel -> PNG (Chrome, una sesión); N = una sola lámina
   posts export <video>                                              video -> reel.mp4 (SOLO cuando se apruebe)
   posts export <video> --frame <seg> <salida.png>                   un fotograma de revisión (no toca reel.mp4)
-  posts check <pieza>                                               validaciones automáticas (+ lista de lo que falta revisar a mano)
+  posts check <pieza> [-v]                                          validaciones automáticas (solo avisos/errores; -v muestra todo)
 
   <pieza> = carpeta (ej. aga/noviembre/postVideos/postVideo1), relativa a la raíz o absoluta.
-  Marcas: ${brands().join(', ')}`;
+  Marcas: ${brands().join(', ')}
+  Carpeta de proyectos (para los archivos de diseño): ${PROJECTS} (PROJECTS_DIR)`;
 
 const [cmd, ...rest] = process.argv.slice(2);
 if (!['init', 'brand', 'help'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');

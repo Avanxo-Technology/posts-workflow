@@ -2,6 +2,8 @@
 
 Raíz: esta carpeta. CLI: `./posts help` (comandos: new, list, preview, audio, export, check).
 
+Primer paso con una marca: `posts brand show <marca>` (datos compactos; evita leer varios archivos).
+
 ## Reglas que siempre aplican
 - Pieza = index.html editable. Carrusel 1080x1350 -> PNG. Video 1080x1920, 30 fps -> reel.mp4.
 - Todo sale del sitio real de la marca o del material que da el usuario. Nada de datos inventados ni promesas no verificadas.
@@ -9,7 +11,8 @@ Raíz: esta carpeta. CLI: `./posts help` (comandos: new, list, preview, audio, e
 - NO generar PNG/MP4 definitivos sin que el usuario lo pida/apruebe. Mostrar estructura y vista previa antes.
 - No modificar piezas existentes (PNG, reel.mp4, sfx.wav) salvo petición expresa. Probar siempre sobre copias o con --out.
 - En video los tiempos van en index.html y en gen_audio.py: deben coincidir.
-- No borrar, mover ni publicar nada (GitHub, redes) sin confirmación.
+- No borrar, mover ni publicar nada (GitHub, redes sociales) sin confirmación expresa. Hoy no existe publicación automática (docs/roadmap.md).
+- Los tokens (COCKPIT_API_TOKEN, etc.) nunca se copian a este repo, a un index.html ni a un caption.
 
 ## Qué leer según la tarea (no leas el resto)
 | Tarea | Leer |
@@ -18,6 +21,7 @@ Raíz: esta carpeta. CLI: `./posts help` (comandos: new, list, preview, audio, e
 | Carrusel | docs/carousel.md |
 | Video | docs/video.md + docs/audio.md |
 | Exportar, caption, revisar | docs/export.md |
+| Contenido (artículo, imágenes) de un proyecto gosite/Cockpit | docs/source-gosite.md |
 | Marca que no existe | `posts brand add` (README) + WORKFLOW.md |
 | Algo antiguo o raro | docs/legacy.md |
 | Prompt para pegar en otra IA | guia-posts.txt |
