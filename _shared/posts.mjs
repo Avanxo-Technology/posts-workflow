@@ -343,7 +343,7 @@ function cmdAudio(args) {
 }
 
 function cmdExport(args) {
-  const outDir = flag(args, '--out'), frame = flag(args, '--frame'), yes = flag(args, '--yes', false), snd = checkSoundArg(flag(args, '--sound'));
+  const outDir = flag(args, '--out'), frame = flag(args, '--frame'), yes = flag(args, '--yes', false), snd = checkSoundArg(flag(args, '--sound')), workers = flag(args, '--workers');
   const dir = resolvePiece(args[0]);
   if (isCarousel(dir)) {
     const a = [join(HERE, 'export-carousel.mjs'), dir]; if (args[1]) a.push(args[1]); if (outDir) a.push('--out', outDir);
@@ -355,6 +355,7 @@ function cmdExport(args) {
     process.exit(2);
   }
   if (frame === null && !soundOf(dir, snd)) a.push('--no-audio');
+  if (frame === null && workers) a.push('--workers', workers);
   if (frame !== null) { const out = args[1]; if (!out) die('Uso: posts export <video> --frame <segundo> <salida.png>'); a.push('--frame', frame, resolve(out)); }
   process.exit(run('node', a, {cwd: dir, stdio: 'inherit'}).status ?? 1);
 }
@@ -446,7 +447,7 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   posts audio <video>                                               corre gen_audio.py -> sfx.wav (omitido si el sonido está en off)
   posts analyze <video.mp4> [--from s --to s] [--out DIR] [--max N]  estudia un video de referencia: resumen y, con --from/--to, fotogramas cada 0.2 s de un tramo (transiciones)
   posts export <pieza> [N] [--out DIR]                              carrusel -> PNG (Chrome, una sesión); N = una sola lámina
-  posts export <video> --yes [--sound on|off]                       video -> reel.mp4. SOLO cuando el usuario lo indica: sin --yes no graba
+  posts export <video> --yes [--sound on|off] [--workers N]         video -> reel.mp4. SOLO cuando el usuario lo indica: sin --yes no graba. N = Chrome en paralelo (auto por defecto)
   posts export <video> --frame <seg> <salida.png>                   un fotograma de revisión (no toca reel.mp4)
   posts check <pieza> [-v]                                          validaciones automáticas (solo avisos/errores; -v muestra todo)
 

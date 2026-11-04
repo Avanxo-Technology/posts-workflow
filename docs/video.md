@@ -95,6 +95,11 @@ Grabar (SOLO cuando el usuario lo pida/apruebe; tarda varios minutos; el tiempo 
     posts export <video> --yes                 # -> reel.mp4 (SOLO si el usuario lo indicó; sin --yes se niega)
     posts check <video>                        # duración, 1080x1920, 30 fps, AAC, tiempos del HTML = audio = video
   Si el render tarda más de 2 min en una herramienta con límite de tiempo, ejecutarlo en segundo plano y esperar.
+  Varios Chrome en paralelo: `posts export <video> --yes --workers N`. Por defecto el render elige solo (hasta 4, según CPU y RAM libre; ver la primera
+  línea de su salida). Con clips `<video>` usa 1 por defecto (buscar muchos clips a la vez falla); forzar N solo si se prueba. Cada Chrome extra consume
+  memoria: en equipos con poca RAM usar `--workers 1` o 2. El resultado es el mismo con cualquier N (MP4 idéntico byte a byte en la prueba).
+  Medición (8 CPU, 6 s de video GMAQ sin clips): 1 trabajador 175 s y ~1.55 GB; 2 trabajadores 105 s y ~2.0 GB; 4 trabajadores 54 s y ~2.8 GB (memoria pico
+  de todo el render). Cada Chrome extra suma ~0.4 GB aprox.
   Después: ffprobe reel.mp4 -> 1080x1920, 30 fps, duración = REEL_TOTAL, con pista de audio AAC. Mirar 3-4 fotogramas.
   El comando es el mismo para videos nuevos y antiguos (GMAQ/GREMCO directo bajo el mes, Pirotecnia december).
   Requisitos: google-chrome (o CHROME=/ruta), ffmpeg, Node 22+, Python 3. Puerto de depuración aleatorio: se pueden

@@ -22,7 +22,7 @@ CLI (desde la raíz: ./posts <comando>; `./posts help`)
   posts audio <video>                                               genera sfx.wav (si hay sonido)
   posts analyze <video.mp4> [--from s --to s]                       estudia un video de referencia (transiciones, ritmo)
   posts export <carrusel> [N] [--out DIR]                           PNG 1080x1350 (Chrome, una sola sesión)
-  posts export <video> --yes                                        reel.mp4: SOLO cuando yo lo indique (sin --yes no graba)
+  posts export <video> --yes [--workers N]                          reel.mp4: SOLO cuando yo lo indique (sin --yes no graba); N = Chrome en paralelo (auto)
   posts export <video> --frame seg salida.png                       un fotograma de revisión
   posts brand show <marca>                                          datos compactos de una marca (usar SIEMPRE primero)
   posts brand add <id> --name ... --dark #hex --light #hex --accent #hex --head "Fuente"   marca nueva (ver README)

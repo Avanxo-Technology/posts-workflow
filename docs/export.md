@@ -5,7 +5,7 @@
   posts export <carrusel> 2                solo la lámina 2
   posts export <carrusel> --out DIR        escribe en otra carpeta (vista previa sin pisar los definitivos)
   posts export <video> --yes               reel.mp4 (SOLO cuando el usuario lo indique; sin --yes no graba; tarda minutos)
-                                           con sonido según piece.json; --sound on|off lo fuerza
+                                           con sonido según piece.json; --sound on|off lo fuerza; --workers N = Chrome en paralelo (auto por defecto)
   posts export <video> --frame 2.5 f.png   un fotograma de revisión (no toca reel.mp4)
   posts check <pieza>                      validaciones automáticas
 Ante un cambio posterior a un export, avisar que los PNG/MP4 quedaron desactualizados (`posts check` lo detecta).
