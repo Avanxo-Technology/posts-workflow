@@ -1,7 +1,19 @@
 # Contenido desde un proyecto gosite (artículos, imágenes, datos)
 
 Caso típico: el usuario dice "en este proyecto gosite tengo X; usa este artículo para crear un video; las imágenes están en Cockpit".
-La IA ya conoce gosite y Cockpit: aquí solo se fija cómo conectar esa fuente con el CLI.
+Esta guía no asume que la IA conozca gosite: lo que necesita saber está aquí; el detalle de cada proyecto, en su README.md, MEMORY.md y ARCHITECTURE.md.
+
+## Qué es gosite y cómo se relaciona con Cockpit
+- **gosite** es la herramienta de línea de comandos que crea y levanta los proyectos web (Go + Cockpit) en Docker para desarrollo (`gosite --help`).
+  No guarda contenido: arranca y apaga el entorno.
+- **Un proyecto gosite** son dos servicios más una infraestructura compartida:
+  - la **app** (Go): el sitio web; genera el HTML y lee su contenido de Cockpit por su API REST;
+  - **Cockpit**: el CMS (headless) donde viven los datos: artículos, catálogo, textos de las páginas y las imágenes (assets);
+  - **infraestructura compartida** (`gosite infra up`): Traefik (dominios `.test`), Redis (caché) y MinIO (almacena los assets, compatible con S3).
+- **Entonces**: lo que el usuario llama "el artículo" y "las imágenes" están en **Cockpit**; el sitio solo los muestra. Para este flujo se lee de Cockpit
+  (o de la página publicada que gosite sirve) y las piezas se crean en la carpeta de posts, no en el proyecto.
+- Comandos para ubicarse: `gosite list` (proyectos y su estado), `gosite path <proyecto>` (ruta), `gosite start|stop|logs <proyecto>`,
+  `gosite doctor` (verifica dependencias). La configuración local del proyecto está en su `.env` (puertos, `COCKPIT_URL`, `COCKPIT_API_TOKEN`).
 
 ## Dónde está cada cosa en un proyecto gosite (leer el MEMORY.md / ARCHITECTURE.md del proyecto para el detalle)
 - **Artículos del blog**: colección `blogPosts` de Cockpit (addon Blog); publicados en la ruta del sitio (p. ej. `/articulos/<slug>`, `/noticias/<slug>`).
@@ -11,7 +23,7 @@ La IA ya conoce gosite y Cockpit: aquí solo se fija cómo conectar esa fuente c
 - Alternativa sin token: leer la página publicada (HTML) y descargar las imágenes por su URL pública.
 
 ## Si el proyecto no está arriba
-Comprobar que el sitio local responde (puertos en el README o `gosite.yml` del proyecto; p. ej. GMAQ: app :8000, Cockpit :8001). Si no responde, subirlo con gosite:
+Comprobar que el sitio local responde (`gosite list` muestra el estado; los puertos están en el README del proyecto o en su `.env`/`gosite.yml`; p. ej. GMAQ: app :8000, Cockpit :8001). Si no responde, subirlo con gosite:
 1. `posts doctor --gosite` (Docker abierto y `gosite` instalado; si falta algo, instalarlo con el comando que indica).
 2. `gosite infra up` (una vez por sesión: Traefik, Redis, MinIO) y `gosite start <proyecto>` (app + Cockpit).
 3. Esperar a que responda (`curl http://localhost:<puerto>`) antes de leer artículos e imágenes. Al terminar, `gosite stop <proyecto>` solo si el usuario lo pide.
