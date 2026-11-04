@@ -14,6 +14,7 @@ ARCHIVOS (todos dentro de la raíz)
   <marca>/_shared/   recursos de la marca (plantilla de video, sonido).
 
 CLI (desde la raíz: ./posts <comando>; `./posts help`)
+  posts doctor [--gosite]                                           comprueba requisitos y da el comando exacto para instalar lo que falte
   posts new <marca> carousel|video [--title "Tema"] [--month mes]   crea la carpeta con plantilla (mes y número automáticos)
   posts list [marca] [mes]                                          piezas existentes y su estado
   posts preview <pieza> [N|segundo] [--open]                        vista previa (lámina N / segundo t)
@@ -26,7 +27,7 @@ CLI (desde la raíz: ./posts <comando>; `./posts help`)
   posts brand show <marca>                                          datos compactos de una marca (usar SIEMPRE primero)
   posts brand add <id> --name ... --dark #hex --light #hex --accent #hex --head "Fuente"   marca nueva (ver README)
   posts check <pieza> [-v]                                          validaciones automáticas (solo avisos/errores)
-  Requisitos: Node 22+, Google Chrome, ffmpeg, Python 3.
+  Requisitos: Node 22+, Google Chrome (o Chromium), ffmpeg, Python 3, git; con proyectos gosite: Docker y gosite. `posts doctor` los comprueba.
 
 PROMPT GENÉRICO
 Copiar y pegar en una IA con acceso a terminal y archivos. Reemplazar lo que está entre [corchetes]; lo que quede vacío la IA lo preguntará.
@@ -53,6 +54,9 @@ en la carpeta, y espera mis respuestas. No supongas ni inventes. Debes cubrir, s
     para inspirar las transiciones (ruta del .mp4; ver docs/reference-video.md). Carrusel: número de láminas (por defecto 3).
  7. Datos a confirmar: contacto, fechas, horas, lugares y cifras. Si el sitio muestra datos distintos entre sí, pregúntame cuál es el correcto.
  8. Confirma que NO generarás PNG ni reel.mp4 definitivos hasta que yo lo diga, y que me mostrarás antes la estructura y una vista previa.
+
+ANTES DE TODO: ejecuta `posts doctor` (con --gosite si el contenido viene de un proyecto gosite); si falta algo, instálalo tú con los comandos que indica
+(si piden sudo, dímelo para que los corra yo). Si el proyecto gosite no está arriba, levántalo con `gosite infra up` y `gosite start <proyecto>`.
 
 DESPUÉS DE MIS RESPUESTAS: sigue WORKFLOW.md (empieza con `posts brand show <marca>`; resumen de 5 líneas de lo que entendiste -> ideas si faltan -> estructura y espera mi visto bueno
 -> posts new -> construir y vista previa -> posts check -> export solo cuando yo lo pida -> caption.txt -> checklist). Al terminar dime la ruta

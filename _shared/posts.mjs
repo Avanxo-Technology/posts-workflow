@@ -233,6 +233,40 @@ function cmdAnalyze(args) {
   console.log(lines.join('\n'));
 }
 
+// ---- doctor: comprueba requisitos y dice cómo instalar lo que falte ----
+function cmdDoctor(args) {
+  const gosite = flag(args, '--gosite', false);
+  const osr = existsSync('/etc/os-release') ? read('/etc/os-release') : '';
+  const id = (osr.match(/^ID=(.*)$/m) || [, ''])[1].replace(/"/g, ''), like = (osr.match(/^ID_LIKE=(.*)$/m) || [, ''])[1].replace(/"/g, '');
+  const kind = process.platform === 'darwin' ? 'mac' : /debian|ubuntu/.test(id + ' ' + like) ? 'apt' : /fedora|rhel|centos/.test(id + ' ' + like) ? 'dnf' : /arch/.test(id + ' ' + like) ? 'pacman' : 'otro';
+  const has = c => run('sh', ['-c', `command -v ${c}`]).status === 0;
+  const ver = (c, a = ['--version']) => (run(c, a).stdout || '').split('\n')[0].trim();
+  const H = {
+    node: {mac: 'brew install node@22', apt: 'instalar nvm (https://github.com/nvm-sh/nvm) y luego: nvm install 22', dnf: 'instalar nvm (https://github.com/nvm-sh/nvm) y luego: nvm install 22', pacman: 'sudo pacman -S nodejs npm   (o nvm install 22)', otro: 'instalar Node 22+ (nvm install 22)'},
+    chrome: {mac: 'brew install --cask google-chrome', apt: 'curl -fLO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && sudo apt install -y ./google-chrome-stable_current_amd64.deb   (alternativa: sudo apt install -y chromium y usar CHROME=chromium)', dnf: 'instalar Google Chrome desde https://www.google.com/chrome/ (o chromium y CHROME=chromium)', pacman: 'yay -S google-chrome   (o sudo pacman -S chromium y CHROME=chromium)', otro: 'instalar Google Chrome o Chromium (variable CHROME=/ruta si no se llama google-chrome)'},
+    ffmpeg: {mac: 'brew install ffmpeg', apt: 'sudo apt install -y ffmpeg', dnf: 'sudo dnf install -y ffmpeg   (puede requerir RPM Fusion)', pacman: 'sudo pacman -S ffmpeg', otro: 'instalar ffmpeg (incluye ffprobe)'},
+    python: {mac: 'brew install python', apt: 'sudo apt install -y python3', dnf: 'sudo dnf install -y python3', pacman: 'sudo pacman -S python', otro: 'instalar Python 3'},
+    git: {mac: 'brew install git', apt: 'sudo apt install -y git', dnf: 'sudo dnf install -y git', pacman: 'sudo pacman -S git', otro: 'instalar git'},
+  };
+  const rows = []; let miss = 0;
+  const add = (name, ok, detail, hint) => { rows.push(ok ? `[OK]    ${name}: ${detail}` : `[FALTA] ${name}  ->  ${hint}`); if (!ok) miss++; };
+  const nv = parseInt((process.versions.node || '0').split('.')[0]);
+  add('Node 22+', nv >= 22, 'v' + process.versions.node, H.node[kind] + (nv && nv < 22 ? `  (hay v${process.versions.node}; se necesita 22 o superior)` : ''));
+  const chrome = process.env.CHROME || 'google-chrome';
+  add('Chrome/Chromium', has(chrome), ver(chrome) || chrome, H.chrome[kind]);
+  add('ffmpeg', has('ffmpeg'), ver('ffmpeg', ['-version']).slice(0, 40), H.ffmpeg[kind]);
+  add('ffprobe', has('ffprobe'), 'ok', H.ffmpeg[kind]);
+  add('Python 3', has('python3'), ver('python3'), H.python[kind]);
+  add('git', has('git'), ver('git'), H.git[kind]);
+  if (gosite) {
+    add('docker', has('docker') && run('docker', ['info']).status === 0, 'activo', 'instalar y abrir Docker (Docker Desktop o Docker Engine); `docker info` debe responder');
+    add('gosite', has('gosite'), ver('gosite', ['--help']).slice(0, 40), 'instalar gosite siguiendo su documentación');
+  }
+  add('carpeta de posts', !!POSTS && existsSync(POSTS), POSTS, 'ejecutar: posts init <carpeta-de-posts>');
+  console.log(`Sistema: ${kind}${id ? ' (' + id + ')' : ''}\n` + rows.join('\n') + `\n${miss ? miss + ' requisito(s) faltan: ejecuta los comandos indicados (si piden sudo, que el usuario los corra con "! comando") y repite posts doctor.' : 'Todo listo.'}`);
+  process.exit(miss ? 1 : 0);
+}
+
 // ---- comandos ----
 function cmdNew(args) {
   const month = flag(args, '--month') || MESES[new Date().getMonth()];
@@ -401,6 +435,7 @@ function cmdCheck(args) {
 
 const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: ${TOOL} · Piezas: ${POSTS || '(sin definir: posts init <ruta>)'}
 
+  posts doctor [--gosite]                                           comprueba requisitos (Node 22+, Chrome, ffmpeg, Python, git; con --gosite también docker y gosite) y da el comando para instalar lo que falte
   posts init <carpeta-de-posts>                                     una vez: define dónde están las piezas y enlaza recursos
   posts brand add <id> --name "Nombre" --dark #hex --light #hex --accent #hex --head "Fuente" [--body ...]   marca NUEVA (plantillas y sonido listos)
   posts brand list | show <marca>                                    marcas disponibles / datos compactos de una marca (colores, contacto, diseño, ideas ya hechas)
@@ -420,5 +455,5 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   Carpeta de proyectos (para los archivos de diseño): ${PROJECTS} (PROJECTS_DIR)`;
 
 const [cmd, ...rest] = process.argv.slice(2);
-if (!['init', 'brand', 'help'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
-({init: cmdInit, sound: cmdSound, analyze: cmdAnalyze, brand: cmdBrand, new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);
+if (!['init', 'brand', 'help', 'doctor'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
+({doctor: cmdDoctor, init: cmdInit, sound: cmdSound, analyze: cmdAnalyze, brand: cmdBrand, new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);

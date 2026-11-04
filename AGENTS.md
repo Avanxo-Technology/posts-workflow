@@ -2,6 +2,12 @@
 
 Raíz: esta carpeta. CLI: `./posts help` (comandos: new, list, preview, audio, export, check).
 
+## Antes de empezar (requisitos)
+Ejecuta `posts doctor` (con `--gosite` si el contenido viene de un proyecto gosite). Si algo FALTA, **instálalo tú ejecutando el comando que `posts doctor` indica**
+y repite la comprobación hasta que diga "Todo listo". Si un comando requiere sudo o contraseña, pídele al usuario que lo corra con `! comando`.
+Si el proyecto gosite no está arriba (su sitio local no responde), levántalo con los comandos de gosite: `gosite infra up` y `gosite start <proyecto>`
+(si Docker está cerrado, ábrelo primero). Ver docs/source-gosite.md.
+
 Primer paso con una marca: `posts brand show <marca>` (datos compactos; evita leer varios archivos).
 
 ## Reglas que siempre aplican

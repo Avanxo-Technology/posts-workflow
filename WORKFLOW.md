@@ -3,6 +3,8 @@
 Estructura: ver docs/legacy.md (piezas nuevas: <marca>/<mes>/postN y <marca>/<mes>/postVideos/postVideoN).
 
 ## Pasos
+ 0. `posts doctor` (+ `--gosite` si el contenido sale de un proyecto gosite). Instalar lo que falte con los comandos que indica y repetir hasta "Todo listo".
+    Si el proyecto gosite no está arriba: `gosite infra up` y `gosite start <proyecto>`.
  1. Recibir la solicitud. Consultar SOLO lo que no se pueda deducir (ver "Qué preguntar").
  2. `posts brand show <marca>` (colores, fuentes, contacto, diseño, ideas ya hechas) y leer brands/<marca>.md solo si hace falta. Si el contenido viene de un
     proyecto gosite/Cockpit: docs/source-gosite.md. No repetir ideas ya hechas.

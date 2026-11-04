@@ -5,7 +5,14 @@ GMAQ, AGA, GREMCO y Pirotecnia Favio Favio Domino. Este repositorio guarda **las
 las piezas (index.html, PNG, MP4, clips) viven aparte, en la carpeta de posts de cada equipo.
 
 ## Requisitos
-Node 22+, Google Chrome, ffmpeg/ffprobe, Python 3.
+Node 22+, Google Chrome (o Chromium con `CHROME=chromium`), ffmpeg/ffprobe, Python 3 y git. Para trabajar con proyectos gosite: Docker y `gosite`.
+
+**Comprobar e instalar:** `posts doctor` (añade `--gosite` si vas a usar un proyecto gosite) revisa cada requisito y, si falta alguno, imprime el comando
+exacto de instalación para tu sistema (apt, dnf, pacman o brew). Si se lo pides a Claude Code, **la IA lo ejecuta ella misma**: corre `posts doctor`, instala lo que
+falte con esos comandos y repite la comprobación. Si un comando necesita `sudo`, te lo indica para que lo corras tú con `! comando` en el chat.
+
+**Proyecto gosite apagado:** si el sitio local del proyecto no responde, se levanta con los comandos de gosite: `gosite infra up` (una vez; Traefik, Redis, MinIO)
+y `gosite start <proyecto>` (app + Cockpit). Ejemplo, GMAQ: app en http://localhost:8000 y Cockpit en http://localhost:8001. Con Docker cerrado, primero se abre Docker.
 
 ## Instalación
 ```

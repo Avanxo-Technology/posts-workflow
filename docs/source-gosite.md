@@ -10,6 +10,13 @@ La IA ya conoce gosite y Cockpit: aquí solo se fija cómo conectar esa fuente c
   del proyecto. El token vive en el `.env` del proyecto: se usa desde ahí y NUNCA se copia a este repo, a un index.html ni a un caption.
 - Alternativa sin token: leer la página publicada (HTML) y descargar las imágenes por su URL pública.
 
+## Si el proyecto no está arriba
+Comprobar que el sitio local responde (puertos en el README o `gosite.yml` del proyecto; p. ej. GMAQ: app :8000, Cockpit :8001). Si no responde, subirlo con gosite:
+1. `posts doctor --gosite` (Docker abierto y `gosite` instalado; si falta algo, instalarlo con el comando que indica).
+2. `gosite infra up` (una vez por sesión: Traefik, Redis, MinIO) y `gosite start <proyecto>` (app + Cockpit).
+3. Esperar a que responda (`curl http://localhost:<puerto>`) antes de leer artículos e imágenes. Al terminar, `gosite stop <proyecto>` solo si el usuario lo pide.
+Otros comandos útiles: `gosite logs <proyecto>`, `gosite restart <proyecto>`. Las piezas se guardan SIEMPRE en la carpeta de posts, nunca dentro del repo del proyecto gosite.
+
 ## Flujo con el CLI
 1. `posts brand show <marca>`: colores, fuentes, contacto, archivo de diseño (relativo a PROJECTS_DIR) e ideas ya hechas.
    Si el diseño no existe en este equipo, pedir la ruta al usuario (o permiso para buscarlo dentro de los proyectos gosite).
