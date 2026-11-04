@@ -1,0 +1,8 @@
+SONIDO DE LOS VIDEOS AGA · orígenes y licencias
+- Efectos (sfx/*.wav): grabaciones reales, no sintetizadas. Se descargan y preparan con fetch_sfx.py.
+  · Mixkit Sound Effects (https://mixkit.co/license/#sfxFree): licencia gratuita, uso comercial, sin atribución.
+  · Kenney Interface Sounds y Casino Audio (https://kenney.nl, CC0 / dominio público).
+- Música de fondo (music/*.mp3), Mixkit Free Stock Music (https://mixkit.co/license/#musicFree, gratuita, uso comercial):
+  · video 1 → "Motivating Mornings" (#33)   · video 2 → "Digital Clouds" (#175)
+  Alternativas ya probadas de descarga: "Curiosity" (#480), "Uplifting Bass" (#726), "Pop Track 03" (#729), "Deep Urban" (#623).
+  Para cambiarla: edita el nombre del mp3 en la última línea de gen_audio.py y vuelve a correrlo.

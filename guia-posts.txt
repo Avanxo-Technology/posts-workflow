@@ -1,0 +1,53 @@
+GUÍA DE POSTS (CARRUSELES Y VIDEOS/REELS) · ÍNDICE Y PROMPT
+============================================================
+Marcas: GMAQ · AGA Growth Advisors · GREMCO · Pirotecnia (Favio Favio Domino). Carpeta raíz: /home/guarapo/gosites/posts
+Actualizada 2026-11-04. La guía ahora está dividida por tarea para que la IA lea solo lo que necesita.
+
+ARCHIVOS (todos dentro de la raíz)
+  AGENTS.md          reglas que siempre aplican + qué leer según la tarea (CLAUDE.md lo importa)
+  WORKFLOW.md        flujo de trabajo, qué preguntar y aprobaciones
+  docs/carousel.md   carruseles: estilo y HTML            docs/video.md   videos: arquitectura, escenas, clips, render
+  docs/audio.md      sonido por marca                     docs/export.md  exportar, caption y checklist de calidad
+  docs/legacy.md     estructuras antiguas e inconsistencias conocidas
+  brands/<marca>.md  datos, recursos y diseño de cada marca  (brands/<marca>.json = configuración que lee el CLI)
+  _shared/           herramientas únicas: posts.mjs (CLI), render.mjs, export-carousel.mjs, carousel-template.html
+  <marca>/_shared/   recursos de la marca (plantilla de video, sonido).
+
+CLI (desde la raíz: ./posts <comando>; `./posts help`)
+  posts new <marca> carousel|video [--title "Tema"] [--month mes]   crea la carpeta con plantilla (mes y número automáticos)
+  posts list [marca] [mes]                                          piezas existentes y su estado
+  posts preview <pieza> [N|segundo] [--open]                        vista previa (lámina N / segundo t)
+  posts audio <video>                                               genera sfx.wav
+  posts export <carrusel> [N] [--out DIR]                           PNG 1080x1350 (Chrome, una sola sesión)
+  posts export <video> [--frame seg salida.png]                     reel.mp4 (solo con aprobación) / un fotograma de revisión
+  posts check <pieza>                                               validaciones automáticas
+  Requisitos: Node 22+, Google Chrome, ffmpeg, Python 3.
+
+PROMPT GENÉRICO
+Copiar y pegar en una IA con acceso a terminal y archivos. Reemplazar lo que está entre [corchetes]; lo que quede vacío la IA lo preguntará.
+
+----- INICIO DEL PROMPT -----
+Trabaja en la carpeta [/home/guarapo/gosites/posts  | otra ruta: ______]. Lee AGENTS.md y sigue sus instrucciones (te indica qué otros
+archivos leer según la tarea). Eres diseñador/a de contenido para redes. Crea una pieza para la marca
+[GMAQ | AGA | GREMCO | PIROTECNIA | otra] de tipo [carrusel de Instagram | video/reel vertical].
+
+TEMA / IDEA: [la idea, el artículo, el evento o el servicio; si lo dejo vacío, propón ideas].
+
+ANTES DE EMPEZAR, PREGÚNTAME en UN SOLO mensaje, numerado, únicamente lo que no esté ya arriba, en brands/<marca>.md o
+en la carpeta, y espera mis respuestas. No supongas ni inventes. Debes cubrir, si falta:
+ 1. Marca y tipo de pieza. Si la marca no tiene brands/<marca>.json: logo, colores, tipografías, contacto y sitio web.
+ 2. Ubicación de los posts, solo si NO es la carpeta indicada arriba. Mes: el actual (automático) salvo que yo diga otro.
+ 3. Archivo de diseño (DESIGN.md / design.md): si la marca ya lo tiene configurado, úsalo sin preguntar. Si no lo tiene o no existe,
+    pídeme la ruta; si no la tengo, PÍDEME PERMISO EXPRESO para buscarlo dentro de los proyectos de /home/guarapo/gosites,
+    diciéndome dónde vas a buscar. No busques en otros lugares. Si no existe, dime cuál será tu fuente de diseño y confírmalo.
+ 4. Material: ruta exacta de fotos, logos, clips o flyers. Si no hay, pregunta si puedes tomar imágenes del sitio de la marca.
+    Para clips: cuáles, de qué segundo a qué segundo y si conservar su audio. No uses imágenes que no hayas confirmado.
+ 5. Fuente del contenido: URL del artículo/página/catálogo real; si no la doy, pregunta si puedes consultar el sitio publicado.
+ 6. Video: duración aproximada y texto que deba aparecer sí o sí. Carrusel: número de láminas (por defecto 3).
+ 7. Datos a confirmar: contacto, fechas, horas, lugares y cifras. Si el sitio muestra datos distintos entre sí, pregúntame cuál es el correcto.
+ 8. Confirma que NO generarás PNG ni reel.mp4 definitivos hasta que yo lo diga, y que me mostrarás antes la estructura y una vista previa.
+
+DESPUÉS DE MIS RESPUESTAS: sigue WORKFLOW.md (resumen de 5 líneas de lo que entendiste -> ideas si faltan -> estructura y espera mi visto bueno
+-> posts new -> construir y vista previa -> posts check -> export solo cuando yo lo pida -> caption.txt -> checklist). Al terminar dime la ruta
+exacta de la pieza, los archivos creados y los datos que quedaron pendientes.
+----- FIN DEL PROMPT -----

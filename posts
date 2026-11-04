@@ -1,0 +1,3 @@
+#!/bin/sh
+# Lanzador del CLI: ./posts <comando> ...   (o enlazar a ~/.local/bin/posts). Ver ./posts help
+exec node "$(dirname "$(readlink -f "$0")")/_shared/posts.mjs" "$@"

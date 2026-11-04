@@ -1,0 +1,10 @@
+# configuración local de cada equipo (ruta de las piezas)
+.posts-dir
+# audio pesado y regenerable (efectos: python3 brands/<marca>/_shared/fetch_sfx.py; música: ver CREDITOS-SONIDO.txt)
+brands/*/_shared/sfx/
+brands/*/_shared/music/
+# resultados y temporales
+*.mp4
+*.wav
+__pycache__/
+node_modules/

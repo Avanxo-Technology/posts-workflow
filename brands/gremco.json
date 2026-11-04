@@ -1,0 +1,14 @@
+{
+  "name": "GREMCO",
+  "sound": "sfxlib + ambiente + audio de clips",
+  "designFile": "/home/guarapo/gosites/gremco-website-v2/design.md",
+  "designExtra": [],
+  "fonts": "https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800;900&family=Source+Sans+3:wght@400;600;700;800&display=swap",
+  "headFont": "Lexend",
+  "bodyFont": "Source Sans 3",
+  "dark": "#0F2440",
+  "light": "#F8F6F3",
+  "accent": "#E86A1A",
+  "legacyMonths": {},
+  "short": "GREMCO"
+}

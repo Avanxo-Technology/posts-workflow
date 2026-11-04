@@ -1,0 +1,17 @@
+{
+  "name": "GMAQ",
+  "sound": "synth (sin música)",
+  "designFile": "/home/guarapo/gosites/gmaq/MEMORY.md",
+  "designExtra": [
+    "/home/guarapo/gosites/gmaq/ARCHITECTURE.md",
+    "/home/guarapo/gosites/gmaq/static/css/styles.css"
+  ],
+  "fonts": "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Montserrat:wght@600;700;800;900&display=swap",
+  "headFont": "Montserrat",
+  "bodyFont": "Inter",
+  "dark": "#0E1111",
+  "light": "#F7F7F5",
+  "accent": "#C46A2B",
+  "legacyMonths": {},
+  "short": "GMAQ"
+}
