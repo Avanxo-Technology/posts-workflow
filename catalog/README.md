@@ -73,3 +73,20 @@ En la pestaña **Marcas** de `posts catalog` se puede crear y configurar una mar
 
 Seguridad: las escrituras exigen un token de sesión y solo aceptan peticiones de `127.0.0.1`. Se rechaza todo texto que parezca una clave o token, los SVG con scripts y los archivos cuyo contenido no coincide con su tipo. La UI no hace commit ni push: los cambios quedan en el clon local.
 Todo el acceso a las marcas pasa por `createFileStore()`; para mover las marcas a una base de datos bastaría con sustituir ese módulo.
+
+## Contrato de efecto (spec 1) y API para agentes
+Un efecto «spec 1» (`"spec": 1` en su `effect.json`) es un módulo portable y parametrizado, pensado para editarse en la UI y para que un agente lo consuma:
+- `fx.css`: keyframes y clases con prefijo `fx-` que leen **variables CSS** `--fx-*` (con valor por defecto en el propio CSS). Nada de colores ni tiempos fijos.
+- `fx.html`: el marcado de uso. Lleva `{{vars}}` donde van las variables en línea; el contenido de ejemplo se marca con `data-fx-sample`/`data-fx-scene` o se envuelve en `<!--fx-demo-->…<!--/fx-demo-->` y se elimina al exportar.
+- `effect.json` → `fx.params`: parámetros tipados. `number` (unit, min, max, step), `color` (hex o `palette.dark|light|accent`) y `enum` (cada opción puede fijar variables propias con `vars`). Cada parámetro `x` se convierte en `--fx-x`. Convención: `duration` y `delay` en segundos; `delay` es el segundo del video en que empieza.
+- `fx.markers`: instantes clave como fracción de la duración (p. ej. la pantalla cubierta de una transición).
+- Los efectos funcionan por tiempo (animaciones CSS que se pueden pausar y mover con `seek`), así que sirven para renderizar video.
+- `_shared/catalog-ui/fx-core.js` valida y genera el código; lo usan la UI, la API y las pruebas (`node --test _shared/fx-core.test.mjs`). `posts effect check` comprueba que cada parámetro se use en el CSS.
+
+Migrados a spec 1: `slam`, `pop`, `scene-push`, `sweep-panel` e `iris-reveal`. Los demás siguen en el formato anterior y se irán migrando.
+
+**API (solo lectura)** — la sirve `posts catalog`; el mismo formato servirá el sitio público:
+- `GET /llms.txt`: instrucciones para agentes.
+- `GET /api/v1/effects?kind=&brand=&tag=&q=`: lista.
+- `GET /api/v1/effects/<id>?duration=0.6&delay=2&palette=gmaq`: ficha con `params`, `values`, `code.css`, `code.html`, `vars`, `markers` y `totalSeconds`. Los valores fuera de rango devuelven 400 con el detalle.
+La UI guarda los valores en la URL (`#/efecto/slam?duration=1.5&palette=gmaq`), así que una configuración se puede compartir.

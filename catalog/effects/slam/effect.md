@@ -1,12 +1,13 @@
 # Slam
-Texto o elemento que entra desde abajo, más grande, rebota un poco y se asienta. Es la entrada "de impacto" para títulos y cifras grandes.
-Sus variantes `slamL` y `slamR` hacen lo mismo entrando desde la izquierda o la derecha.
+Texto o elemento que entra desde abajo, más grande, rebota un poco y se asienta. Es la entrada «de impacto» para títulos y cifras grandes.
+Sus variantes laterales están en `slam-sides`.
 
 ## Cómo aplicarlo
-1. Verifica que el `index.html` tenga la clase `.k` y el `@keyframes slam` (vienen en `video-template.html`; si no, copia `snippet.css`).
-2. En el elemento: `class="abs k"` y `style="--n:slam;--s:<segundo>s;--t:<duración>s"`.
-3. Añade el sonido en `gen_audio.py` en el mismo segundo `--s`.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Añade la clase al elemento y fija los parámetros como variables en su `style`: `<h1 class="fx-slam" style="--fx-delay:.3s;--fx-duration:.8s">`.
+3. `--fx-delay` es el segundo del video en que entra el elemento. Pon el sonido en `gen_audio.py` en ese mismo segundo (`hit=True` si debe sacudir la pantalla).
 
 ## Notas
-- Las 6 copias revisadas (4 plantillas + posts de GMAQ) son idénticas.
-- Las animaciones son función del tiempo (el reproductor las pausa y mueve con `seek`), así que no usa JS.
+- Funciona por tiempo: es una animación CSS que el reproductor puede pausar y mover con `seek`; no usa JS.
+- Con los valores por defecto equivale al antiguo `--n:slam` de las plantillas de video (`.k`), así que ambos sistemas conviven.
+- Los parámetros están en `effect.json` → `fx.params`.

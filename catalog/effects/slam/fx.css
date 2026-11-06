@@ -1,0 +1,7 @@
+/* slam — entrada de impacto: sube con escala grande, rebota y se asienta. Parámetros: --fx-duration, --fx-delay, --fx-distance, --fx-scale, --fx-settle, --fx-ease */
+@keyframes fx-slam{
+  0%{opacity:0;transform:translateY(var(--fx-distance,160px)) scale(var(--fx-scale,1.35))}
+  60%{opacity:1;transform:translateY(calc(var(--fx-distance,160px) * -.0625)) scale(var(--fx-settle,.98))}
+  100%{opacity:1;transform:none}
+}
+.fx-slam{animation:fx-slam var(--fx-duration,.7s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}

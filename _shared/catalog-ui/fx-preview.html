@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<style>
+html,body{margin:0;height:100%;background:#0b0d10;overflow:hidden;font-family:system-ui,sans-serif;color:#cfd3d8}
+#area{position:absolute;left:0;right:0;top:0;bottom:44px}
+#fit{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0}
+#stage{position:absolute;inset:0;overflow:hidden;background:radial-gradient(70% 40% at 50% 38%,color-mix(in srgb,var(--p-accent) 28%,var(--p-dark)),var(--p-dark) 70%)}
+#root{position:absolute;inset:0;display:grid;place-items:center}
+[data-fx-sample]{margin:0;padding:50px 100px;border-radius:44px;background:var(--p-accent);color:var(--p-on);font:900 130px/1 system-ui,sans-serif;letter-spacing:-.03em;box-shadow:0 50px 80px rgba(0,0,0,.45)}
+[data-fx-scene]{display:grid;place-items:center;font:900 150px/1 system-ui,sans-serif;letter-spacing:-.04em;text-align:center}
+[data-fx-scene=a]{background:var(--p-dark);color:var(--p-light)}
+[data-fx-scene=b]{background:var(--p-light);color:var(--p-dark)}
+#root>[data-fx-scene]{position:absolute;inset:0}
+#bar{position:absolute;left:0;right:0;bottom:0;height:44px;display:flex;align-items:center;gap:10px;padding:0 10px;background:#12161b;border-top:1px solid #262c34;font-size:12px}
+#bar button{background:#222831;color:#e7eaee;border:1px solid #2f3742;border-radius:6px;width:30px;height:26px;cursor:pointer}
+#seekwrap{position:relative;flex:1;height:26px;display:flex;align-items:center}
+#seek{width:100%;margin:0}
+.mk{position:absolute;top:2px;width:2px;height:8px;background:#ffd166;pointer-events:none}
+#clock{font-family:ui-monospace,monospace;min-width:92px;text-align:right}
+label{display:flex;gap:4px;align-items:center;white-space:nowrap}
+</style><style id="fxcss"></style></head>
+<body>
+<div id="area"><div id="fit"><div id="stage"><div id="root"></div></div></div></div>
+<div id="bar"><button id="pp" title="Pausa / reproducir">❚❚</button>
+  <div id="seekwrap"><input id="seek" type="range" min="0" max="1000" value="0"></div>
+  <span id="clock">0.00 / 0.00 s</span><label><input type="checkbox" id="loop" checked> Repetir</label></div>
+<script>
+// Vista previa de un efecto spec 1. Vive en un iframe aislado (sandbox): solo recibe datos del padre por postMessage.
+var fit = document.getElementById('fit'), area = document.getElementById('area'), root = document.getElementById('root'), style = document.getElementById('fxcss');
+var pp = document.getElementById('pp'), seek = document.getElementById('seek'), clock = document.getElementById('clock'), loop = document.getElementById('loop'), wrap = document.getElementById('seekwrap');
+var HOLD = 0.8, total = 1, end = 1.8, t = 0, playing = true, last = null, anims = [];
+function size() { var k = Math.min(area.clientWidth / 1080, area.clientHeight / 1920); fit.style.transform = 'scale(' + k + ')'; fit.style.left = (area.clientWidth - 1080 * k) / 2 + 'px'; fit.style.top = (area.clientHeight - 1920 * k) / 2 + 'px'; }
+addEventListener('resize', size); size();
+function lum(h) { var c = [1, 3, 5].map(function (i) { var v = parseInt(h.slice(i, i + 2), 16) / 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
+function apply() {
+  anims.forEach(function (a) { try { a.currentTime = t * 1000; } catch (e) { /* animación ya terminada o inválida */ } });
+  seek.value = Math.round(t / end * 1000);
+  clock.textContent = t.toFixed(2) + ' / ' + total.toFixed(2) + ' s';
+}
+function tick(ts) {
+  if (playing) {
+    if (last !== null) t += (ts - last) / 1000;
+    last = ts;
+    if (t >= end) { if (loop.checked) t = 0; else { t = end; playing = false; pp.textContent = '▶'; } }
+    apply();
+  } else last = null;
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+pp.onclick = function () { playing = !playing; pp.textContent = playing ? '❚❚' : '▶'; if (playing && t >= end) t = 0; };
+seek.oninput = function () { playing = false; pp.textContent = '▶'; t = seek.value / 1000 * end; apply(); };
+addEventListener('message', function (e) {
+  if (e.source !== parent || !e.data || e.data.type !== 'fx') return;
+  var m = e.data, p = m.palette || {};
+  var rs = document.documentElement.style;
+  rs.setProperty('--p-dark', p.dark || '#14181c'); rs.setProperty('--p-light', p.light || '#f4f1ea'); rs.setProperty('--p-accent', p.accent || '#c46a2b');
+  rs.setProperty('--p-on', /^#[0-9a-f]{6}$/i.test(p.accent || '') && lum(p.accent) > .4 ? '#111111' : '#ffffff');
+  style.textContent = m.css || ''; root.innerHTML = m.html || '';
+  total = m.total || 1; end = total + HOLD;
+  wrap.querySelectorAll('.mk').forEach(function (n) { n.remove(); });
+  (m.markers || []).forEach(function (k) { var d = document.createElement('div'); d.className = 'mk'; d.title = k.label; d.style.left = 'calc(' + (k.at / end * 100) + '% )'; wrap.appendChild(d); });
+  void root.offsetWidth;
+  anims = document.getAnimations(); anims.forEach(function (a) { a.pause(); });
+  t = m.keepTime ? Math.min(t, end) : 0; last = null; playing = true; pp.textContent = '❚❚'; apply();
+});
+parent.postMessage({type: 'fx-ready'}, '*');
+</script></body></html>

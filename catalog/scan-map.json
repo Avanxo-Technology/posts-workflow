@@ -404,5 +404,12 @@
     "effect": "progress-bar"
    }
   ]
+ },
+ "classes": {
+  "fx-slam": "slam",
+  "fx-pop": "pop",
+  "fx-push-in": "scene-push",
+  "fx-sweep": "sweep-panel",
+  "fx-iris": "iris-reveal"
  }
 }

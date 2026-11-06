@@ -1,0 +1,7 @@
+/* sweep-panel — un panel de color cruza la pantalla; a mitad del recorrido la pantalla está cubierta y se puede cambiar la escena. Parámetros: --fx-duration, --fx-delay, --fx-color, --fx-dx/--fx-dy (dirección), --fx-ease */
+.fx-sweep{position:absolute;inset:0;z-index:90;pointer-events:none;background:var(--fx-color,#c46a2b);animation:fx-sweep var(--fx-duration,.8s) var(--fx-ease,cubic-bezier(.65,0,.35,1)) var(--fx-delay,0s) both}
+@keyframes fx-sweep{
+  0%{transform:translate(calc(var(--fx-dx,-1) * 101%),calc(var(--fx-dy,0) * 101%))}
+  50%{transform:none}
+  100%{transform:translate(calc(var(--fx-dx,-1) * -101%),calc(var(--fx-dy,0) * -101%))}
+}

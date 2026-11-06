@@ -2,6 +2,8 @@
 import {existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {join, relative} from 'node:path';
 import {scanHtml, externalKeyframes} from './catalog-scan.mjs';
+import {createRequire} from 'node:module';
+const FX = createRequire(import.meta.url)('./catalog-ui/fx-core.js');
 
 const readJson = p => JSON.parse(readFileSync(p, 'utf8'));
 const subdirs = d => existsSync(d) ? readdirSync(d, {withFileTypes: true}).filter(e => e.isDirectory()).map(e => e.name) : [];
@@ -34,6 +36,11 @@ export function checkCatalog(TOOL, POSTS) {
     if (e.source?.file && !existsSync(join(TOOL, e.source.file))) err.push(`effects/${id}: source.file "${e.source.file}" no existe`);
     if (e.source?.piece && POSTS && !existsSync(join(POSTS, e.source.piece, 'index.html'))) warn.push(`effects/${id}: la pieza de origen no está en este equipo (${e.source.piece}); el código está en snippet.css`);
     if (e.source && !e.source.file && !e.source.piece) err.push(`effects/${id}: source necesita "file" o "piece"`);
+    if (e.spec === 1) {   // contrato de efecto spec 1: fx.css + fx.html + parámetros coherentes
+      const rd = f => (existsSync(join(e.dir, f || '')) ? readFileSync(join(e.dir, f), 'utf8') : '');
+      if (!e.fx?.params) err.push(`effects/${id}: spec 1 sin fx.params`);
+      else for (const m of FX.lint(e.fx, rd(e.fx.css), rd(e.fx.html))) err.push(`effects/${id}: ${m}`);
+    }
     if (!e.uses.length) warn.push(`effects/${id}: ningún post lo usa`);
   }
   const seen = new Set();
@@ -77,7 +84,8 @@ export function cmdEffect(args, {TOOL, POSTS, die, flag, resolvePiece, allPieces
     if (e.tags?.length) console.log('tags: ' + e.tags.join(', '));
     if (e.source) console.log(`código: ${e.source.file || 'pieza ' + e.source.piece} → ${e.source.symbol}`);
     console.log('guía: ' + join(e.dir, 'effect.md') + (e.snippet ? `\nsnippet: ${join(e.dir, e.snippet)}` : ''));
-    if (e.params && Object.keys(e.params).length) console.log('parámetros: ' + Object.entries(e.params).map(([k, v]) => `${k} (${v})`).join(' · '));
+    if (e.spec === 1 && e.fx?.params) console.log('parámetros editables (spec 1): ' + Object.entries(e.fx.params).map(([k, d]) => d.type === 'number' ? `${k} (${d.default}${d.unit || ''}, ${d.min}–${d.max})` : d.type === 'enum' ? `${k} (${d.options.map(o => o.value).join('|')})` : `${k} (color)`).join(' · ') + '\ncódigo listo con tus valores: GET /api/v1/effects/' + e.id + '?<param>=<valor>&palette=<marca>  (posts catalog)');
+    else if (e.params && Object.keys(e.params).length) console.log('parámetros: ' + Object.entries(e.params).map(([k, v]) => `${k} (${v})`).join(' · '));
     if (e.audio) console.log(`audio: ${e.audio.sfx} — ${e.audio.sync}`);
     const by = new Map();
     for (const u of e.uses) { if (!by.has(u.post)) by.set(u.post, []); by.get(u.post).push(u); }

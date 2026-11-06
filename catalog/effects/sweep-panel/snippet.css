@@ -1,3 +1,0 @@
-/* Barrido de panel (GMAQ) — extraído de gmaq/noviembre/postVideos/postVideo3/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
-@keyframes swp{0%{transform:translateX(-101%)}50%{transform:none}100%{transform:translateX(101%)}}
-.sw{position:absolute;inset:0;z-index:80;pointer-events:none;background:var(--accent);animation:swp .8s cubic-bezier(.65,0,.35,1) var(--s) both}

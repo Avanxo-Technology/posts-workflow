@@ -1,7 +1,7 @@
 // UI del catálogo: JS plano, sin dependencias. Todo el contenido se inserta con textContent (nada de innerHTML).
 (function () {
   'use strict';
-  var data = null, filters = {brand: null, kind: null};
+  var data = null, filters = {brand: null, kind: null}, routeQuery = new URLSearchParams(), cleanup = null;
   var app = document.getElementById('app'), q = document.getElementById('q');
   var KIND = {entrance: 'Entrada', text: 'Texto', transition: 'Transición', camera: 'Cámara', overlay: 'Overlay', loop: 'Bucle'};
 
@@ -116,10 +116,133 @@
       })) : h('div', {class: 'empty', text: 'Ningún efecto coincide con el filtro.'}));
   }
 
+
+  function usesTable(e) {
+    var byPost = {};
+    e.uses.forEach(function (u) { (byPost[u.post] = byPost[u.post] || []).push(u); });
+    return h('div', null, h('h2', {text: 'Usado en ' + Object.keys(byPost).length + ' posts'}),
+      Object.keys(byPost).length ? h('table', null, h('thead', null, h('tr', null, h('th', {text: 'Post'}), h('th', {text: 'Segundos (clic = copiar prompt)'}))),
+        h('tbody', null, Object.keys(byPost).sort().map(function (pid) {
+          return h('tr', {class: 'postrow'}, h('td', null, h('a', {href: '#/post/' + pid, style: 'color:var(--acc)', text: pid})),
+            h('td', null, h('div', {class: 'times'}, byPost[pid].sort(function (a, b) { return a.t - b.t; }).map(function (u) {
+              return h('span', {class: 't', title: 'copiar prompt', onclick: function () { copy(promptFor(e.id, pid, u.t), 'Prompt copiado'); }, text: fmt(u.t) + (u.note ? ' · ' + u.note : '')});
+            }))));
+        }))) : h('div', {class: 'empty', text: 'Ningún post registrado usa este efecto todavía.'}));
+  }
+
+  // ---- vista: efecto con contrato spec 1 (controles + vista previa + código listo) ----
+  function viewEffectFx(e) {
+    if (cleanup) { cleanup(); cleanup = null; }
+    var fx = e.fx, pr = routeQuery, vals = FX.defaults(fx);
+    var brandIds = Object.keys(data.brands).sort(), custom = {dark: '#14181c', light: '#f4f1ea', accent: '#c46a2b'};
+    var palId = pr.get('palette') && (data.brands[pr.get('palette')] || pr.get('palette') === 'custom') ? pr.get('palette') : ((e.brands || []).filter(function (b) { return data.brands[b]; })[0] || brandIds[0] || 'custom');
+    ['dark', 'light', 'accent'].forEach(function (k) { if (/^#[0-9a-fA-F]{6}$/.test(pr.get('c_' + k) || '')) custom[k] = pr.get('c_' + k); });
+    Object.keys(fx.params).forEach(function (k) {
+      if (pr.get(k) == null) return;
+      var r = FX.resolve(fx, (function (o) { o[k] = pr.get(k); return o; })({}));
+      if (!r.errors.length) vals[k] = r.values[k];
+    });
+    var palette = function () { var b = data.brands[palId]; return palId === 'custom' || !b ? custom : {dark: b.dark, light: b.light, accent: b.accent}; };
+    var frame = h('iframe', {src: '/fx-preview.html', sandbox: 'allow-scripts', title: 'Vista previa de ' + e.name}), ready = false;
+    var htmlPre = h('pre'), cssPre = h('pre'), urlBox = h('div', {class: 'cmd'}), markersBox = h('div', {class: 'note'});
+    var current = null, rows = [];
+
+    function query() {
+      var d = FX.defaults(fx), qs = new URLSearchParams();
+      Object.keys(fx.params).forEach(function (k) { if (vals[k] !== d[k]) qs.set(k, vals[k]); });
+      return qs;
+    }
+    function update() {
+      var p = palette(), r = FX.build(e, vals, p);
+      current = r;
+      if (ready) frame.contentWindow.postMessage({type: 'fx', css: r.css, html: r.previewHtml, total: r.total, markers: r.markers, palette: p}, '*');
+      htmlPre.textContent = r.html; cssPre.textContent = r.css;
+      var qs = query(), local = new URLSearchParams(qs.toString());
+      if (palId !== 'custom') local.set('palette', palId); else ['dark', 'light', 'accent'].forEach(function (k) { local.set(k, custom[k]); });
+      var qsApi = local.toString();
+      urlBox.textContent = location.origin + '/api/v1/effects/' + e.id + (qsApi ? '?' + qsApi : '');
+      markersBox.replaceChildren();
+      markersBox.style.display = r.markers.length ? '' : 'none';
+      r.markers.forEach(function (m) { markersBox.appendChild(h('div', null, h('b', {text: fmt(m.at)}), ' — ' + m.label)); });
+      var ui = qs.toString(), pal = palId === 'custom' ? 'palette=custom&' + ['dark', 'light', 'accent'].map(function (k) { return 'c_' + k + '=' + encodeURIComponent(custom[k]); }).join('&') : 'palette=' + palId;
+      history.replaceState(null, '', '#/efecto/' + e.id + '?' + (ui ? ui + '&' : '') + pal);
+      rows.forEach(function (fn) { fn(); });
+    }
+    function onMsg(ev) { if (ev.source === frame.contentWindow && ev.data && ev.data.type === 'fx-ready') { ready = true; update(); } }
+    window.addEventListener('message', onMsg);
+    cleanup = function () { window.removeEventListener('message', onMsg); };
+
+    function control(k, p) {
+      var def = p.default, reset = h('button', {class: 'mini', title: 'Restablecer', text: '↺', onclick: function () { vals[k] = def; sync(); update(); }}), body, sync;
+      if (p.type === 'number') {
+        var rng = h('input', {type: 'range', min: p.min, max: p.max, step: p.step, value: vals[k]}), out = h('span', {class: 'val mono'});
+        rng.addEventListener('input', function () { vals[k] = parseFloat(rng.value); sync(); update(); });
+        sync = function () { rng.value = vals[k]; out.textContent = (Math.round(vals[k] * 1000) / 1000) + (p.unit || ''); reset.style.visibility = vals[k] === def ? 'hidden' : 'visible'; };
+        body = h('div', {class: 'rg'}, rng, out);
+      } else if (p.type === 'color') {
+        var col = h('input', {type: 'color'}), tag = h('span', {class: 'val mono'});
+        col.addEventListener('input', function () { vals[k] = col.value; sync(); update(); });
+        sync = function () { var v = vals[k], hex = /^palette\./.test(v) ? palette()[v.split('.')[1]] : v; col.value = hex; tag.textContent = /^palette\./.test(v) ? 'paleta · ' + v.split('.')[1] : v; reset.style.visibility = vals[k] === def ? 'hidden' : 'visible'; };
+        body = h('div', {class: 'rg'}, col, tag);
+        rows.push(sync);
+      } else {
+        var sel = h('select', {class: 'in'}, p.options.map(function (o) { return h('option', {value: o.value, text: o.label || o.value}); }));
+        sel.addEventListener('change', function () { vals[k] = sel.value; sync(); update(); });
+        sync = function () { sel.value = vals[k]; reset.style.visibility = vals[k] === def ? 'hidden' : 'visible'; };
+        body = h('div', {class: 'rg'}, sel);
+      }
+      sync();
+      return h('div', {class: 'ctl'}, h('label', {text: p.label || k}), body, reset);
+    }
+
+    var palSel = h('select', {class: 'in'}, brandIds.map(function (b) { return h('option', {value: b, text: data.brands[b].name}); }).concat([h('option', {value: 'custom', text: 'Personalizada…'})]));
+    palSel.value = palId;
+    var customBox = h('div', {class: 'rg', style: 'margin-top:8px'}, ['dark', 'light', 'accent'].map(function (k) {
+      var inp = h('input', {type: 'color', value: custom[k], title: {dark: 'Oscuro', light: 'Claro', accent: 'Acento'}[k]});
+      inp.addEventListener('input', function () { custom[k] = inp.value; update(); });
+      return inp;
+    }));
+    var showCustom = function () { customBox.style.display = palId === 'custom' ? '' : 'none'; };
+    palSel.addEventListener('change', function () { palId = palSel.value; showCustom(); update(); });
+    showCustom();
+
+    var allCode = function () { return '/* ' + e.id + ' — CSS (una vez) */\n' + current.css.trim() + '\n\n<!-- ' + e.id + ' — HTML -->\n' + current.html + '\n'; };
+    var promptText = function () { return 'Usa el efecto "' + e.name + '" del catálogo. Lee ' + urlBox.textContent + ' (JSON con code.css y code.html ya ajustados) y aplícalo en mi pieza; empieza en el segundo ___.'; };
+
+    app.replaceChildren(
+      h('a', {class: 'back', href: '#/', text: '← Todos los efectos'}),
+      h('div', {class: 'detail'},
+        h('div', {class: 'stagebox'}, frame,
+          h('div', {class: 'bar', style: 'margin-top:10px'}, 'Paleta', palSel), customBox,
+          h('p', {style: 'color:var(--mut);font-size:12px;margin:10px 0 0', text: 'La barra inferior de la vista previa permite pausar y mover el instante. Las marcas amarillas indican momentos clave.'})),
+        h('div', null,
+          h('h1', {text: e.name}),
+          h('div', {class: 'idline'}, h('code', {text: e.id}), h('span', {class: 'kind k-' + e.kind, text: KIND[e.kind] || e.kind}),
+            h('button', {onclick: function () { copy(e.id, 'id copiado'); }, text: 'Copiar id'})),
+          md(e.md),
+          h('h2', {text: 'Controles'}),
+          h('div', {class: 'panel'}, Object.keys(fx.params).map(function (k) { return control(k, fx.params[k]); }),
+            h('div', {class: 'actions'}, h('button', {text: 'Restablecer todo', onclick: function () { routeQuery = new URLSearchParams(palId === 'custom' ? '' : 'palette=' + palId); viewEffectFx(e); }}))),
+          markersBox,
+          h('h2', {text: 'Código con estos valores'}),
+          h('div', {class: 'actions', style: 'margin:0 0 6px'},
+            h('button', {class: 'primary', text: 'Copiar todo', onclick: function () { copy(allCode(), 'Código copiado'); }}),
+            h('button', {text: 'Copiar HTML', onclick: function () { copy(current.html, 'HTML copiado'); }}),
+            h('button', {text: 'Copiar CSS', onclick: function () { copy(current.css, 'CSS copiado'); }})),
+          h('div', {class: 'sub', style: 'margin:8px 0 0', text: 'HTML'}), htmlPre, h('div', {class: 'sub', style: 'margin:8px 0 0', text: 'CSS (una sola vez por pieza)'}), cssPre,
+          h('h2', {text: 'Para tu agente'}),
+          h('p', {class: 'hint', style: 'color:var(--mut);margin:0 0 8px', text: 'Esta URL devuelve el efecto con tus valores en JSON (código listo, parámetros y marcas de tiempo). Pégala en el prompt de Claude.'}),
+          urlBox, h('div', {class: 'actions'}, h('button', {text: 'Copiar URL de la API', onclick: function () { copy(urlBox.textContent, 'URL copiada'); }}),
+            h('button', {text: 'Copiar prompt para Claude', onclick: function () { copy(promptText(), 'Prompt copiado'); }})),
+          usesTable(e))));
+    update();
+  }
+
   // ---- vista: detalle de un efecto ----
   function viewEffect(id) {
     var e = effById(id);
     if (!e) return notFound('efecto', id);
+    if (e.fx) return viewEffectFx(e);
     var byPost = {};
     e.uses.forEach(function (u) { (byPost[u.post] = byPost[u.post] || []).push(u); });
     var brandSel = h('select', {onchange: function () { frame.src = demoSrc(e, brandSel.value, true); }},
@@ -234,7 +357,11 @@
   // ---- router ----
   function render() {
     if (!data) return;
-    var hash = location.hash.replace(/^#\/?/, ''), parts = hash.split('/');
+    if (cleanup) { cleanup(); cleanup = null; }
+    var hash = location.hash.replace(/^#\/?/, ''), qi = hash.indexOf('?');
+    routeQuery = new URLSearchParams(qi >= 0 ? hash.slice(qi + 1) : '');
+    if (qi >= 0) hash = hash.slice(0, qi);
+    var parts = hash.split('/');
     var route = parts[0] === 'posts' || parts[0] === 'post' ? 'posts' : /^marca/.test(parts[0]) ? 'marcas' : 'efectos';
     Array.prototype.forEach.call(document.querySelectorAll('#nav a'), function (a) { a.classList.toggle('on', a.dataset.r === route); });
     if (data.errors && data.errors.length) console.warn('Catálogo con avisos:', data.errors);

@@ -63,6 +63,7 @@ export function scanHtml(html, brand, map, extraKf = new Set()) {
         if (d.cin && known(d.cin)) byName(d.cin, r2(s0 + num(d.cd ?? '0s')), 'cell');
         for (const sp of ['flash', 'wipe', 'lt', 'sw', 'ring']) if (cls.includes(sp)) byEl(sp, s0);
       }
+      for (const c of cls) if (map.classes?.[c]) add(map.classes[c], 'fx-delay' in d ? num(d['fx-delay']) ?? 0 : 0);   // efectos spec 1: class="fx-<efecto>" + --fx-delay
       if (cls.includes('bar') && cls.some(c => c === 'v' || c === 'h')) { const m1 = /--s1:([\d.]+)s/.exec(st); if (m1) byEl('bar', parseFloat(m1[1])); }
       if (cls.includes('prog') && 'tot' in d) byEl('prog', 0);
       for (const am of st.matchAll(/animation:\s*([\w-]+)\s+([\d.]+m?s)(?:\s+[^;,]*?\s([\d.]+s))?[^;]*/g)) {

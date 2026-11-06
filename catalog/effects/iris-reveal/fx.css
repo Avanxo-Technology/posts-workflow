@@ -1,0 +1,13 @@
+/* iris-reveal — cortina circular que cierra y/o abre. Usa @property (Chrome/Edge 85+, Safari 16.4+, Firefox 128+).
+   Parámetros: --fx-duration, --fx-delay, --fx-mode, --fx-color, --fx-ring-color, --fx-ring, --fx-x, --fx-y, --fx-ease */
+@property --fx-r{syntax:'<percentage>';inherits:false;initial-value:100%}
+.fx-iris{position:absolute;inset:0;z-index:90;pointer-events:none;
+  background:radial-gradient(circle farthest-corner at var(--fx-x,50%) var(--fx-y,50%),
+    transparent calc(var(--fx-r) - var(--fx-ring,3%)),
+    var(--fx-ring-color,#f7f7f5) calc(var(--fx-r) - var(--fx-ring,3%)),
+    var(--fx-ring-color,#f7f7f5) var(--fx-r),
+    var(--fx-color,#c46a2b) var(--fx-r));
+  animation:var(--fx-mode,fx-iris-both) var(--fx-duration,.9s) var(--fx-ease,cubic-bezier(.65,0,.35,1)) var(--fx-delay,0s) both}
+@keyframes fx-iris-both{0%{--fx-r:100%}50%{--fx-r:0%}100%{--fx-r:100%}}
+@keyframes fx-iris-close{0%{--fx-r:100%}100%{--fx-r:0%}}
+@keyframes fx-iris-open{0%{--fx-r:0%}100%{--fx-r:100%}}
