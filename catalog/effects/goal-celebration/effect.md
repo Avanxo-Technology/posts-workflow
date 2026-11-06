@@ -2,8 +2,10 @@
 Compuesto de la escena del gol: texto "Gooool" enorme que cae con rebote (`goal`), red que aparece y se atenúa (`netin`/`outf`) y foco con parpadeo (`flick`).
 
 ## Cómo aplicarlo
-Ver las reglas `.s3 .goal`, `.s3 .net` y `.s3 .flood` del snippet; los tiempos salen del inicio de la escena.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Ponlo sobre la escena del gol; cambia el texto y los colores de las sombras por los de los equipos.
 
 ## Notas
-- Código real extraído de `pirotecnia/december/postVideos/postVideo1` (ver `snippet.css`); la definición canónica está en `pirotecnia/december/postVideos/postVideo1/index.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Versión simplificada de la escena de `pirotecnia-december-postVideos-postVideo1`: no incluye el foco de luz con parpadeo (`flick`). La fuente es Oswald si está cargada.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

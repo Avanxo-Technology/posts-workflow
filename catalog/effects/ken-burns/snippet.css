@@ -1,9 +1,0 @@
-/* Zoom lento (Ken Burns) — extraído de gremco/noviembre/reel1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
-@keyframes kbin{from{transform:scale(1)}to{transform:scale(1.16)}}
-@keyframes kbout{from{transform:scale(1.16)}to{transform:scale(1)}}
-@keyframes vslow{from{transform:scale(1)}to{transform:scale(1.07)}}
-.m>img,.m>video{will-change:transform;backface-visibility:hidden;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.m>img{animation:var(--kb,kbin) calc(var(--d) + .6s) linear var(--s) both}
-.m>img.pan{animation:panx calc(var(--d) - .5s) cubic-bezier(.45,0,.55,1) calc(var(--s) + .3s) both}
-.m>video{animation:vslow calc(var(--d) + .6s) linear var(--s) both}
-.m.cell{animation:var(--cin,cellL) .5s cubic-bezier(.16,.84,.2,1) calc(var(--s) + var(--cd,0s)) both}

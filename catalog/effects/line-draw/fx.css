@@ -1,0 +1,4 @@
+/* line-draw — el trazo de un icono SVG se dibuja. El path debe llevar pathLength="1". Parámetros: --fx-duration, --fx-delay, --fx-color, --fx-stroke, --fx-ease */
+.fx-draw path{fill:none;stroke:var(--fx-color,#c46a2b);stroke-width:var(--fx-stroke,15);stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;
+  animation:fx-draw var(--fx-duration,.4s) var(--fx-ease,cubic-bezier(.65,0,.35,1)) var(--fx-delay,0s) both}
+@keyframes fx-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}

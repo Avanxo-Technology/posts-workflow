@@ -1,0 +1,8 @@
+/* num-stamp — cifra gigante: entra desde grande, se queda y sale encogiendo. --fx-duration es el tiempo total que está en pantalla. Parámetros: --fx-duration, --fx-delay, --fx-from, --fx-out */
+@keyframes fx-num{
+  0%{opacity:0;transform:scale(var(--fx-from,1.7))}
+  10%{opacity:1;transform:scale(1)}
+  86%{opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:scale(var(--fx-out,.6))}
+}
+.fx-num{animation:fx-num var(--fx-duration,3s) cubic-bezier(.2,.8,.2,1) var(--fx-delay,0s) both}

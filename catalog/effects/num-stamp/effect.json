@@ -15,13 +15,51 @@
     "file": "brands/gremco/_shared/video-template.html",
     "symbol": "@keyframes num"
   },
-  "snippet": "snippet.css",
-  "params": {
-    "--s": "segundo de entrada (delay absoluto)",
-    "--t": "duración"
-  },
+  "snippet": "fx.css",
   "audio": null,
-  "demo": {
-    "duration": 2.4
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Tiempo visible",
+        "type": "number",
+        "unit": "s",
+        "default": 3,
+        "min": 0.1,
+        "max": 10,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "from": {
+        "label": "Escala inicial",
+        "type": "number",
+        "unit": "",
+        "default": 1.7,
+        "min": 1,
+        "max": 4,
+        "step": 0.05
+      },
+      "out": {
+        "label": "Escala al salir",
+        "type": "number",
+        "unit": "",
+        "default": 0.6,
+        "min": 0.2,
+        "max": 1,
+        "step": 0.05
+      }
+    },
+    "markers": [],
+    "label": "25"
   }
 }

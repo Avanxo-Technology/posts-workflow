@@ -1,0 +1,7 @@
+/* stamp-in — aparece enorme y se encoge hasta encajar, como un sello. Parámetros: --fx-duration, --fx-delay, --fx-from, --fx-rotate, --fx-ease */
+@keyframes fx-stamp{
+  0%{opacity:0;transform:scale(var(--fx-from,3.4)) rotate(var(--fx-rotate,-14deg))}
+  55%{opacity:1;transform:scale(.9) rotate(calc(var(--fx-rotate,-14deg) * -.214))}
+  100%{opacity:1;transform:scale(1) rotate(0)}
+}
+.fx-stamp{animation:fx-stamp var(--fx-duration,.5s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}

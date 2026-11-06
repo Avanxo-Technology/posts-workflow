@@ -1,5 +1,0 @@
-/* Aro de luz (GMAQ) — extraído de gmaq/noviembre/postVideo2/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
-@keyframes ringx{0%{transform:scale(0);opacity:1}100%{transform:scale(13);opacity:0}}
-@keyframes flashx{0%{opacity:.85}100%{opacity:0}}
-.ring{position:absolute;left:540px;top:960px;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;animation:ringx .65s cubic-bezier(.4,0,.2,1) var(--s) both}
-.flash{position:absolute;inset:0;background:#fff;opacity:0;animation:flashx .42s ease-out var(--s) forwards}

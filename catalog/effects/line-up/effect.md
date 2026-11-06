@@ -2,8 +2,10 @@
 Cada línea del titular vive en un contenedor `.clip` (overflow hidden) y su `span` sube desde 115% con fade, como si saliera de detrás de una máscara. Es el estilo de los titulares de AGA.
 
 ## Cómo aplicarlo
-`<div class="giant g1 clip"><span class="k" style="--n:lineUp;--s:<seg>s;--t:.6s">Texto</span></div>`.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Una línea por contenedor `.fx-lineup-clip`; escalona `--fx-delay` entre líneas (~.25 s).
 
 ## Notas
-- Código real extraído de `/home/guarapo/tools/posts-workflow/brands/aga/_shared/aga.css` (ver `snippet.css`); la definición canónica está en `brands/aga/_shared/aga.css`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale al antiguo `lineUp` de AGA.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

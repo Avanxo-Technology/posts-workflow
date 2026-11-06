@@ -1,7 +1,7 @@
 {
   "id": "glow-pulse",
   "name": "Resplandor que late",
-  "kind": "loop",
+  "kind": "overlay",
   "medium": "video",
   "brands": [
     "pirotecnia"
@@ -15,7 +15,55 @@
     "piece": "pirotecnia/december/reels/diciembre/reel1",
     "symbol": "@keyframes glowp"
   },
-  "snippet": "snippet.css",
-  "params": {},
-  "audio": null
+  "snippet": "fx.css",
+  "audio": null,
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración del ciclo",
+        "type": "number",
+        "unit": "s",
+        "default": 1.2,
+        "min": 0.1,
+        "max": 5,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "color": {
+        "label": "Color",
+        "type": "color",
+        "default": "palette.accent"
+      },
+      "size": {
+        "label": "Tamaño",
+        "type": "number",
+        "unit": "px",
+        "default": 780,
+        "min": 200,
+        "max": 1800,
+        "step": 10
+      },
+      "low": {
+        "label": "Opacidad mínima",
+        "type": "number",
+        "unit": "",
+        "default": 0.75,
+        "min": 0,
+        "max": 1,
+        "step": 0.05
+      }
+    },
+    "markers": []
+  }
 }

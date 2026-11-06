@@ -1,4 +1,6 @@
 # Iris circular
+
+**Sustituido por `iris-reveal`**: reimplementación en CSS puro con colores, centro y modo configurables. Este es el original en canvas del motor de AGA, con sus colores fijos.
 Un círculo navy (con núcleo lima y aro claro) crece hasta cubrir la pantalla y luego se abre un agujero circular que revela la escena nueva.
 
 Se dibuja en el canvas `#cv-tr` por el motor de AGA (`brands/aga/_shared/engine.js`, función `iris`); es función pura de `u` (0..1).

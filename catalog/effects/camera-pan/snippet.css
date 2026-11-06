@@ -1,4 +1,0 @@
-/* Paneo de cámara — extraído de gremco/noviembre/reel1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
-@keyframes kbl{from{transform:scale(1.14) translateX(3%)}to{transform:scale(1.14) translateX(-3%)}}
-@keyframes kbr{from{transform:scale(1.14) translateX(-3%)}to{transform:scale(1.14) translateX(3%)}}
-@keyframes panx{from{object-position:0% 50%}to{object-position:100% 50%}}

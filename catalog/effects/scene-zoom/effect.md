@@ -2,8 +2,10 @@
 La escena entra desde escala 1.5 con fade (`inZoom`) y sale reduciéndose a .92 (`outZoom`). Se usa en escenas de cierre.
 
 ## Cómo aplicarlo
-`--in:inZoom` / `--out:outZoom` en `.wrap`.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Úsala en escenas de cierre.
 
 ## Notas
-- Código real extraído de `gremco/noviembre/reel1` (ver `snippet.css`); la definición canónica está en `brands/gremco/_shared/video-template.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale a los antiguos `inZoom`/`outZoom` de GREMCO.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

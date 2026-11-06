@@ -11,6 +11,28 @@
   var kebab = function (s) { return s.replace(/[A-Z]/g, function (m) { return '-' + m.toLowerCase(); }); };
   var num = function (v) { return String(Math.round(v * 1000) / 1000); };
 
+
+  // Evaluador aritmético mínimo (números, nombres de parámetros, + - * / y paréntesis). No usa eval.
+  function evalExpr(src, values) {
+    var tokens = String(src).match(/\d*\.?\d+|[A-Za-z_]\w*|[()+\-*/]/g) || [], pos = 0;
+    function peek() { return tokens[pos]; }
+    function next() { return tokens[pos++]; }
+    function primary() {
+      var t = next();
+      if (t === undefined) return NaN;
+      if (t === '(') { var v = sum(); if (next() !== ')') return NaN; return v; }
+      if (t === '-') return -primary();
+      if (/^\d|^\./.test(t)) return parseFloat(t);
+      var n = values[t];
+      return typeof n === 'number' ? n : NaN;
+    }
+    function prod() { var v = primary(); while (peek() === '*' || peek() === '/') { var o = next(), r = primary(); v = o === '*' ? v * r : v / r; } return v; }
+    function sum() { var v = prod(); while (peek() === '+' || peek() === '-') { var o = next(), r = prod(); v = o === '+' ? v + r : v - r; } return v; }
+    var out = sum();
+    return pos === tokens.length ? out : NaN;
+  }
+  var r3 = function (v) { return Math.round(v * 1000) / 1000; };
+
   function defaults(fx) {
     var out = {};
     Object.keys(fx.params || {}).forEach(function (k) { out[k] = fx.params[k].default; });
@@ -62,28 +84,32 @@
 
   // Quita lo que solo sirve para la vista previa (contenido de ejemplo y marcas data-fx-*).
   var escapeHtml = function (t) { return String(t).replace(/[&<>"']/g, function (c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]; }); };
-  function exportHtml(html, style, label) {
+  function exportHtml(html, style, label, keepContent) {
+    html = keepContent ? html : html.replace(/\{\{content\}\}/g, '<!-- tu contenido -->');
     return html.replace(/\{\{label\}\}/g, function () { return escapeHtml(label); }).replace(/<!--fx-demo-->[\s\S]*?<!--\/fx-demo-->\s*/g, '').replace(/\s+data-fx-[\w-]+(="[^"]*")?/g, '').replace(/\{\{vars\}\}/g, style).trim();
   }
-  function previewHtml(html, style, label) { return html.replace(/\{\{label\}\}/g, function () { return escapeHtml(label); }).replace(/<!--\/?fx-demo-->/g, '').replace(/\{\{vars\}\}/g, style); }
+  function previewHtml(html, style, label) { return html.replace(/\{\{content\}\}/g, '').replace(/\{\{label\}\}/g, function () { return escapeHtml(label); }).replace(/<!--\/?fx-demo-->/g, '').replace(/\{\{vars\}\}/g, style); }
 
   // Todo lo necesario para usar o previsualizar un efecto con unos valores y una paleta.
   function build(effect, input, palette, opts) {
     var fx = effect.fx, r = resolve(fx, input), v = vars(fx, r.values, palette), style = inline(v);
     var label = ((opts && opts.label) || fx.label || '').slice(0, 80);
     var delay = r.values.delay || 0, dur = r.values.duration || 0;
+    var totalV = fx.total ? evalExpr(fx.total, r.values) : delay + dur;
+    if (!isFinite(totalV)) totalV = delay + dur;
     return {
       values: r.values, errors: r.errors, vars: v, style: style,
-      css: fx.cssText, html: exportHtml(fx.htmlText, style, label), previewHtml: previewHtml(fx.htmlText, style, label),
-      total: Math.round((delay + dur) * 1000) / 1000,
-      markers: (fx.markers || []).map(function (m) { return {label: m.label, at: Math.round((delay + m.at * dur) * 1000) / 1000}; }),
+      css: fx.cssText, html: exportHtml(fx.htmlText, style, label, opts && opts.keepContent), previewHtml: previewHtml(fx.htmlText, style, label),
+      total: r3(totalV),
+      markers: (fx.markers || []).map(function (m) { var at = m.expr ? evalExpr(m.expr, r.values) : delay + m.at * dur; return {label: m.label, at: r3(isFinite(at) ? at : delay)}; }),
     };
   }
 
   // Comprobaciones de coherencia del contrato (las usa `posts effect check`).
-  function lint(fx, css, html) {
+  function lint(fx, cssRaw, html) {
     var p = [], params = fx.params || {};
-    if (!css) p.push('fx.css vacío');
+    var css = (cssRaw || '').replace(/\/\*[\s\S]*?\*\//g, '');   // los comentarios no cuentan como uso
+    if (!css.trim()) p.push('fx.css vacío');
     if (!html) p.push('fx.html vacío');
     else {
       if (html.indexOf('{{vars}}') < 0) p.push('fx.html no contiene {{vars}}: los parámetros no llegarían al efecto');
@@ -114,7 +140,7 @@
 
   // ================= KIT (carrito): varios efectos en una misma pieza =================
   // kit = {name, palette: '<marca>' | {dark,light,accent}, items: [{effect, label, params}]}; params incluye delay (inicio) y duration.
-  var KIT_MAX = 40, ELEMENT_KINDS = ['entrance', 'text', 'loop', 'camera'];
+  var KIT_MAX = 40, ELEMENT_KINDS = ['entrance', 'text', 'loop'];
   var KIT_CSS = '/* kit: posiciones de ejemplo de los elementos; sustitúyelas por tu diseño */\n' +
     '.kit-slot{position:absolute;left:0;right:0;display:flex;justify-content:center;transform:translateY(-50%)}\n' +
     '.kit-slot>*{margin:0;padding:40px 90px;border-radius:40px;background:var(--kit-accent);color:var(--kit-on);font:900 110px/1 system-ui,sans-serif;letter-spacing:-.03em}\n';
@@ -136,19 +162,21 @@
     list.forEach(function (it, i) {
       var e = effects[it.effect];
       if (!e || !e.fx) { errors.push('Elemento ' + (i + 1) + ': el efecto "' + it.effect + '" no existe o no es parametrizable'); return; }
-      var r = build(e, it.params || {}, palette, {label: it.label});
+      var wrapper = e.fx.htmlText.indexOf('{{content}}') >= 0;
+      var r = build(e, it.params || {}, palette, {label: it.label, keepContent: wrapper});
       r.errors.forEach(function (m) { errors.push('Elemento ' + (i + 1) + ' (' + it.effect + '): ' + m); });
       if (!seen[it.effect]) { seen[it.effect] = 1; cssParts.push(e.fx.cssText.trim()); }
       var isElem = ELEMENT_KINDS.indexOf(e.kind) >= 0;
       items.push({n: i + 1, effect: it.effect, name: e.name, kind: e.kind, label: (it.label || e.fx.label || ''), start: r.values.delay || 0, duration: r.values.duration || 0,
-        end: r.total, values: r.values, vars: r.vars, markers: r.markers, html: r.html, element: isElem});
-      if (isElem) elems.push(items.length - 1);
+        end: r.total, values: r.values, vars: r.vars, markers: r.markers, html: r.html, element: isElem && !wrapper, wrap: wrapper});
+      if (isElem && !wrapper) elems.push(items.length - 1);
     });
-    var html = items.map(function (it) {
+    var html = items.filter(function (it) { return !it.wrap; }).map(function (it) {
       if (!it.element) return it.html;
       var k = elems.indexOf(items.indexOf(it)), y = Math.round((15 + (k + 0.5) / elems.length * 70) * 10) / 10;
       return '<div class="kit-slot" style="top:' + y + '%">' + it.html + '</div>';
     }).join('\n');
+    items.filter(function (it) { return it.wrap; }).forEach(function (w) { var inner = html; html = w.html.replace(/\{\{content\}\}/g, function () { return inner; }); });   // los envoltorios (p. ej. la sacudida) rodean al resto
     var total = items.reduce(function (m, it) { return Math.max(m, it.end); }, 0);
     var markers = [];
     items.forEach(function (it) { it.markers.forEach(function (m) { markers.push({at: m.at, label: m.label, item: it.n, effect: it.effect}); }); });

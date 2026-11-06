@@ -1,0 +1,3 @@
+/* blink — parpadea N veces. Parámetros: --fx-duration (uno), --fx-delay, --fx-count, --fx-low */
+@keyframes fx-blink{0%{opacity:1}50%{opacity:var(--fx-low,.25)}100%{opacity:1}}
+.fx-blink{animation:fx-blink var(--fx-duration,.45s) linear var(--fx-delay,0s) var(--fx-count,2) both}

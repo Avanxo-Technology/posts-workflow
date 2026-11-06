@@ -1,0 +1,5 @@
+/* rays-spin — capa de rayos gigante que gira lentamente detrás del contenido. Parámetros: --fx-duration (una vuelta), --fx-delay, --fx-color, --fx-opacity, --fx-width, --fx-period */
+.fx-rays{position:absolute;left:50%;top:50%;width:2520px;height:2520px;margin:-1260px 0 0 -1260px;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--fx-color,#fff) calc(var(--fx-opacity,.12) * 100%),transparent) 0 var(--fx-width,6deg),transparent var(--fx-width,6deg) var(--fx-period,18deg));
+  animation:fx-rays var(--fx-duration,60s) linear var(--fx-delay,0s) infinite}
+@keyframes fx-rays{from{transform:rotate(0)}to{transform:rotate(360deg)}}

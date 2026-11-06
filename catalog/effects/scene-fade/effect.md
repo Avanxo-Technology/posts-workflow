@@ -2,8 +2,10 @@
 La escena entra solo con opacidad (`inFade`).
 
 ## Cómo aplicarlo
-`--in:inFade` en `.wrap`.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. La escena saliente queda debajo; no necesita animación.
 
 ## Notas
-- Código real extraído de `gremco/noviembre/reel1` (ver `snippet.css`); la definición canónica está en `brands/gremco/_shared/video-template.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale al antiguo `inFade` de GREMCO.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

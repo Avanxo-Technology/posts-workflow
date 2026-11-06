@@ -1,0 +1,8 @@
+/* label-rise — la etiqueta sube con fade, se mantiene y se desvanece. --fx-duration es el tiempo total en pantalla. Parámetros: --fx-duration, --fx-delay, --fx-distance */
+@keyframes fx-labelrise{
+  0%{opacity:0;transform:translateY(var(--fx-distance,40px))}
+  10%{opacity:1;transform:none}
+  88%{opacity:1;transform:none}
+  100%{opacity:0}
+}
+.fx-labelrise{animation:fx-labelrise var(--fx-duration,3s) cubic-bezier(.2,.8,.2,1) var(--fx-delay,0s) both}

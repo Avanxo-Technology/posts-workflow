@@ -108,7 +108,7 @@
         h('div', {class: 'grp'}, h('b', {text: 'Tipo'}), Object.keys(kinds).sort().map(function (k) { return chip(KIND[k] || k, filters.kind === k, set('kind', k)); }))),
       list.length ? h('div', {class: 'grid'}, list.map(function (e) {
         return h('a', {class: 'card', href: '#/efecto/' + e.id},
-          h('div', {class: 'thumb'}, e.demo ? h('iframe', {src: demoSrc(e), loading: 'lazy', tabindex: '-1', title: 'Demo de ' + e.name}) : h('div', {class: 'nodemo', text: 'Sin demo en vivo\n(' + (e.snippetName ? 'código JS' : 'ver motor') + ')'})),
+          h('div', {class: 'thumb'}, e.demo ? h('iframe', {src: demoSrc(e), loading: 'lazy', tabindex: '-1', sandbox: 'allow-scripts', title: 'Demo de ' + e.name}) : h('div', {class: 'nodemo', text: 'Sin demo en vivo\n(' + (e.snippetName ? 'código JS' : 'ver motor') + ')'})),
           h('div', {class: 'meta'},
             h('div', {class: 'nm', text: e.name}), h('div', {class: 'id mono', text: e.id}),
             h('div', {class: 'row'}, h('span', {class: 'kind k-' + e.kind, text: KIND[e.kind] || e.kind}),
@@ -300,6 +300,7 @@
           h('div', {class: 'idline'}, h('code', {text: e.id}),
             h('button', {onclick: function () { copy(e.id, 'id copiado'); }, text: 'Copiar id'}),
             h('button', {onclick: function () { copy(promptFor(e.id), 'Prompt copiado'); }, text: 'Copiar prompt para Claude'})),
+          e.supersededBy ? h('div', {class: 'note'}, 'Este efecto está sustituido por ', h('a', {href: '#/efecto/' + e.supersededBy, style: 'color:var(--acc)', text: e.supersededBy}), ': una versión en CSS puro, configurable y compatible con el kit.') : null,
           md(e.md),
           h('h2', {text: 'Ficha'}), h('dl', {class: 'kv'}, kv),
           e.snippet ? [h('h2', {text: 'Código (' + e.snippetName + ')'}), h('button', {onclick: function () { copy(e.snippet, 'Código copiado'); }, text: 'Copiar código'}), h('pre', {text: e.snippet})] : null,

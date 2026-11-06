@@ -1,7 +1,7 @@
 {
   "id": "line-draw",
   "name": "Trazo que se dibuja",
-  "kind": "overlay",
+  "kind": "entrance",
   "medium": "video",
   "brands": [
     "pirotecnia"
@@ -15,7 +15,81 @@
     "piece": "pirotecnia/december/postVideos/postVideo4",
     "symbol": "@keyframes draw"
   },
-  "snippet": "snippet.css",
-  "params": {},
-  "audio": null
+  "snippet": "fx.css",
+  "audio": null,
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración",
+        "type": "number",
+        "unit": "s",
+        "default": 0.4,
+        "min": 0.1,
+        "max": 3,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "color": {
+        "label": "Color del trazo",
+        "type": "color",
+        "default": "palette.accent"
+      },
+      "stroke": {
+        "label": "Grosor",
+        "type": "number",
+        "unit": "",
+        "default": 15,
+        "min": 2,
+        "max": 40,
+        "step": 1
+      },
+      "ease": {
+        "label": "Curva",
+        "type": "enum",
+        "default": "in-out",
+        "options": [
+          {
+            "value": "suave",
+            "label": "Rebote suave",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.2,.8,.2,1)"
+            }
+          },
+          {
+            "value": "lineal",
+            "label": "Lineal",
+            "vars": {
+              "--fx-ease": "linear"
+            }
+          },
+          {
+            "value": "in-out",
+            "label": "Entrada y salida",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.65,0,.35,1)"
+            }
+          },
+          {
+            "value": "brusco",
+            "label": "Brusco",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.7,0,.3,1)"
+            }
+          }
+        ]
+      }
+    },
+    "markers": []
+  }
 }

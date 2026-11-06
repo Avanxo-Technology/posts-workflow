@@ -2,8 +2,10 @@
 Etiqueta que sube 40 px con fade, se mantiene y se desvanece al final (entrada y salida en una sola definición).
 
 ## Cómo aplicarlo
-`--n:lab` con `--t` igual a la duración de la escena.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Pon en `--fx-duration` lo que dura la escena.
 
 ## Notas
-- Código real extraído de `gremco/octubre/reel1` (ver `snippet.css`); la definición canónica está en `brands/gremco/_shared/video-template.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale al antiguo `lab` de GREMCO.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

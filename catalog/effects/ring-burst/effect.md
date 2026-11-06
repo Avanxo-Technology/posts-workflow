@@ -2,8 +2,10 @@
 Transición "B" de GMAQ: un aro de 200 px (borde grueso cobre, y otro blanco más fino .05 s después) escala de 0 a 13 con fade en .65 s, junto a un flash. El comentario del código indica "aro de luz + la escena nueva se abre en círculo".
 
 ## Cómo aplicarlo
-`<div class="ring" style="border:70px solid var(--copper-light);--s:<seg>s">` y un segundo aro blanco, más un `<div class="flash" style="--s:..">`.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Colócalo encima de las escenas. Pon un golpe de audio en `--fx-delay`.
 
 ## Notas
-- Código real extraído de `gmaq/noviembre/postVideo2` (ver `snippet.css`); la definición canónica está en `gmaq/noviembre/postVideo2`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Origen: transición «B» de GMAQ (`postVideo2`): aro de luz y flash.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

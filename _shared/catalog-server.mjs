@@ -37,7 +37,7 @@ export function catalogData(TOOL, POSTS) {
     const fx = e.spec === 1 && fxMeta ? {...fxMeta, cssText: readIf(join(e.dir, fxMeta.css || 'fx.css')) || '', htmlText: readIf(join(e.dir, fxMeta.html || 'fx.html')) || ''} : null;
     return {
       ...meta, spec: fx ? 1 : null, fx, md: readIf(join(e.dir, 'effect.md')) || '', snippetName: snipName, snippet,
-      demo: fx ? null : hasDemoFile ? {type: 'file', variants: []} : kfs.length ? {type: 'auto', variants: cfg.variants || kfs, duration: cfg.duration} : null,
+      demo: fx ? {type: 'fx', variants: []} : hasDemoFile ? {type: 'file', variants: []} : kfs.length ? {type: 'auto', variants: cfg.variants || kfs, duration: cfg.duration} : null,
       uses,
     };
   }).sort((a, b) => a.id.localeCompare(b.id));
@@ -184,6 +184,26 @@ function readBody(req, max) {
   });
 }
 
+
+// Miniatura autónoma de un efecto spec 1 (galería): mismo CSS de base que la vista previa, sin controles y en bucle.
+function fxCardPage(e, brand) {
+  const pal = {dark: brand?.dark || '#14181c', light: brand?.light || '#f4f1ea', accent: brand?.accent || '#c46a2b'};
+  const r = FX.build(e, {}, pal);
+  const base = (readFileSync(join(UI, 'fx-preview.html'), 'utf8').match(/<style>([\s\S]*?)<\/style>/) || ['', ''])[1];
+  const on = (() => { const c = [1, 3, 5].map(i => { const v = parseInt(pal.accent.slice(i, i + 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] > 0.4 ? '#111111' : '#ffffff'; })();
+  const vars = `--p-dark:${pal.dark};--p-light:${pal.light};--p-accent:${pal.accent};--p-on:${on};--kit-dark:${pal.dark};--kit-light:${pal.light};--kit-accent:${pal.accent};--kit-on:${on};--fx-bg-a:${pal.dark};--fx-bg-b:${pal.light};`;
+  return `<!doctype html><html style="${vars}"><head><meta charset="utf-8"><style>${base}#bar{display:none}#area{bottom:0}</style><style>${r.css}</style></head><body>
+<div id="area"><div id="fit"><div id="stage"><div id="root">${r.previewHtml}</div></div></div></div>
+<script>
+var fit=document.getElementById('fit'),area=document.getElementById('area'),total=${Math.max(r.total, 0.1)},end=total+0.8,t=0,last=null,anims=[];
+function size(){var k=Math.min(area.clientWidth/1080,area.clientHeight/1920);fit.style.transform='scale('+k+')';fit.style.left=(area.clientWidth-1080*k)/2+'px';fit.style.top=(area.clientHeight-1920*k)/2+'px'}
+addEventListener('resize',size);size();
+anims=document.getAnimations();anims.forEach(function(a){a.pause()});
+function tick(ts){if(last!==null)t+=(ts-last)/1000;last=ts;if(t>=end)t=0;anims.forEach(function(a){a.currentTime=t*1000});requestAnimationFrame(tick)}
+requestAnimationFrame(tick);
+</script></body></html>`;
+}
+
 export function startCatalogServer({TOOL, POSTS, port = 4747, host = '127.0.0.1'}) {
   const store = createFileStore({TOOL, POSTS});
   const token = randomBytes(24).toString('hex');   // las escrituras exigen este token: una página web ajena no puede escribir en tu repo
@@ -271,8 +291,9 @@ export function startCatalogServer({TOOL, POSTS, port = 4747, host = '127.0.0.1'
       if (dm) {
         const data = catalogData(TOOL, POSTS), e = data.effects.find(x => x.id === dm[1]);
         if (!e || !e.demo) return send(404, 'text/plain', 'Este efecto no tiene demo en vivo');
-        if (e.demo.type === 'file') return send(200, 'text/html', readFileSync(join(TOOL, 'catalog', 'effects', e.id, 'demo.html')));
         const b = url.searchParams.get('brand'), brand = data.brands[b] || data.brands[e.brands?.[0]];
+        if (e.demo.type === 'fx') return send(200, 'text/html', fxCardPage(e, brand));
+        if (e.demo.type === 'file') return send(200, 'text/html', readFileSync(join(TOOL, 'catalog', 'effects', e.id, 'demo.html')));
         return send(200, 'text/html', demoHtml(e, brand, url.searchParams.get('v'), url.searchParams.get('ui') === '1'));
       }
       send(404, 'text/plain', 'No encontrado');

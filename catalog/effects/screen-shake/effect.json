@@ -17,10 +17,44 @@
     "file": "_shared/base/video-template.html",
     "symbol": "function shake"
   },
-  "snippet": "snippet.js",
-  "params": {},
+  "snippet": "fx.css",
   "audio": {
     "sfx": "cualquier golpe (pop_bubble, card_place…) con hit=True",
     "sync": "mismo instante que HITS"
+  },
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración",
+        "type": "number",
+        "unit": "s",
+        "default": 0.5,
+        "min": 0.1,
+        "max": 2,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "amplitude": {
+        "label": "Amplitud",
+        "type": "number",
+        "unit": "",
+        "default": 18,
+        "min": 2,
+        "max": 60,
+        "step": 1
+      }
+    },
+    "markers": []
   }
 }

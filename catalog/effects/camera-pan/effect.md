@@ -2,8 +2,10 @@
 Desplazamiento horizontal de la imagen: `kbl`/`kbr` (±3 % con zoom 1.14), `pan` (banda panorámica que se desplaza 260 px) y `panx` (`object-position` de 0 a 100 %).
 
 ## Cómo aplicarlo
-`--kb:kbl` o `--kb:kbr` en el contenedor `.m`; `panx` con la clase `.pan` en la imagen.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Sustituye el `<div class="fx-pan-media">` por tu `<img>` o `<video>` con la misma clase.
 
 ## Notas
-- Código real extraído de `gremco/noviembre/reel1` (ver `snippet.css`); la definición canónica está en `brands/gremco/_shared/video-template.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale a los antiguos `kbl` y `kbr`. El paneo por `object-position` (`panx`) no está migrado.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

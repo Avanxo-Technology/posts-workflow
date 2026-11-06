@@ -1,5 +1,0 @@
-/* Línea que sube (máscara) — extraído de brands/aga/_shared/aga.css. Requiere las variables --s/--t/--d de la plantilla de video. */
-.k{animation:var(--n) var(--t,.55s) cubic-bezier(.2,.8,.2,1) var(--s) both}
-@keyframes lineUp{0%{opacity:0;transform:translateY(115%)}100%{opacity:1;transform:none}}
-.clip{display:block;overflow:hidden;padding:.22em 0 .06em;margin-top:-.22em}
-.clip>span{display:block}

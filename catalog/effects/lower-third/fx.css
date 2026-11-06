@@ -1,0 +1,13 @@
+/* lower-third — rótulo del tercio inferior: barra, kicker, título (por máscara) y subtítulo, con salida. --fx-duration = tiempo visible. Parámetros: --fx-duration, --fx-delay, --fx-color, --fx-text-color, --fx-scrim, --fx-size */
+.fx-lt{position:absolute;left:70px;right:70px;bottom:230px;z-index:25;animation:fx-lt-sc var(--fx-duration,3.5s) linear var(--fx-delay,0s) both}
+.fx-lt:before{content:"";position:absolute;left:-70px;right:-70px;bottom:-230px;height:820px;z-index:-1;background:linear-gradient(0deg,color-mix(in srgb,#05101c calc(var(--fx-scrim,.9) * 100%),transparent),color-mix(in srgb,#05101c calc(var(--fx-scrim,.9) * 61%),transparent) 55%,transparent)}
+.fx-lt-w{animation:fx-lt-out .35s ease-in calc(var(--fx-delay,0s) + var(--fx-duration,3.5s) - .35s) forwards}
+.fx-lt-bar{display:block;width:150px;height:10px;border-radius:5px;background:var(--fx-color,#e86a1a);transform-origin:left;animation:fx-lt-grow .5s cubic-bezier(.2,.8,.2,1) var(--fx-delay,0s) both}
+.fx-lt-kicker{display:block;margin-top:20px;font:800 28px system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--fx-color,#e86a1a);animation:fx-lt-rise .5s cubic-bezier(.2,.8,.2,1) calc(var(--fx-delay,0s) + .15s) both}
+.fx-lt-title{margin-top:12px;font:900 var(--fx-size,82px)/.94 system-ui,sans-serif;letter-spacing:-.045em;text-transform:uppercase;color:var(--fx-text-color,#fff);animation:fx-lt-reveal .7s cubic-bezier(.65,0,.35,1) calc(var(--fx-delay,0s) + .25s) both}
+.fx-lt-sub{margin-top:18px;font:600 40px/1.18 system-ui,sans-serif;color:var(--fx-text-color,#fff);opacity:.92;animation:fx-lt-rise .6s cubic-bezier(.2,.8,.2,1) calc(var(--fx-delay,0s) + .7s) both}
+@keyframes fx-lt-sc{0%{opacity:0}.01%{opacity:1}99.99%{opacity:1}100%{opacity:0}}
+@keyframes fx-lt-grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes fx-lt-rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes fx-lt-reveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes fx-lt-out{to{opacity:0;transform:translateY(-14px)}}

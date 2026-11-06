@@ -2,8 +2,10 @@
 `scaleX` de 0 a 1 desde la izquierda (con `transform-origin:left`). Se usa en subrayados y barras de acento.
 
 ## Cómo aplicarlo
-Elemento con `transform-origin:left` y `--n:grow;--s:<seg>s`.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Subrayados, líneas de acento y barras de datos. Para una barra vertical intercambia ancho y alto.
 
 ## Notas
-- Código real extraído de `pirotecnia/december/postVideos/postVideo1` (ver `snippet.css`); la definición canónica está en `_shared/base/video-template.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale a los antiguos `grow` (horizontal) y `growY` (vertical, AGA).
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

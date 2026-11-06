@@ -17,10 +17,98 @@
     "file": "brands/pirotecnia/_shared/video-template.html",
     "symbol": "@keyframes left"
   },
-  "snippet": "snippet.css",
-  "params": {
-    "--s": "segundo de entrada (delay absoluto)",
-    "--t": "duración"
-  },
-  "audio": null
+  "snippet": "fx.css",
+  "audio": null,
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración",
+        "type": "number",
+        "unit": "s",
+        "default": 0.5,
+        "min": 0.1,
+        "max": 3,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "distance": {
+        "label": "Distancia",
+        "type": "number",
+        "unit": "px",
+        "default": 170,
+        "min": 0,
+        "max": 600,
+        "step": 10
+      },
+      "from": {
+        "label": "Entra desde",
+        "type": "enum",
+        "default": "left",
+        "options": [
+          {
+            "value": "left",
+            "label": "La izquierda",
+            "vars": {
+              "--fx-dir": "-1"
+            }
+          },
+          {
+            "value": "right",
+            "label": "La derecha",
+            "vars": {
+              "--fx-dir": "1"
+            }
+          }
+        ]
+      },
+      "ease": {
+        "label": "Curva",
+        "type": "enum",
+        "default": "suave",
+        "options": [
+          {
+            "value": "suave",
+            "label": "Rebote suave",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.2,.8,.2,1)"
+            }
+          },
+          {
+            "value": "lineal",
+            "label": "Lineal",
+            "vars": {
+              "--fx-ease": "linear"
+            }
+          },
+          {
+            "value": "in-out",
+            "label": "Entrada y salida",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.65,0,.35,1)"
+            }
+          },
+          {
+            "value": "brusco",
+            "label": "Brusco",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.7,0,.3,1)"
+            }
+          }
+        ]
+      }
+    },
+    "markers": [],
+    "label": "Etiqueta"
+  }
 }

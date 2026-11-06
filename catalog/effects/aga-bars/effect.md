@@ -4,7 +4,10 @@
 Se dibuja en el canvas `#cv-tr` por el motor de AGA (`brands/aga/_shared/engine.js`, función `bars`); es función pura de `u` (0..1).
 
 ## Cómo aplicarlo
-1. El video debe cargar `engine.js` (plantilla `brands/aga/_shared/video-template.html`).
-2. En `VIDEO.trans` añade `{t0:<segundo>, dur:.9, type:'bars'}`.
-3. La escena siguiente debe empezar en el instante de swap (~t0+.52); anótalo en el comentario.
-4. En `gen_audio.py` pon el sonido (tr_bars) en el mismo `t0`. Los tiempos de index.html y gen_audio.py deben coincidir.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Colócalo encima de las escenas; cambia la escena en el marcador. Pon `tr_bars` en `--fx-delay`.
+
+## Notas
+- Reimplementación en CSS de la transición `bars` del motor de AGA (`engine.js`): las barras impares entran por la derecha y salen por la izquierda; las pares, al revés.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

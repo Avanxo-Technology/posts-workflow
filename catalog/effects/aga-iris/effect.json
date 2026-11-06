@@ -3,14 +3,27 @@
   "name": "Iris circular",
   "kind": "transition",
   "medium": "video",
-  "brands": ["aga"],
-  "tags": ["transicion", "canvas", "pantalla-completa"],
-  "source": { "file": "brands/aga/_shared/engine.js", "symbol": "iris" },
+  "brands": [
+    "aga"
+  ],
+  "tags": [
+    "transicion",
+    "canvas",
+    "pantalla-completa"
+  ],
+  "source": {
+    "file": "brands/aga/_shared/engine.js",
+    "symbol": "iris"
+  },
   "snippet": null,
   "params": {
     "t0": "segundo en que empieza",
     "dur": "duración (los posts usan .9)",
     "type": "'iris' en VIDEO.trans"
   },
-  "audio": { "sfx": "tr_iris", "sync": "la pantalla queda 100% cubierta en ~t0+.45; la escena siguiente empieza ahí" }
+  "audio": {
+    "sfx": "tr_iris",
+    "sync": "la pantalla queda 100% cubierta en ~t0+.45; la escena siguiente empieza ahí"
+  },
+  "supersededBy": "iris-reveal"
 }

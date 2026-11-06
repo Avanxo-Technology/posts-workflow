@@ -16,7 +16,46 @@
     "file": "brands/gremco/_shared/video-template.html",
     "symbol": "@keyframes flash"
   },
-  "snippet": "snippet.css",
-  "params": {},
-  "audio": null
+  "snippet": "fx.css",
+  "audio": null,
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración",
+        "type": "number",
+        "unit": "s",
+        "default": 0.28,
+        "min": 0.1,
+        "max": 2,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "color": {
+        "label": "Color",
+        "type": "color",
+        "default": "#ffffff"
+      },
+      "peak": {
+        "label": "Intensidad",
+        "type": "number",
+        "unit": "",
+        "default": 0.9,
+        "min": 0.1,
+        "max": 1,
+        "step": 0.05
+      }
+    },
+    "markers": []
+  }
 }

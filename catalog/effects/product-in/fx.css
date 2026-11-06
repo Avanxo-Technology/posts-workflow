@@ -1,0 +1,7 @@
+/* product-in — imagen de producto que entra con rebote y giro. Parámetros: --fx-duration, --fx-delay, --fx-distance, --fx-rotate (giro final), --fx-spin (giro extra al entrar), --fx-bounce, --fx-dx/--fx-dy (dirección), --fx-ease */
+@keyframes fx-product{
+  0%{opacity:0;transform:translate(calc(var(--fx-dx,0) * var(--fx-distance,700px)),calc(var(--fx-dy,1) * var(--fx-distance,700px))) rotate(calc(var(--fx-rotate,0deg) + var(--fx-spin,0deg)))}
+  70%{opacity:1;transform:translate(calc(var(--fx-dx,0) * var(--fx-bounce,16px) * -1),calc(var(--fx-dy,1) * var(--fx-bounce,16px) * -1)) rotate(var(--fx-rotate,0deg))}
+  100%{opacity:1;transform:rotate(var(--fx-rotate,0deg))}
+}
+.fx-product{animation:fx-product var(--fx-duration,.55s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}

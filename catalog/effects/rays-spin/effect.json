@@ -15,7 +15,64 @@
     "piece": "pirotecnia/december/reels/diciembre/reel1",
     "symbol": "@keyframes spin"
   },
-  "snippet": "snippet.css",
-  "params": {},
-  "audio": null
+  "snippet": "fx.css",
+  "audio": null,
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Segundos por vuelta",
+        "type": "number",
+        "unit": "s",
+        "default": 60,
+        "min": 0.1,
+        "max": 180,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "color": {
+        "label": "Color de los rayos",
+        "type": "color",
+        "default": "palette.light"
+      },
+      "opacity": {
+        "label": "Intensidad",
+        "type": "number",
+        "unit": "",
+        "default": 0.12,
+        "min": 0.02,
+        "max": 0.6,
+        "step": 0.01
+      },
+      "width": {
+        "label": "Ancho de cada rayo",
+        "type": "number",
+        "unit": "deg",
+        "default": 6,
+        "min": 1,
+        "max": 30,
+        "step": 1
+      },
+      "period": {
+        "label": "Separación entre rayos",
+        "type": "number",
+        "unit": "deg",
+        "default": 18,
+        "min": 4,
+        "max": 60,
+        "step": 1
+      }
+    },
+    "markers": []
+  }
 }

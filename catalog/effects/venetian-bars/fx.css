@@ -1,0 +1,8 @@
+/* venetian-bars — 7 barras que cierran la pantalla y luego la abren, escalonadas. Parámetros: --fx-duration (cada barra), --fx-delay, --fx-hold, --fx-stagger, --fx-color1/--fx-color2, --fx-flow/--fx-sx0/--fx-sy0/--fx-oin/--fx-oout (orientación) */
+.fx-bars{position:absolute;inset:0;z-index:80;pointer-events:none;overflow:hidden;display:flex;flex-direction:var(--fx-flow,row)}
+.fx-bars>i{flex:1;display:block;background:var(--fx-color2,#222);
+  animation:fx-bars-in var(--fx-duration,.34s) cubic-bezier(.7,0,.3,1) calc(var(--fx-delay,0s) + var(--i,0) * var(--fx-stagger,.03s)) both,
+            fx-bars-out var(--fx-duration,.34s) cubic-bezier(.7,0,.3,1) calc(var(--fx-delay,0s) + var(--fx-duration,.34s) + var(--fx-hold,.28s) + var(--i,0) * var(--fx-stagger,.03s)) forwards}
+.fx-bars>i:nth-child(odd){background:var(--fx-color1,#c46a2b)}
+@keyframes fx-bars-in{from{transform:scale(var(--fx-sx0,1),var(--fx-sy0,0));transform-origin:var(--fx-oin,50% 0)}to{transform:scale(1,1);transform-origin:var(--fx-oin,50% 0)}}
+@keyframes fx-bars-out{from{transform:scale(1,1);transform-origin:var(--fx-oout,50% 100%)}to{transform:scale(var(--fx-sx0,1),var(--fx-sy0,0));transform-origin:var(--fx-oout,50% 100%)}}

@@ -2,8 +2,10 @@
 Cifra gigante que entra a escala 1.7 y se asienta, se queda y sale encogiendo a .6. La animación incluye entrada y salida en una sola definición.
 
 ## Cómo aplicarlo
-`--n:num` con `--t` igual a la duración de la escena (la salida está al 86-100 %).
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. La animación incluye entrada y salida: pon en `--fx-duration` lo que dura la escena de la cifra.
 
 ## Notas
-- Código real extraído de `gremco/octubre/reel1` (ver `snippet.css`); la definición canónica está en `brands/gremco/_shared/video-template.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale al antiguo `num` de GREMCO.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

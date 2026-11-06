@@ -1,0 +1,3 @@
+/* progress-bar — barra superior que avanza durante todo el video. --fx-duration = duración total. Parámetros: --fx-duration, --fx-delay, --fx-color, --fx-height */
+.fx-prog{position:absolute;left:0;top:0;width:100%;height:var(--fx-height,7px);z-index:30;background:var(--fx-color,#e86a1a);transform-origin:left;transform:scaleX(0);animation:fx-prog var(--fx-duration,10s) linear var(--fx-delay,0s) both}
+@keyframes fx-prog{from{transform:scaleX(0)}to{transform:scaleX(1)}}

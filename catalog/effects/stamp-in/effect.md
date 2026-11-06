@@ -2,8 +2,10 @@
 El elemento aparece enorme (escala 2.4-3.4) y se encoge hasta encajar con un pequeño rebote: `zoomIn` (con rotación `--r`), `stampIn` (con -14°) y `stamp` (GMAQ: escala 3 con -24°, para el sello de "25 años"). Efecto de sello o impacto.
 
 ## Cómo aplicarlo
-`--n:stampIn` o `--n:zoomIn` (este necesita `--r`).
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Sellos, cifras y rótulos de impacto.
 
 ## Notas
-- Código real extraído de `pirotecnia/december/postVideos/postVideo4` (ver `snippet.css`); la definición canónica está en `pirotecnia/december/postVideos/postVideo4/index.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Reúne los antiguos `stampIn`, `stamp` (GMAQ: `--fx-from:3`, `--fx-rotate:-24deg`) y `zoomIn`.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

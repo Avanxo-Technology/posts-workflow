@@ -2,8 +2,10 @@
 Rótulo compuesto: barra naranja (crece), kicker (sube), título (revelado por máscara), subtítulo (sube) y salida suave. Se usa para identificar cada escena de foto.
 
 ## Cómo aplicarlo
-`<div class="lt" style="--s:<seg>s;--d:<dur>s"><div class="ltw"><i class="ltb"></i><span class="ltk">…</span><div class="ltt">…</div><div class="lts">…</div></div></div>`.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Edita el kicker y el subtítulo en el HTML; el título es el texto del kit. Pon en `--fx-duration` lo que dura la escena.
 
 ## Notas
-- Código real extraído de `gremco/noviembre/reel1` (ver `snippet.css`); la definición canónica está en `brands/gremco/_shared/video-template.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale al `.lt` de los reels de GREMCO. Usa la fuente del sistema: añade `font-family` con la de tu marca.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

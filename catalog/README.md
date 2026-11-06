@@ -83,7 +83,14 @@ Un efecto «spec 1» (`"spec": 1` en su `effect.json`) es un módulo portable y 
 - Los efectos funcionan por tiempo (animaciones CSS que se pueden pausar y mover con `seek`), así que sirven para renderizar video.
 - `_shared/catalog-ui/fx-core.js` valida y genera el código; lo usan la UI, la API y las pruebas (`node --test _shared/fx-core.test.mjs`). `posts effect check` comprueba que cada parámetro se use en el CSS.
 
-Migrados a spec 1: `slam`, `pop`, `scene-push`, `sweep-panel` e `iris-reveal`. Los demás siguen en el formato anterior y se irán migrando.
+Migrados a spec 1: todos menos `aga-iris` (39 de 40). `aga-iris` es el original en canvas del motor de AGA y está sustituido por `iris-reveal`. Los efectos con varias piezas (p. ej. `lower-third`, `venetian-bars`) y los envoltorios (`screen-shake`) también cumplen el contrato.
+
+Campos opcionales de `fx` para los casos complejos:
+- `total`: fórmula del tiempo total cuando no es `delay + duration` (p. ej. `"delay + duration * count"`). Solo admite números, nombres de parámetros, `+ - * /` y paréntesis; no ejecuta código.
+- `markers[].expr`: marcador como fórmula en segundos (en vez de `at`, fracción de la duración).
+- `{{content}}` en `fx.html`: el efecto es un **envoltorio** (como la sacudida) y rodea al resto del contenido; en un kit envuelve a todos los demás elementos.
+- `{{label}}` y `fx.label`: el texto editable del elemento.
+- Todos los nombres de clase y de `@keyframes` llevan el prefijo `fx-<efecto>` y no pueden repetirse entre efectos (lo comprueban las pruebas), para que un kit pueda juntarlos.
 
 **API (solo lectura)** — la sirve `posts catalog`; el mismo formato servirá el sitio público:
 - `GET /llms.txt`: instrucciones para agentes.

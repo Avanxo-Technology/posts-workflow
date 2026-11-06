@@ -2,8 +2,10 @@
 Escala 1 a 1.03-1.05 en bucle (`infinite`). Se usa en el CTA o el teléfono para llamar la atención hasta el final del video.
 
 ## Cómo aplicarlo
-`animation:beat 1.2s ease-in-out infinite` (con retraso = segundo de entrada si va dentro de una escena).
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Llamada a la acción o teléfono hasta el final del video. Es un bucle (`infinite`).
 
 ## Notas
-- Código real extraído de `gremco/octubre/reel1` (ver `snippet.css`); la definición canónica está en `brands/gremco/_shared/video-template.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale al antiguo `beat` (GREMCO 1.05, Pirotecnia 1.03). La vista previa muestra un ciclo.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

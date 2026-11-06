@@ -1,0 +1,9 @@
+/* scene-up — la escena nueva sube desde abajo (o baja desde arriba) y la anterior se desplaza. Parámetros: --fx-duration, --fx-delay, --fx-parallax, --fx-dy (1 abajo, -1 arriba), --fx-ease */
+.fx-sceneup{position:absolute;inset:0;overflow:hidden}
+.fx-sceneup>*{position:absolute;inset:0}
+.fx-sceneup-out{background:var(--fx-bg-a,transparent)}
+.fx-sceneup-in{background:var(--fx-bg-b,transparent)}
+@keyframes fx-sceneup-in{from{transform:translateY(calc(var(--fx-dy,1) * 104%))}to{transform:none}}
+@keyframes fx-sceneup-out{to{transform:translateY(calc(var(--fx-dy,1) * var(--fx-parallax,22%) * -1))}}
+.fx-sceneup-in{animation:fx-sceneup-in var(--fx-duration,.55s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}
+.fx-sceneup-out{animation:fx-sceneup-out var(--fx-duration,.55s) ease-in var(--fx-delay,0s) both}

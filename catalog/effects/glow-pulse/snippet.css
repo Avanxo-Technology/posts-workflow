@@ -1,3 +1,0 @@
-/* Resplandor que late — extraído de pirotecnia/december/reels/diciembre/reel1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
-@keyframes glowp{0%,100%{opacity:.75}50%{opacity:1}}
-.s1 .glow{position:absolute;left:150px;top:900px;width:780px;height:780px;border-radius:50%;background:radial-gradient(circle,rgba(250,204,21,.4),rgba(220,38,38,.22) 40%,transparent 68%);animation:glowp 1.2s ease-in-out infinite}

@@ -2,8 +2,10 @@
 Capa de rayos gigante (1680x2520) que gira 360° en 60 s detrás del contenido. Fondo de energía.
 
 ## Cómo aplicarlo
-`<div class="rays">` con `animation:spin 60s linear infinite`.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Colócalo detrás del contenido de la escena.
 
 ## Notas
-- Código real extraído de `pirotecnia/december/reels/diciembre/reel1` (ver `snippet.css`); la definición canónica está en `pirotecnia/december/reels/diciembre/reel1/index.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale al movimiento `spin` de los rayos de Pirotecnia. El dibujo de los rayos aquí es genérico (cono repetido); en las piezas originales era una imagen propia.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

@@ -2,8 +2,10 @@
 Transición propia de Pirotecnia: un círculo de luz gigante (`fl`) crece desde un punto (`--x`, `--y`) y cubre la pantalla, acompañado de un anillo (`rg`). Se usa para cambiar de escena como si fuera un estallido.
 
 ## Cómo aplicarlo
-`<div class="flash" style="--s:<seg>s;--x:..;--y:..">` y `<div class="ring">` con los mismos valores. La escena nueva debe empezar cuando la luz cubre la pantalla.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Colócalo encima de las escenas y cambia la escena en el marcador. Pon una explosión de audio en `--fx-delay`.
 
 ## Notas
-- Código real extraído de `pirotecnia/december/reels/diciembre/reel1` (ver `snippet.css`); la definición canónica está en `pirotecnia/december/reels/diciembre/reel1/index.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Origen: transición de Pirotecnia (`reel1`/`reel2`). Los colores por defecto son los de fuego de esa marca.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

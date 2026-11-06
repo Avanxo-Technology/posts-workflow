@@ -101,3 +101,54 @@ test('kit: codificación ida y vuelta, omite valores por defecto y rechaza basur
   assert.equal(FX.decodeKit('esto no es un kit'), null);
   assert.equal(FX.decodeKit(Buffer.from('{"v":2}').toString('base64url')), null);
 });
+
+test('nombres únicos: ninguna clase ni @keyframes fx-* se repite entre efectos (si no, un kit los mezclaría)', () => {
+  const owner = new Map(), dups = [];
+  for (const id of readdirSync(ROOT)) {
+    const f = join(ROOT, id, 'effect.json');
+    if (!existsSync(f)) continue;
+    const e = JSON.parse(readFileSync(f, 'utf8'));
+    if (e.spec !== 1) continue;
+    const css = readFileSync(join(ROOT, id, e.fx.css), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const names = new Set([...css.matchAll(/@keyframes\s+([\w-]+)/g)].map(m => 'kf:' + m[1]));
+    for (const m of css.matchAll(/\.(fx-[\w-]+)/g)) names.add('cls:' + m[1]);
+    for (const n of names) { if (owner.has(n) && owner.get(n) !== id) dups.push(`${n} (${owner.get(n)} y ${id})`); else owner.set(n, id); }
+  }
+  assert.deepEqual(dups, []);
+});
+
+test('todos los efectos spec 1 se componen en un kit con sus valores por defecto', () => {
+  const all = {};
+  for (const id of readdirSync(ROOT)) {
+    const f = join(ROOT, id, 'effect.json');
+    if (!existsSync(f)) continue;
+    const e = JSON.parse(readFileSync(f, 'utf8'));
+    if (e.spec !== 1) continue;
+    e.fx.cssText = readFileSync(join(ROOT, id, e.fx.css), 'utf8'); e.fx.htmlText = readFileSync(join(ROOT, id, e.fx.html), 'utf8');
+    all[id] = e;
+  }
+  const b = FX.buildKit(all, {palette: pal, items: Object.keys(all).map(effect => ({effect}))}, {});
+  assert.deepEqual(b.errors, []);   // (más de 40 efectos se recortan; aquí basta con que ninguno falle)
+  assert.ok(Object.keys(all).length >= 39);
+});
+
+test('kit: un efecto envoltorio (screen-shake) rodea al resto del contenido y las fórmulas de tiempo se aplican', () => {
+  const all = {};
+  for (const id of ['slam', 'screen-shake', 'venetian-bars', 'blink']) all[id] = load(id);
+  const b = FX.buildKit(all, {palette: pal, items: [{effect: 'slam', label: 'Hola'}, {effect: 'screen-shake', params: {delay: 1}}, {effect: 'blink', params: {delay: 2, count: 3, duration: 0.5}}, {effect: 'venetian-bars', params: {delay: 4}}]}, {});
+  assert.deepEqual(b.errors, []);
+  assert.ok(b.html.startsWith('<div class="fx-shake"'), 'el envoltorio queda fuera');
+  assert.ok(b.html.includes('kit-slot') && b.html.includes('fx-bars'), 'y dentro va el resto');
+  assert.ok(b.html.indexOf('fx-shake') < b.html.indexOf('kit-slot'));
+  const blink = b.items.find(i => i.effect === 'blink'), bars = b.items.find(i => i.effect === 'venetian-bars');
+  assert.equal(blink.end, 3.5);                                // delay 2 + duration .5 * count 3
+  assert.equal(bars.end, 4 + 2 * 0.34 + 0.28 + 6 * 0.03);      // fórmula declarada en effect.json
+});
+
+test('evalExpr no ejecuta código: solo aritmética con parámetros', () => {
+  const e = load('venetian-bars');
+  e.fx.total = 'process.exit(1)';
+  assert.ok(Number.isFinite(FX.build(e, {}, pal).total));      // expresión inválida: vuelve a delay + duration
+  e.fx.total = '(delay + 2) * duration - 1';
+  assert.equal(FX.build(e, {delay: 1, duration: 0.5}, pal).total, 0.5);
+});

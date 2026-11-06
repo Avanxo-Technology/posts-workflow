@@ -1,0 +1,3 @@
+/* fade — aparición por opacidad. Parámetros: --fx-duration, --fx-delay, --fx-ease */
+@keyframes fx-fade{from{opacity:0}to{opacity:1}}
+.fx-fade{animation:fx-fade var(--fx-duration,.4s) var(--fx-ease,linear) var(--fx-delay,0s) both}

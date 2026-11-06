@@ -1,0 +1,9 @@
+/* scene-zoom — la escena nueva entra con zoom y fade; la anterior se encoge. Parámetros: --fx-duration, --fx-delay, --fx-from, --fx-out, --fx-ease */
+.fx-scenezoom{position:absolute;inset:0;overflow:hidden}
+.fx-scenezoom>*{position:absolute;inset:0}
+.fx-scenezoom-out{background:var(--fx-bg-a,transparent)}
+.fx-scenezoom-in{background:var(--fx-bg-b,transparent)}
+@keyframes fx-scenezoom-in{from{opacity:0;transform:scale(var(--fx-from,1.5))}to{opacity:1;transform:none}}
+@keyframes fx-scenezoom-out{to{transform:scale(var(--fx-out,.92))}}
+.fx-scenezoom-in{animation:fx-scenezoom-in var(--fx-duration,.55s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}
+.fx-scenezoom-out{animation:fx-scenezoom-out var(--fx-duration,.55s) ease-in var(--fx-delay,0s) both}

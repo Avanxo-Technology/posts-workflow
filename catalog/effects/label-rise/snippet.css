@@ -1,3 +1,0 @@
-/* Etiqueta que sube — extraído de gremco/octubre/reel1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
-.k{animation:var(--n) var(--t,.7s) cubic-bezier(.2,.8,.2,1) var(--s) both}
-@keyframes lab{0%{opacity:0;transform:translateY(40px)}10%{opacity:1;transform:none}88%{opacity:1;transform:none}100%{opacity:0}}

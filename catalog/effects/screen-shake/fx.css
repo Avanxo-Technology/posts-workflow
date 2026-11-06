@@ -1,0 +1,30 @@
+/* screen-shake — sacudida amortiguada de todo lo que envuelve (golpe de pantalla). Es un envoltorio: pon dentro el contenido. Parámetros: --fx-duration, --fx-delay, --fx-amplitude (px) */
+.fx-shake{position:absolute;inset:0;animation:fx-shake var(--fx-duration,.5s) linear var(--fx-delay,0s) both}
+@keyframes fx-shake{
+  0%{transform:translate(calc(var(--fx-amplitude,18) * 0.0000px),calc(var(--fx-amplitude,18) * 0.7000px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000729))}
+  4%{transform:translate(calc(var(--fx-amplitude,18) * 0.8425px),calc(var(--fx-amplitude,18) * 0.1824px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.001560))}
+  8%{transform:translate(calc(var(--fx-amplitude,18) * 0.2157px),calc(var(--fx-amplitude,18) * -0.4132px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000430))}
+  12%{transform:translate(calc(var(--fx-amplitude,18) * -0.5565px),calc(var(--fx-amplitude,18) * -0.3478px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.001031))}
+  16%{transform:translate(calc(var(--fx-amplitude,18) * -0.2991px),calc(var(--fx-amplitude,18) * 0.1188px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000554))}
+  20%{transform:translate(calc(var(--fx-amplitude,18) * 0.3275px),calc(var(--fx-amplitude,18) * 0.3145px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000607))}
+  24%{transform:translate(calc(var(--fx-amplitude,18) * 0.3011px),calc(var(--fx-amplitude,18) * 0.0777px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000558))}
+  28%{transform:translate(calc(var(--fx-amplitude,18) * -0.1608px),calc(var(--fx-amplitude,18) * -0.1879px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000298))}
+  32%{transform:translate(calc(var(--fx-amplitude,18) * -0.2598px),calc(var(--fx-amplitude,18) * -0.1543px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000481))}
+  36%{transform:translate(calc(var(--fx-amplitude,18) * 0.0502px),calc(var(--fx-amplitude,18) * 0.0560px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000093))}
+  40%{transform:translate(calc(var(--fx-amplitude,18) * 0.2015px),calc(var(--fx-amplitude,18) * 0.1412px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000373))}
+  44%{transform:translate(calc(var(--fx-amplitude,18) * 0.0151px),calc(var(--fx-amplitude,18) * 0.0330px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000034))}
+  48%{transform:translate(calc(var(--fx-amplitude,18) * -0.1424px),calc(var(--fx-amplitude,18) * -0.0854px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000264))}
+  52%{transform:translate(calc(var(--fx-amplitude,18) * -0.0474px),calc(var(--fx-amplitude,18) * -0.0684px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000088))}
+  56%{transform:translate(calc(var(--fx-amplitude,18) * 0.0913px),calc(var(--fx-amplitude,18) * 0.0263px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000169))}
+  60%{transform:translate(calc(var(--fx-amplitude,18) * 0.0578px),calc(var(--fx-amplitude,18) * 0.0634px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000107))}
+  64%{transform:translate(calc(var(--fx-amplitude,18) * -0.0515px),calc(var(--fx-amplitude,18) * 0.0139px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000095))}
+  68%{transform:translate(calc(var(--fx-amplitude,18) * -0.0552px),calc(var(--fx-amplitude,18) * -0.0388px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000102))}
+  72%{transform:translate(calc(var(--fx-amplitude,18) * 0.0233px),calc(var(--fx-amplitude,18) * -0.0303px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000043))}
+  76%{transform:translate(calc(var(--fx-amplitude,18) * 0.0460px),calc(var(--fx-amplitude,18) * 0.0124px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000085))}
+  80%{transform:translate(calc(var(--fx-amplitude,18) * -0.0051px),calc(var(--fx-amplitude,18) * 0.0285px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000030))}
+  84%{transform:translate(calc(var(--fx-amplitude,18) * -0.0347px),calc(var(--fx-amplitude,18) * 0.0059px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000064))}
+  88%{transform:translate(calc(var(--fx-amplitude,18) * -0.0052px),calc(var(--fx-amplitude,18) * -0.0176px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000018))}
+  92%{transform:translate(calc(var(--fx-amplitude,18) * 0.0239px),calc(var(--fx-amplitude,18) * -0.0134px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000044))}
+  96%{transform:translate(calc(var(--fx-amplitude,18) * 0.0099px),calc(var(--fx-amplitude,18) * 0.0058px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000018))}
+  100%{transform:translate(calc(var(--fx-amplitude,18) * -0.0148px),calc(var(--fx-amplitude,18) * 0.0128px)) scale(calc(1.004 + var(--fx-amplitude,18) * 0.000027))}
+}

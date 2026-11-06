@@ -2,8 +2,10 @@
 Franja naranja de 7 px arriba que crece de 0 a 100 % durante todo el video (`--tot` = duración total).
 
 ## Cómo aplicarlo
-`<div class="prog" style="--tot:<total>s">`.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Pon en `--fx-duration` la duración total de la pieza.
 
 ## Notas
-- Código real extraído de `gremco/noviembre/reel1` (ver `snippet.css`); la definición canónica está en `brands/gremco/_shared/video-template.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale a la barra `.prog` de los reels de GREMCO (`--tot`).
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

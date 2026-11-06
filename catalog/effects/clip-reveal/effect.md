@@ -2,8 +2,10 @@
 Un `clip-path: inset` que pasa de 100% a 0 por la derecha: la banda o el texto se descubre de izquierda a derecha. En GMAQ se usa en bandas y rótulos; en GREMCO la misma animación (`reveal`) forma parte del tercio inferior.
 
 ## Cómo aplicarlo
-`class="k"` y `style="--n:wipe;--s:<seg>s;--t:.45s"`.
+1. Copia `fx.css` en el CSS de la pieza (una sola vez).
+2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
+3. Bandas, rótulos y títulos que se descubren.
 
 ## Notas
-- Código real extraído de `gmaq/noviembre/postVideo1` (ver `snippet.css`); la definición canónica está en `_shared/base/video-template.html`.
-- Los tiempos de index.html y gen_audio.py deben coincidir.
+- Equivale al antiguo `wipe` aplicado a un elemento (`--n:wipe`) y al `reveal` del tercio inferior de GREMCO.
+- Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.
