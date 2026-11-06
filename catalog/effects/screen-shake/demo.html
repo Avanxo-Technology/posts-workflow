@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;height:100%;background:#0b0d10;overflow:hidden;font-family:system-ui,sans-serif}
+#fit{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0}
+#stage{position:absolute;inset:0;overflow:hidden;background:#0E1111}
+#world{position:absolute;inset:0;background:radial-gradient(70% 40% at 50% 40%,#5b3a22,#0E1111 70%)}
+.card{position:absolute;left:100px;top:700px;width:880px;height:420px;border-radius:44px;background:#C46A2B;color:#F7F7F5;display:flex;align-items:center;justify-content:center;font:900 130px/1 system-ui;letter-spacing:-.03em;box-shadow:0 50px 80px rgba(0,0,0,.45)}
+#hit{position:absolute;left:0;right:0;top:1300px;text-align:center;font:700 64px system-ui;color:#98a1ad}
+</style></head><body><div id="fit"><div id="stage"><div id="world"><div class="card">GOLPE</div><div id="hit"></div></div></div></div>
+<script>
+var fit=document.getElementById('fit'),world=document.getElementById('world'),lab=document.getElementById('hit');
+function sz(){var k=Math.min(innerWidth/1080,innerHeight/1920);fit.style.transform='scale('+k+')';fit.style.left=(innerWidth-1080*k)/2+'px';fit.style.top=(innerHeight-1920*k)/2+'px'}
+addEventListener('resize',sz);sz();
+/* --- misma fórmula que shake() de _shared/base/video-template.html: HITS = instantes de golpe --- */
+var PERIOD=2.4; /* un golpe en el segundo .5 de cada ciclo */
+var start=performance.now();
+function frame(){
+  var t=((performance.now()-start)/1000)%PERIOD,sx=0,sy=0,dt=t-.5,amp;
+  if(dt>=0&&dt<=.5){amp=18*Math.exp(-dt*8);sx=Math.sin(dt*71)*amp;sy=Math.cos(dt*63)*amp*.7}
+  var sc=1+Math.max(Math.abs(sx)/540,Math.abs(sy)/960)+.004;
+  world.style.transform=(sx||sy)?'translate('+sx.toFixed(1)+'px,'+sy.toFixed(1)+'px) scale('+sc.toFixed(4)+')':'none';
+  lab.textContent=dt>=0&&dt<=.5?'HIT':'';
+  requestAnimationFrame(frame);
+}
+frame();
+</script></body></html>

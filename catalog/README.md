@@ -59,5 +59,5 @@ posts catalog [--port N] [--open]
 ```
 Abre una página local (solo `127.0.0.1`, solo lectura, sin dependencias) con la galería de efectos, una demo en vivo de cada uno, su ficha y código, y en qué posts y segundos se usó. También hay vista por post con línea de tiempo. Los botones "Copiar prompt" generan una frase lista para pegar a Claude (por ejemplo: usa el efecto `slam` tal como se hizo en `gmaq-noviembre-postVideo1` en el segundo 0.3).
 - Lee los JSON en cada recarga: lo que cambie `posts effect scan --write` o Claude se ve al pulsar "Recargar".
-- La demo es automática para los efectos que tienen `@keyframes` en `snippet.css`, aplicados a una pieza de muestra con los colores de la marca. Los efectos de motor JS/canvas (`aga-*`, `screen-shake`) no tienen demo.
+- La demo es automática para los efectos que tienen `@keyframes` en `snippet.css`, aplicados a una pieza de muestra con los colores de la marca. Los de motor JS/canvas (`aga-*`, `screen-shake`) usan un `demo.html` a medida con el código real del motor.
 - Para una demo a medida pon un `demo.html` autocontenido en la carpeta del efecto; en `effect.json` puedes ajustar la demo automática con `"demo": {"duration": 2.4, "variants": ["kbin"]}`.

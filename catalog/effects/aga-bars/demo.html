@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;height:100%;background:#0b0d10;overflow:hidden;font-family:system-ui,sans-serif}
+#fit{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0}
+#stage{position:absolute;inset:0;overflow:hidden}
+.sc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 190px/.9 system-ui;letter-spacing:-.05em;text-align:center}
+#A{background:#0B2938;color:#F4F0E7}#B{background:#F4F0E7;color:#0B2938}
+canvas{position:absolute;inset:0}
+</style></head><body><div id="fit"><div id="stage"><div class="sc" id="A">ESCENA<br>A</div><div class="sc" id="B" style="display:none">ESCENA<br>B</div><canvas id="cv" width="1080" height="1920"></canvas></div></div>
+<script>
+var fit=document.getElementById('fit');
+function sz(){var k=Math.min(innerWidth/1080,innerHeight/1920);fit.style.transform='scale('+k+')';fit.style.left=(innerWidth-1080*k)/2+'px';fit.style.top=(innerHeight-1920*k)/2+'px'}
+addEventListener('resize',sz);sz();
+var x=document.getElementById('cv').getContext('2d'),NAVY='#0B2938',LIME='#A8CB18',PAPER='#F4F0E7',TAU=Math.PI*2;
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function ease(u){return u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2}
+/* --- copiado de brands/aga/_shared/engine.js --- */
+function bars(u){            /* 8 persianas horizontales alternando sentido y color */
+  var n=8,h=1920/n,k,d,pi,po,L,R,dir;
+  for(k=0;k<n;k++){
+    d=k*.035;dir=k%2?1:-1;
+    pi=ease(clamp((u-d)/.38,0,1));po=ease(clamp((u-.58-d*.6)/.38,0,1));
+    if(pi<=0)continue;
+    if(dir<0){R=1080;L=1080-1080*pi;R=1080-(1080*po)}     /* entra desde la derecha, sale hacia la izquierda */
+    else{L=0;R=1080*pi;L=1080*po}                       /* entra desde la izquierda, sale hacia la derecha */
+    if(R-L<1)continue;
+    x.fillStyle=k%2?LIME:NAVY;x.fillRect(L-1,k*h-1,R-L+2,h+2);
+  }
+}
+var T0=.4,DUR=.9,PERIOD=3,start=performance.now();
+function frame(){
+  var t=((performance.now()-start)/1000)%PERIOD,u=clamp((t-T0)/DUR,0,1);
+  x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,1080,1920);
+  var inT=t>=T0&&t<=T0+DUR;
+  if(inT)bars(u);
+  document.getElementById('B').style.display=t>=T0+DUR*0.58?'flex':'none';
+  requestAnimationFrame(frame);
+}
+frame();
+</script></body></html>
