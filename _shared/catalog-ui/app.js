@@ -1,6 +1,7 @@
 // UI del catálogo: JS plano, sin dependencias. Todo el contenido se inserta con textContent (nada de innerHTML).
 (function () {
   'use strict';
+  var STATIC = ((document.querySelector('meta[name=posts-mode]') || {}).content) === 'static';   // sitio publicado: sin servidor de escritura
   var data = null, filters = {brand: null, kind: null}, routeQuery = new URLSearchParams(), cleanup = null;
   var app = document.getElementById('app'), q = document.getElementById('q');
   var KIND = {entrance: 'Entrada', text: 'Texto', transition: 'Transición', camera: 'Cámara', overlay: 'Overlay', loop: 'Bucle'};
@@ -84,6 +85,7 @@
   }
   function usedCount(e) { var s = {}; e.uses.forEach(function (u) { s[u.post] = 1; }); return Object.keys(s).length; }
   function demoSrc(e, brand, ui) {
+    if (STATIC) return '/demo/' + e.id + '.html';
     return '/demo/' + e.id + '?brand=' + encodeURIComponent(brand || (e.brands && e.brands[0]) || '') + (ui ? '&ui=1' : '');
   }
 
@@ -397,7 +399,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('#nav a'), function (a) { a.classList.toggle('on', a.dataset.r === route); });
     if (data.errors && data.errors.length) console.warn('Catálogo con avisos:', data.errors);
     if (parts[0] === 'kit') { if (window.KitUI) window.KitUI.render(); }
-    else if (/^marca/.test(parts[0])) { if (window.BrandsUI) window.BrandsUI.render(parts); }
+    else if (/^marca/.test(parts[0])) { if (window.BrandsUI) window.BrandsUI.render(parts); else location.hash = '#/'; }
     else if (parts[0] === 'efecto' && parts[1]) viewEffect(decodeURIComponent(parts[1]));
     else if (parts[0] === 'post' && parts[1]) viewPost(decodeURIComponent(parts[1]));
     else if (parts[0] === 'posts') viewPosts();
@@ -405,7 +407,7 @@
     window.scrollTo(0, 0);
   }
   function load(keepScroll) {
-    return fetch('/api/catalog').then(function (r) { return r.json(); }).then(function (d) {
+    return fetch(STATIC ? '/data/catalog.json' : '/api/catalog').then(function (r) { return r.json(); }).then(function (d) {
       data = d; var y = window.scrollY; render(); if (keepScroll) window.scrollTo(0, y);
     }).catch(function (err) { app.replaceChildren(h('div', {class: 'empty', text: 'No se pudo leer el catálogo: ' + err.message})); });
   }

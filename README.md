@@ -4,6 +4,19 @@ Herramientas para producir carruseles (HTML -> PNG 1080x1350) y videos/reels (HT
 GMAQ, AGA, GREMCO y Pirotecnia Favio Favio Domino. Este repositorio guarda **las herramientas, plantillas y documentación**;
 las piezas (index.html, PNG, MP4, clips) viven aparte, en la carpeta de posts de cada equipo.
 
+## Cómo se usa: el sitio y GitHub tienen papeles distintos
+- **Quien solo quiere usar los efectos** entra al **sitio** (no necesita GitHub ni instalar nada): explora el catálogo, ajusta duración y colores, arma un kit y copia el código, o le pasa a su Claude la URL del efecto o del kit (`/llms.txt` explica la API a los agentes).
+- **GitHub** es el taller del equipo: guarda la fuente de verdad (los efectos de `catalog/`, las marcas de `brands/` y el código). Los cambios se revisan con PR y, al fusionarse a `main`, el sitio se regenera (`.github/workflows/site.yml`).
+- **El equipo** produce las piezas con el CLI `posts` y Claude Code en su equipo, y registra los efectos nuevos con `posts effect scan --write`.
+
+Comandos del catálogo y del sitio (solo necesitan Node 22+):
+```
+posts catalog --open                 UI local completa (incluye el editor de marcas, que escribe en el repo)
+posts site build [--base https://…]  genera el sitio público en dist/ (estático + función de la API)
+posts site serve                     lo prueba en local emulando el hosting
+```
+Detalles, contrato de efectos y API: `catalog/README.md`. El sitio publicado **no** incluye el editor de marcas: las marcas son paletas de solo lectura y cada persona puede usar colores propios en su navegador.
+
 ## Requisitos
 Node 22+, Google Chrome (o Chromium con `CHROME=chromium`), ffmpeg/ffprobe, Python 3 y git. Para trabajar con proyectos gosite: Docker y `gosite`.
 

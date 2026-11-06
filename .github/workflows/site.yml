@@ -1,0 +1,56 @@
+# Valida el catálogo y genera el sitio público en cada cambio. Publicarlo en un hosting es un paso aparte (ver el bloque comentado al final).
+name: Sitio del catálogo
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Pruebas
+        run: node --test _shared/fx-core.test.mjs _shared/site/site.test.mjs
+
+      - name: Validar el catálogo
+        run: ./posts effect check
+
+      - name: Generar el sitio
+        run: ./posts site build --out dist
+
+      - name: Prueba de humo (emulando el hosting)
+        run: |
+          ./posts site serve --dir dist --port 4748 &
+          sleep 2
+          curl -fsS http://127.0.0.1:4748/ > /dev/null
+          curl -fsS http://127.0.0.1:4748/api/v1/effects.json | grep -q '"count"'
+          curl -fsS "http://127.0.0.1:4748/api/v1/effects/slam?duration=0.5" | grep -q '"duration":0.5'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sitio
+          path: dist
+
+  # Publicación (desactivada). Para activarla: elige hosting, crea sus secretos en GitHub y descomenta.
+  # Ejemplo con Cloudflare Pages (secretos CLOUDFLARE_API_TOKEN y CLOUDFLARE_ACCOUNT_ID):
+  #
+  # deploy:
+  #   needs: build
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with: { name: sitio, path: dist }
+  #     - uses: cloudflare/wrangler-action@v3
+  #       with:
+  #         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  #         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  #         workingDirectory: dist
+  #         command: pages deploy public --project-name=catalogo-de-efectos

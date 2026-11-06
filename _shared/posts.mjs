@@ -11,6 +11,7 @@ import {spawnSync} from 'node:child_process';
 import {cmdEffect} from './catalog.mjs';
 import {startCatalogServer} from './catalog-server.mjs';
 import {createFileStore, BrandError} from './brand-store.mjs';
+import {cmdSite} from './site/cmd.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TOOL = resolve(HERE, '..');
@@ -421,6 +422,8 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   posts export <video> --yes [--sound on|off] [--workers N]         video -> reel.mp4. SOLO cuando el usuario lo indica: sin --yes no graba. N = Chrome en paralelo (auto por defecto)
   posts export <video> --frame <seg> <salida.png>                   un fotograma de revisión (no toca reel.mp4)
   posts catalog [--port N] [--open]                                 UI local del catálogo de efectos (galería, demos en vivo, dónde se usó cada uno)
+  posts site build [--out dist] [--base https://mi-sitio.com]       genera el sitio público (estático + función de la API) listo para publicar
+  posts site serve [--dir dist] [--port 4748]                       lo sirve en local emulando el hosting
   posts effect list [--brand b] [--kind k] [--tag t]                catálogo de efectos (catalog/README.md)
   posts effect show <id>                                            cómo está hecho, parámetros, audio y en qué posts se usó
   posts effect at <post> [segundo]                                  efectos de un post / el más cercano a ese segundo ("el efecto del seg 3 de X")
@@ -433,11 +436,12 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   Carpeta de proyectos (para los archivos de diseño): ${PROJECTS} (PROJECTS_DIR)`;
 
 const [cmd, ...rest] = process.argv.slice(2);
-if (!['init', 'brand', 'help', 'doctor', 'effect', 'catalog'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
+if (!['init', 'brand', 'help', 'doctor', 'effect', 'catalog', 'site'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
 ({doctor: cmdDoctor, init: cmdInit, sound: cmdSound, analyze: cmdAnalyze, brand: cmdBrand, catalog: async a => {
     const port = flag(a, '--port'), open = flag(a, '--open', false);
     const {url} = await startCatalogServer({TOOL, POSTS, port: port ? parseInt(port, 10) : 4747}).catch(e => die('No pude abrir el servidor: ' + e.message));
     console.log(`Catálogo de efectos en ${url}  (solo este equipo · Ctrl+C para cerrar)`);
     if (open) run('xdg-open', [url]);
   },
+  site: a => cmdSite(a, {TOOL, die, flag}),
   effect: a => cmdEffect(a, {TOOL, POSTS, die, flag, resolvePiece, isCarousel, allPieces: () => brands().flatMap(n => piecesOf(n, brandOf(n))).filter(d => !isCarousel(d))}), new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);

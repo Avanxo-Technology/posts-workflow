@@ -110,3 +110,16 @@ En la pestaña **Kit** de `posts catalog` se reúnen varios efectos spec 1 para 
 - `GET /api/v1/kit?k=<kit>`: JSON con `items[]` (inicio, duración, marcadores y HTML de cada uno), `code.css`, `code.html`, `markers` y `howTo`. Un kit no válido devuelve 400 con el detalle.
 - `GET /api/v1/kit?k=<kit>&format=html`: la página autónoma (con política de seguridad restrictiva).
 Solo admiten efectos spec 1 (parametrizados) y hasta 40 elementos. Las etiquetas se escapan siempre.
+
+## Sitio público (`posts site build`)
+El sitio es lo que usa el visitante; GitHub guarda la fuente y publica. `posts site build [--out dist] [--base https://mi-sitio.com]` genera una carpeta lista para publicar (se ignora en git):
+- `public/`: la UI (sin el editor de marcas), los datos del catálogo, las miniaturas, `llms.txt` y la API con **valores por defecto** como archivos (`api/v1/effects.json`, `api/v1/effects/<id>.json`).
+- `functions/`, `netlify/`, `lib/`: la **función** que responde a `/api/v1/*` y `/llms.txt` con valores a medida (`?duration=0.6&palette=gmaq`) y a los kits (`/api/v1/kit?k=…`). Un hosting solo estático no puede calcular eso; sin la función, el agente solo obtiene los valores por defecto.
+- Sin `--base`, las URL de los JSON estáticos son relativas (`/api/v1/effects/slam`); con `--base`, absolutas. La función siempre usa el origen real de la petición.
+- La lógica de la API es **una sola** (`_shared/site/api-core.mjs`, estándares web `Request`/`Response`): la usan `posts catalog`, la función desplegada y la generación de los JSON, así que lo que pruebas en local es lo que se publica.
+- `posts site serve [--dir dist]` lo sirve en local emulando el hosting (un archivo estático tiene prioridad sobre la función, como en Cloudflare/Netlify).
+- Adaptadores incluidos: **Cloudflare Pages Functions** y **Netlify Functions**. Se verifican en las pruebas cargándolos desde la carpeta generada, pero **no se han desplegado en una plataforma real**.
+- `build` no pisa una carpeta que no sea un build anterior (lleva un marcador `.posts-site-build`).
+- Lo que se publica de cada post son referencias (ids, rutas relativas y segundos), nunca videos ni imágenes ni rutas locales (lo comprueban las pruebas).
+
+**Integración continua** (`.github/workflows/site.yml`): en cada push y PR corre las pruebas, `effect check`, el build y una prueba de humo contra el emulador, y guarda el sitio como artefacto. La publicación en un hosting está **comentada**: hace falta elegir proveedor y crear sus secretos en GitHub.

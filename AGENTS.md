@@ -33,6 +33,7 @@ Primer paso con una marca: `posts brand show <marca>` (datos compactos; evita le
 | "Usa el efecto del segundo N del post X" / buscar efectos ya usados | `posts effect at <post> <seg>` → `posts effect show <id>` → leer su effect.md (catalog/README.md) |
 | Registrar en el catálogo un video nuevo o modificado | `posts effect scan <pieza>` y, si el resultado es correcto, `--write` (catalog/README.md) |
 | Que el usuario configure una marca (colores, design.md, logos) | `posts catalog --open` → pestaña Marcas (catalog/README.md). `posts brand show <marca>` muestra el design.md y los logos del repo |
+| Generar o probar el sitio público del catálogo | `posts site build` y `posts site serve` (catalog/README.md, «Sitio público»); el editor de marcas solo existe en `posts catalog` local |
 | El usuario te pasa un enlace de kit (`#/kit?k=…`) o pide combinar varios efectos | `GET /api/v1/kit?k=<kit>` (con `posts catalog` activo): aplica `code.css` una vez y `code.html` en orden, con los tiempos de `items[].start` (catalog/README.md, «Kit») |
 | Usar un efecto del catálogo en una pieza | `GET /api/v1/effects/<id>?<param>=<valor>` (con `posts catalog` activo) o `posts effect show <id>`; copiar `code.css` una vez y `code.html` donde corresponda (catalog/README.md, «Contrato de efecto») |
 | Que el usuario vea/explore los efectos | `posts catalog --open` (UI local; catalog/README.md) |

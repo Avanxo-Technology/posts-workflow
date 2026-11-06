@@ -9,3 +9,5 @@ sfx.wav
 _sfx_raw.wav
 __pycache__/
 node_modules/
+# build del sitio público (se regenera con `posts site build`)
+dist/
