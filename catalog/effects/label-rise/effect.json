@@ -19,5 +19,8 @@
     "--s": "segundo de entrada (delay absoluto)",
     "--t": "duración"
   },
-  "audio": null
+  "audio": null,
+  "demo": {
+    "duration": 2.4
+  }
 }

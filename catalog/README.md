@@ -52,3 +52,12 @@ posts effect scan --all [--check]    revisa todos los videos; --check sale con e
 - Lo que no se puede fechar automáticamente (p. ej. retrasos por elemento `var(--cs)`) se avisa como `? sin tiempo deducible`. Añade esos usos a mano en el JSON del post con `"manual": true`; el escáner los conserva y no los duplica.
 - `--write` conserva las notas escritas a mano y los usos `manual`, y reemplaza el resto por lo detectado.
 - Con carruseles no hace nada (no tienen animaciones).
+
+## UI: `posts catalog`
+```
+posts catalog [--port N] [--open]
+```
+Abre una página local (solo `127.0.0.1`, solo lectura, sin dependencias) con la galería de efectos, una demo en vivo de cada uno, su ficha y código, y en qué posts y segundos se usó. También hay vista por post con línea de tiempo. Los botones "Copiar prompt" generan una frase lista para pegar a Claude (por ejemplo: usa el efecto `slam` tal como se hizo en `gmaq-noviembre-postVideo1` en el segundo 0.3).
+- Lee los JSON en cada recarga: lo que cambie `posts effect scan --write` o Claude se ve al pulsar "Recargar".
+- La demo es automática para los efectos que tienen `@keyframes` en `snippet.css`, aplicados a una pieza de muestra con los colores de la marca. Los efectos de motor JS/canvas (`aga-*`, `screen-shake`) no tienen demo.
+- Para una demo a medida pon un `demo.html` autocontenido en la carpeta del efecto; en `effect.json` puedes ajustar la demo automática con `"demo": {"duration": 2.4, "variants": ["kbin"]}`.
