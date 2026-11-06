@@ -4,7 +4,7 @@
   "medium": "video",
   "path": "aga/noviembre/postVideos/postVideo2",
   "uses": [
-    {"effect": "ken-burns", "t": 0.0, "note": "kenIn"},
+    {"effect": "ken-burns", "t": 0, "note": "kenIn"},
     {"effect": "fade", "t": 0.1},
     {"effect": "pop", "t": 0.25},
     {"effect": "line-up", "t": 0.35},
@@ -22,7 +22,7 @@
     {"effect": "aga-iris", "t": 4.3, "note": "swap 4.75"},
     {"effect": "fade", "t": 4.85},
     {"effect": "pop", "t": 4.95},
-    {"effect": "line-up", "t": 5.0},
+    {"effect": "line-up", "t": 5},
     {"effect": "line-up", "t": 5.25},
     {"effect": "screen-shake", "t": 5.9},
     {"effect": "slam-sides", "t": 5.9, "note": "slamL"},
@@ -69,8 +69,8 @@
     {"effect": "line-up", "t": 23.2},
     {"effect": "pop", "t": 23.2},
     {"effect": "line-up", "t": 23.45},
-    {"effect": "screen-shake", "t": 24.0},
-    {"effect": "slam-sides", "t": 24.0, "note": "slamL"},
+    {"effect": "screen-shake", "t": 24},
+    {"effect": "slam-sides", "t": 24, "note": "slamL"},
     {"effect": "screen-shake", "t": 25.2},
     {"effect": "slam-sides", "t": 25.2, "note": "slamR"},
     {"effect": "up", "t": 26.5, "note": "rise"},
@@ -84,6 +84,6 @@
     {"effect": "up", "t": 29.9, "note": "rise"},
     {"effect": "pop", "t": 30.5},
     {"effect": "screen-shake", "t": 30.5},
-    {"effect": "up", "t": 31.0, "note": "rise"}
+    {"effect": "up", "t": 31, "note": "rise"}
   ]
 }

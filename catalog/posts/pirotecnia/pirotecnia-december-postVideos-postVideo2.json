@@ -4,7 +4,7 @@
   "medium": "video",
   "path": "pirotecnia/december/postVideos/postVideo2",
   "uses": [
-    {"effect": "fade", "t": 0.0},
+    {"effect": "fade", "t": 0},
     {"effect": "slide-side", "t": 0.1, "note": "left"},
     {"effect": "screen-shake", "t": 0.3},
     {"effect": "slam-sides", "t": 0.3, "note": "slamL"},
@@ -12,7 +12,7 @@
     {"effect": "slam-sides", "t": 0.75, "note": "slamR"},
     {"effect": "up", "t": 1.3},
     {"effect": "up", "t": 1.65},
-    {"effect": "product-in", "t": 2.0, "note": "inU"},
+    {"effect": "product-in", "t": 2, "note": "inU"},
     {"effect": "screen-shake", "t": 2.7},
     {"effect": "slide-side", "t": 4.6, "note": "left"},
     {"effect": "slam", "t": 4.7},
@@ -23,7 +23,7 @@
     {"effect": "pop", "t": 6.25},
     {"effect": "pop", "t": 6.4},
     {"effect": "product-in", "t": 8.75, "note": "inR"},
-    {"effect": "product-in", "t": 9.0, "note": "inL"},
+    {"effect": "product-in", "t": 9, "note": "inL"},
     {"effect": "slide-side", "t": 9.2, "note": "left"},
     {"effect": "screen-shake", "t": 9.5},
     {"effect": "slam-sides", "t": 9.5, "note": "slamL"},
@@ -41,7 +41,7 @@
     {"effect": "up", "t": 13.6},
     {"effect": "screen-shake", "t": 13.7},
     {"effect": "slam", "t": 13.7},
-    {"effect": "up", "t": 14.0},
+    {"effect": "up", "t": 14},
     {"effect": "up", "t": 14.1},
     {"effect": "pop", "t": 14.3},
     {"effect": "pop", "t": 14.36},
@@ -52,6 +52,6 @@
     {"effect": "pop", "t": 14.6},
     {"effect": "pop", "t": 14.66},
     {"effect": "pop", "t": 14.72},
-    {"effect": "fade", "t": 15.0}
+    {"effect": "fade", "t": 15}
   ]
 }

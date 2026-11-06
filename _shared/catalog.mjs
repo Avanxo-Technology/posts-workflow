@@ -1,6 +1,7 @@
 // Catálogo de efectos (ver catalog/README.md). Fuente de verdad = JSON en catalog/. El índice inverso (efecto -> posts) se calcula al vuelo.
-import {existsSync, readdirSync, readFileSync} from 'node:fs';
-import {join} from 'node:path';
+import {existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync} from 'node:fs';
+import {join, relative} from 'node:path';
+import {scanHtml, externalKeyframes} from './catalog-scan.mjs';
 
 const readJson = p => JSON.parse(readFileSync(p, 'utf8'));
 const subdirs = d => existsSync(d) ? readdirSync(d, {withFileTypes: true}).filter(e => e.isDirectory()).map(e => e.name) : [];
@@ -48,9 +49,17 @@ export function checkCatalog(TOOL, POSTS) {
   return {err, warn, effects: c.effects.size, posts: c.posts.length};
 }
 
+// formato canónico de un registro de post: una línea por uso (diffs pequeños en git)
+export function formatPost(p) {
+  const {uses, file: _f, ...head} = p;
+  const lines = Object.entries(head).filter(([, v]) => v !== undefined).map(([k, v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)}`);
+  const one = u => '{' + Object.entries(u).map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`).join(', ') + '}';
+  return `{\n${lines.join(',\n')},\n  "uses": [\n${uses.map(u => '    ' + one(u)).join(',\n')}\n  ]\n}\n`;
+}
+const pick0 = (entries, brand) => entries?.find(e => !e.brands || e.brands.includes(brand)) || null;
 const fmt = t => (Math.round(t * 100) / 100) + 's';
 
-export function cmdEffect(args, {TOOL, POSTS, die, flag}) {
+export function cmdEffect(args, {TOOL, POSTS, die, flag, resolvePiece, allPieces, isCarousel}) {
   const [sub, ...rest] = args, c = loadCatalog(TOOL);
   for (const e of c.errors) console.error('⚠ ' + e);
 
@@ -99,6 +108,53 @@ export function cmdEffect(args, {TOOL, POSTS, die, flag}) {
     return;
   }
 
+
+  if (sub === 'scan') {
+    const write = flag(rest, '--write', false), all = flag(rest, '--all', false), check = flag(rest, '--check', false);
+    if (!all && !rest[0]) die('Uso: posts effect scan <pieza> | --all  [--write] [--check]');
+    const map = JSON.parse(readFileSync(join(c.root, 'scan-map.json'), 'utf8'));
+    const dirs = all ? allPieces() : [resolvePiece(rest[0])];
+    let changed = 0;
+    for (const dir of dirs) {
+      const rel = relative(POSTS, dir), brand = rel.split('/')[0], id = rel.replace(/\//g, '-');
+      const html = readFileSync(join(dir, 'index.html'), 'utf8');
+      if (isCarousel(dir)) { if (!all) console.log(`${rel}: es un carrusel (sin animaciones)`); continue; }
+      const res = scanHtml(html, brand, map, externalKeyframes(join(dir, 'index.html'), html));
+      const old = c.posts.find(p => p.path === rel), oldUses = old?.uses || [];
+      const manual = oldUses.filter(u => u.manual);
+      const isM = u => manual.some(m => m.effect === u.effect && m.t === u.t);
+      const noteOf = new Map(oldUses.map(u => [u.effect + '@' + u.t, u.note]));
+      const auto = res.uses.filter(u => !isM(u)).map(u => ({effect: u.effect, t: u.t, ...((u.note || noteOf.get(u.effect + '@' + u.t)) ? {note: u.note || noteOf.get(u.effect + '@' + u.t)} : {})}));
+      const merged = [...auto, ...manual].sort((a, b) => a.t - b.t || (a.effect < b.effect ? -1 : a.effect > b.effect ? 1 : 0));
+      const key = u => u.effect + '@' + u.t;
+      const before = new Set(oldUses.filter(u => !u.manual).map(key)), after = new Set(auto.map(key));
+      const added = auto.filter(u => !before.has(key(u))), gone = oldUses.filter(u => !u.manual && !after.has(key(u)));
+      const missing = [...new Set(merged.map(u => u.effect))].filter(e => !c.effects.has(e));
+      const diff = added.length || gone.length || (!old && merged.length);
+      if (diff) changed++;
+      console.log(`${rel}: ${merged.length} usos` + (old ? (diff ? `  (+${added.length} nuevos, -${gone.length} que ya no están)` : '  (sin cambios)') : merged.length ? '  (post nuevo en el catálogo)' : ''));
+      if (!all || diff) for (const u of added) console.log(`   + ${u.t}s ${u.effect}${u.note ? ` (${u.note})` : ''}`);
+      if (!all || diff) for (const u of gone) console.log(`   - ${u.t}s ${u.effect}`);
+      for (const e of missing) console.log(`   ✗ el efecto "${e}" no existe en catalog/effects/ (créalo o corrige scan-map.json)`);
+      for (const u of res.unknown) console.log(`   ? animación sin catalogar: ${u.name} (×${u.count}). Añádela a catalog/scan-map.json y crea su efecto en catalog/effects/`);
+      for (const u of res.unscoped) {
+        const e = pick0(map.animations[u.animation], brand);
+        if (e?.effect && manual.some(m => m.effect === e.effect)) continue;
+        console.log(`   ? sin tiempo deducible: ${u.animation} en "${u.selector}"` + (e?.effect ? ` → efecto ${e.effect}: añade el uso a mano con "manual": true` : ' (sin efecto asignado)'));
+      }
+      if (write && merged.length && diff) {
+        const dp = join(c.root, 'posts', brand); mkdirSync(dp, {recursive: true});
+        const {uses: _u, ...rest0} = old || {};
+        writeFileSync(join(dp, id + '.json'), formatPost({id, brand, medium: 'video', path: rel, ...rest0, file: undefined, uses: merged}));
+        console.log(`   ✓ escrito catalog/posts/${brand}/${id}.json`);
+      }
+    }
+    if (!write && changed) console.log(`\n${changed} pieza(s) con diferencias. Aplica con --write.`);
+    if (!changed) console.log(all ? '\nCatálogo al día.' : '');
+    if (check && changed) process.exit(1);
+    return;
+  }
+
   if (sub === 'check') {
     const r = checkCatalog(TOOL, POSTS);
     r.err.forEach(m => console.log('✗ ' + m)); r.warn.forEach(m => console.log('⚠ ' + m));
@@ -106,6 +162,6 @@ export function cmdEffect(args, {TOOL, POSTS, die, flag}) {
     if (r.err.length) process.exit(1);
     return;
   }
-  console.log('Uso: posts effect list [--brand b] [--kind k] [--tag t] | show <id> | at <post> [segundo] | check');
+  console.log('Uso: posts effect list [--brand b] [--kind k] [--tag t] | show <id> | at <post> [segundo] | scan <pieza>|--all [--write] [--check] | check');
   if (sub) process.exit(1);
 }

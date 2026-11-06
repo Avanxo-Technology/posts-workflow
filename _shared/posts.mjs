@@ -453,6 +453,7 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   posts effect list [--brand b] [--kind k] [--tag t]                catálogo de efectos (catalog/README.md)
   posts effect show <id>                                            cómo está hecho, parámetros, audio y en qué posts se usó
   posts effect at <post> [segundo]                                  efectos de un post / el más cercano a ese segundo ("el efecto del seg 3 de X")
+  posts effect scan <pieza>|--all [--write] [--check]               detecta los efectos que usa un video y su segundo; --write actualiza el catálogo
   posts effect check                                                valida el catálogo
   posts check <pieza> [-v]                                          validaciones automáticas (solo avisos/errores; -v muestra todo)
 
@@ -462,4 +463,4 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
 
 const [cmd, ...rest] = process.argv.slice(2);
 if (!['init', 'brand', 'help', 'doctor', 'effect'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
-({doctor: cmdDoctor, init: cmdInit, sound: cmdSound, analyze: cmdAnalyze, brand: cmdBrand, effect: a => cmdEffect(a, {TOOL, POSTS, die, flag}), new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);
+({doctor: cmdDoctor, init: cmdInit, sound: cmdSound, analyze: cmdAnalyze, brand: cmdBrand, effect: a => cmdEffect(a, {TOOL, POSTS, die, flag, resolvePiece, isCarousel, allPieces: () => brands().flatMap(n => piecesOf(n, brandOf(n))).filter(d => !isCarousel(d))}), new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);
