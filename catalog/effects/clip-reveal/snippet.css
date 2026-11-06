@@ -1,0 +1,3 @@
+/* Revelado por máscara — extraído de gmaq/noviembre/postVideo1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
+.k{animation:var(--n) var(--t,.7s) cubic-bezier(.2,.8,.2,1) var(--s) both}
+@keyframes wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}

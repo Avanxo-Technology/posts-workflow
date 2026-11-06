@@ -1,5 +1,5 @@
 # Subida suave
-El elemento sube 80 px mientras aparece. Es la entrada estándar para subtítulos, fechas y pies de foto. Con GREMCO también se usa `rise` (26 px) en el tercio inferior.
+El elemento sube 80 px mientras aparece. Es la entrada estándar para subtítulos, fechas y pies de foto. AGA y GMAQ usan una variante llamada `rise` (90 px). En GREMCO también hay un `rise` (26 px) dentro del tercio inferior.
 
 ## Cómo aplicarlo
 `class="k"` y `style="--n:up;--s:<seg>s;--t:.4s"`.

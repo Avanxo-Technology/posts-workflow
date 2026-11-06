@@ -1,0 +1,24 @@
+{
+  "id": "line-up",
+  "name": "Línea que sube (máscara)",
+  "kind": "text",
+  "medium": "video",
+  "brands": [
+    "aga"
+  ],
+  "tags": [
+    "titular",
+    "texto",
+    "mascara"
+  ],
+  "source": {
+    "file": "brands/aga/_shared/aga.css",
+    "symbol": "@keyframes lineUp"
+  },
+  "snippet": "snippet.css",
+  "params": {
+    "--s": "segundo de entrada (delay absoluto)",
+    "--t": "duración"
+  },
+  "audio": null
+}

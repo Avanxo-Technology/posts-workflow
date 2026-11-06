@@ -1,0 +1,24 @@
+{
+  "id": "check-in",
+  "name": "Check que aparece",
+  "kind": "entrance",
+  "medium": "video",
+  "brands": [
+    "aga"
+  ],
+  "tags": [
+    "check",
+    "lista",
+    "icono"
+  ],
+  "source": {
+    "file": "brands/aga/_shared/aga.css",
+    "symbol": "@keyframes checkIn"
+  },
+  "snippet": "snippet.css",
+  "params": {
+    "--s": "segundo de entrada (delay absoluto)",
+    "--t": "duración"
+  },
+  "audio": null
+}

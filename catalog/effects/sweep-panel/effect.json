@@ -1,0 +1,24 @@
+{
+  "id": "sweep-panel",
+  "name": "Barrido de panel (GMAQ)",
+  "kind": "transition",
+  "medium": "video",
+  "brands": [
+    "gmaq"
+  ],
+  "tags": [
+    "transicion",
+    "panel",
+    "pantalla-completa"
+  ],
+  "source": {
+    "piece": "gmaq/noviembre/postVideos/postVideo3",
+    "symbol": "@keyframes swp"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": {
+    "sfx": "whoosh de transición",
+    "sync": "mismo `--s` en gen_audio.py"
+  }
+}

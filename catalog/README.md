@@ -39,3 +39,5 @@ catalog/
 - `snippet.css` se extrae de una pieza real; si la pieza se retoca, el snippet no se actualiza solo.
 - Los bucles (`infinite`) se registran en el segundo en que empieza su escena.
 - Los usos de GREMCO y Pirotecnia se extrajeron con un script a partir de los `index.html`; no se revisaron viendo el video.
+- `screen-shake` se registra una vez por cada instante de `HITS`/`hits`; suele coincidir con la entrada de un título.
+- Los keyframes definidos pero sin usar en ninguna pieza (p. ej. `pulse`, `bob`, `float`, `spin` en GMAQ/AGA; `bob`, `bar`, `drift` en Pirotecnia) no se catalogan.

@@ -1,0 +1,26 @@
+{
+  "id": "clip-reveal",
+  "name": "Revelado por máscara",
+  "kind": "text",
+  "medium": "video",
+  "brands": [
+    "gmaq",
+    "gremco",
+    "pirotecnia"
+  ],
+  "tags": [
+    "texto",
+    "mascara",
+    "clip-path"
+  ],
+  "source": {
+    "file": "_shared/base/video-template.html",
+    "symbol": "@keyframes wipe"
+  },
+  "snippet": "snippet.css",
+  "params": {
+    "--s": "segundo de entrada (delay absoluto)",
+    "--t": "duración"
+  },
+  "audio": null
+}

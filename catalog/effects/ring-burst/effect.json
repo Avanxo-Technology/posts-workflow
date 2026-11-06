@@ -1,0 +1,22 @@
+{
+  "id": "ring-burst",
+  "name": "Aro de luz (GMAQ)",
+  "kind": "transition",
+  "medium": "video",
+  "brands": [
+    "gmaq",
+    "pirotecnia"
+  ],
+  "tags": [
+    "transicion",
+    "aro",
+    "destello"
+  ],
+  "source": {
+    "piece": "gmaq/noviembre/postVideo2",
+    "symbol": ".ring"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}
