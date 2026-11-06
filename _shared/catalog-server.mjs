@@ -4,11 +4,13 @@ import {createServer} from 'node:http';
 import {existsSync, readFileSync, readdirSync} from 'node:fs';
 import {join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {randomBytes} from 'node:crypto';
 import {loadCatalog} from './catalog.mjs';
+import {createFileStore, BrandError, LIMITS} from './brand-store.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const UI = join(HERE, 'catalog-ui');
-const STATIC = {'/': ['index.html', 'text/html'], '/app.js': ['app.js', 'text/javascript'], '/style.css': ['style.css', 'text/css']};
+const STATIC = {'/': ['index.html', 'text/html'], '/app.js': ['app.js', 'text/javascript'], '/brands.js': ['brands.js', 'text/javascript'], '/style.css': ['style.css', 'text/css'], '/preview.html': ['preview.html', 'text/html']};
 const readIf = p => (existsSync(p) ? readFileSync(p, 'utf8') : null);
 
 function brandsOf(TOOL) {
@@ -93,13 +95,71 @@ setInterval(replay,${Math.round((dur + 1.1) * 1000)});`}
 </script></body></html>`;
 }
 
+
+function readBody(req, max) {
+  return new Promise((resolve, reject) => {
+    const chunks = []; let n = 0;
+    req.on('data', c => { n += c.length; if (n > max) { reject(new BrandError('El archivo es demasiado grande', 413)); req.destroy(); } else chunks.push(c); });
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+
 export function startCatalogServer({TOOL, POSTS, port = 4747, host = '127.0.0.1'}) {
-  const server = createServer((req, res) => {
+  const store = createFileStore({TOOL, POSTS});
+  const token = randomBytes(24).toString('hex');   // las escrituras exigen este token: una página web ajena no puede escribir en tu repo
+  let actualPort = port;
+  const hostOk = h => h === `127.0.0.1:${actualPort}` || h === `localhost:${actualPort}`;
+
+  const server = createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
-    const send = (code, type, body) => { res.writeHead(code, {'content-type': type + '; charset=utf-8', 'cache-control': 'no-store'}); res.end(body); };
+    const send = (code, type, body, extra = {}) => { res.writeHead(code, {'content-type': type + '; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', ...extra}); res.end(body); };
+    const json = (code, obj) => send(code, 'application/json', JSON.stringify(obj));
     try {
+      if (!hostOk(req.headers.host)) return send(403, 'text/plain', 'Host no permitido');
+      const write = req.method !== 'GET' && req.method !== 'HEAD';
+      if (write) {
+        if (req.headers['x-posts-token'] !== token) return json(403, {error: 'Falta el token de sesión: recarga la página'});
+        if (req.headers.origin && req.headers.origin !== `http://${req.headers.host}`) return json(403, {error: 'Origen no permitido'});
+      }
+
+      if (url.pathname === '/') return send(200, 'text/html', readFileSync(join(UI, 'index.html'), 'utf8').replace('__TOKEN__', token));
       if (STATIC[url.pathname]) { const [f, t] = STATIC[url.pathname]; return send(200, t, readFileSync(join(UI, f))); }
-      if (url.pathname === '/api/catalog') return send(200, 'application/json', JSON.stringify(catalogData(TOOL, POSTS)));
+      if (url.pathname === '/api/catalog') return json(200, catalogData(TOOL, POSTS));
+
+      // ---- marcas ----
+      if (url.pathname === '/api/brands') {
+        if (req.method === 'GET') return json(200, store.list());
+        if (req.method === 'POST') { const b = JSON.parse((await readBody(req, 64 * 1024)).toString() || '{}'); const r = store.create(b); return json(201, {ok: true, ...r}); }
+      }
+      const bm = /^\/api\/brands\/([a-z0-9-]+)(?:\/(notes|design|logos)(?:\/([\w.-]+))?)?$/.exec(url.pathname);
+      if (bm) {
+        const [, id, part, file] = bm;
+        if (!part) {
+          if (req.method === 'GET') return json(200, store.get(id));
+          if (req.method === 'PUT') { const r = store.update(id, JSON.parse((await readBody(req, 64 * 1024)).toString() || '{}')); return json(200, {ok: true, ...r}); }
+        }
+        if (part === 'notes' && req.method === 'PUT') { store.saveNotes(id, JSON.parse((await readBody(req, LIMITS.notes + 1024)).toString()).text); return json(200, {ok: true}); }
+        if (part === 'design') {
+          if (req.method === 'PUT') { store.saveDesign(id, JSON.parse((await readBody(req, LIMITS.design + 1024)).toString()).text); return json(200, {ok: true}); }
+          if (req.method === 'DELETE') { store.deleteDesign(id); return json(200, {ok: true}); }
+        }
+        if (part === 'logos') {
+          if (req.method === 'POST' && !file) {
+            const name = req.headers['x-logo-name'], ext = req.headers['x-logo-ext'];
+            const file2 = store.addLogo(id, name, await readBody(req, LIMITS.logo + 1024), ext);
+            return json(201, {ok: true, file: file2});
+          }
+          if (req.method === 'DELETE' && file) { store.deleteLogo(id, file); return json(200, {ok: true}); }
+          if (req.method === 'GET' && file) {
+            const lf = store.logoFile(id, file);
+            if (!lf) return send(404, 'text/plain', 'Logo no encontrado');
+            res.writeHead(200, {'content-type': lf.type, 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox"});
+            return res.end(readFileSync(lf.path));
+          }
+        }
+      }
+
       const dm = /^\/demo\/([\w-]+)$/.exec(url.pathname);
       if (dm) {
         const data = catalogData(TOOL, POSTS), e = data.effects.find(x => x.id === dm[1]);
@@ -109,11 +169,15 @@ export function startCatalogServer({TOOL, POSTS, port = 4747, host = '127.0.0.1'
         return send(200, 'text/html', demoHtml(e, brand, url.searchParams.get('v'), url.searchParams.get('ui') === '1'));
       }
       send(404, 'text/plain', 'No encontrado');
-    } catch (err) { send(500, 'text/plain', 'Error: ' + err.message); }
+    } catch (err) {
+      if (err instanceof BrandError) return json(err.status, {error: err.message});
+      if (err instanceof SyntaxError) return json(400, {error: 'Petición no válida'});
+      json(500, {error: 'Error interno: ' + err.message});
+    }
   });
   return new Promise((resolve, reject) => {
     let p = port, tries = 0;
-    server.on('error', er => { if (er.code === 'EADDRINUSE' && tries++ < 20) server.listen(++p, host); else reject(er); });
+    server.on('error', er => { if (er.code === 'EADDRINUSE' && tries++ < 20) { actualPort = ++p; server.listen(p, host); } else reject(er); });
     server.on('listening', () => resolve({server, url: `http://${host}:${p}/`}));
     server.listen(p, host);
   });

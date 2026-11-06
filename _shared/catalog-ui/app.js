@@ -229,14 +229,17 @@
     app.replaceChildren(h('a', {class: 'back', href: '#/', text: '← Volver'}), h('div', {class: 'empty', text: 'No existe ' + what + ' "' + id + '" en el catálogo.'}));
   }
 
+  window.PW = {h: h, toast: toast, copy: copy, app: app, search: q, reload: function () { return load(true); }};
+
   // ---- router ----
   function render() {
     if (!data) return;
     var hash = location.hash.replace(/^#\/?/, ''), parts = hash.split('/');
-    var route = parts[0] === 'posts' || parts[0] === 'post' ? 'posts' : 'efectos';
+    var route = parts[0] === 'posts' || parts[0] === 'post' ? 'posts' : /^marca/.test(parts[0]) ? 'marcas' : 'efectos';
     Array.prototype.forEach.call(document.querySelectorAll('#nav a'), function (a) { a.classList.toggle('on', a.dataset.r === route); });
     if (data.errors && data.errors.length) console.warn('Catálogo con avisos:', data.errors);
-    if (parts[0] === 'efecto' && parts[1]) viewEffect(decodeURIComponent(parts[1]));
+    if (/^marca/.test(parts[0])) { if (window.BrandsUI) window.BrandsUI.render(parts); }
+    else if (parts[0] === 'efecto' && parts[1]) viewEffect(decodeURIComponent(parts[1]));
     else if (parts[0] === 'post' && parts[1]) viewPost(decodeURIComponent(parts[1]));
     else if (parts[0] === 'posts') viewPosts();
     else viewEffects();

@@ -32,6 +32,7 @@ Primer paso con una marca: `posts brand show <marca>` (datos compactos; evita le
 | Marca que no existe | `posts brand add` (README) + WORKFLOW.md |
 | "Usa el efecto del segundo N del post X" / buscar efectos ya usados | `posts effect at <post> <seg>` → `posts effect show <id>` → leer su effect.md (catalog/README.md) |
 | Registrar en el catálogo un video nuevo o modificado | `posts effect scan <pieza>` y, si el resultado es correcto, `--write` (catalog/README.md) |
+| Que el usuario configure una marca (colores, design.md, logos) | `posts catalog --open` → pestaña Marcas (catalog/README.md). `posts brand show <marca>` muestra el design.md y los logos del repo |
 | Que el usuario vea/explore los efectos | `posts catalog --open` (UI local; catalog/README.md) |
 | Algo antiguo o raro | docs/legacy.md |
 | Prompt para pegar en otra IA | guia-posts.txt |

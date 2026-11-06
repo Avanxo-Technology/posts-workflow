@@ -61,3 +61,15 @@ Abre una página local (solo `127.0.0.1`, solo lectura, sin dependencias) con la
 - Lee los JSON en cada recarga: lo que cambie `posts effect scan --write` o Claude se ve al pulsar "Recargar".
 - La demo es automática para los efectos que tienen `@keyframes` en `snippet.css`, aplicados a una pieza de muestra con los colores de la marca. Los de motor JS/canvas (`aga-*`, `screen-shake`) usan un `demo.html` a medida con el código real del motor.
 - Para una demo a medida pon un `demo.html` autocontenido en la carpeta del efecto; en `effect.json` puedes ajustar la demo automática con `"demo": {"duration": 2.4, "variants": ["kbin"]}`.
+
+## Marcas desde la UI
+En la pestaña **Marcas** de `posts catalog` se puede crear y configurar una marca sin tocar archivos:
+- **Nueva marca**: lo mismo que `posts brand add` (comparten código en `_shared/brand-store.mjs`).
+- **Identidad y contacto**: nombre, colores, fuentes de Google Fonts, WhatsApp, correo, web. En marcas generadas con `brand add` (`"generated": true` en su JSON) puede regenerar `brands/<id>/_shared/video-template.html`; en las marcas con plantilla hecha a mano no la toca.
+- **design.md**: se sube o se pega y se guarda en `brands/<id>/design.md`. Si existe, `posts brand show` y la IA usan este en vez de la ruta externa `designFile`.
+- **Notas** (`brands/<id>.md`): contacto, caption de cierre, reglas.
+- **Logos**: PNG/JPG/WEBP/SVG simple (2 MB máx.) en `brands/<id>/logos/`.
+- **Vista previa en vivo** con la paleta, las fuentes y el logo.
+
+Seguridad: las escrituras exigen un token de sesión y solo aceptan peticiones de `127.0.0.1`. Se rechaza todo texto que parezca una clave o token, los SVG con scripts y los archivos cuyo contenido no coincide con su tipo. La UI no hace commit ni push: los cambios quedan en el clon local.
+Todo el acceso a las marcas pasa por `createFileStore()`; para mover las marcas a una base de datos bastaría con sustituir ese módulo.

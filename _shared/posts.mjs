@@ -10,6 +10,7 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import {cmdEffect} from './catalog.mjs';
 import {startCatalogServer} from './catalog-server.mjs';
+import {createFileStore, BrandError} from './brand-store.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TOOL = resolve(HERE, '..');
@@ -44,7 +45,8 @@ const probe = (f, entries) => {
 
 function designOf(b) {
   const r = p => { if (!p) return null; const abs = isAbsolute(p) ? p : join(PROJECTS, p); return {path: abs, exists: existsSync(abs)}; };
-  return {main: r(b.designFile), extra: (b.designExtra || []).map(r)};
+  const own = join(TOOL, 'brands', b.id || '', 'design.md');   // design.md subido desde la UI (vive en el repo)
+  return {main: b.id && existsSync(own) ? {path: own, exists: true} : r(b.designFile), extra: (b.designExtra || []).map(r)};
 }
 function piecesOf(name, b) {
   const base = join(POSTS, name), out = [];
@@ -108,8 +110,6 @@ function cmdInit(args) {
 
 
 // ---- brand: alta de marcas nuevas (todo lo necesario sale de _shared/base, sin descargas) ----
-const hex = v => /^#[0-9a-fA-F]{6}$/.test(v || '');
-const mix = (h, t, k) => '#' + [1, 3, 5].map(i => Math.round(parseInt(h.slice(i, i + 2), 16) * (1 - k) + t * k).toString(16).padStart(2, '0')).join('');
 function cmdBrand(args) {
   const [sub, ...rest] = args;
   if (sub === 'show') {
@@ -123,6 +123,8 @@ function cmdBrand(args) {
     console.log('contacto: ' + (Object.entries(c).map(([k, v]) => `${k} ${v}`).join(' · ') || '(sin datos: completar brands/' + id + '.json)'));
     console.log(`sonido: ${b.sound}` + (existsSync(join(sh, 'fetch_sfx.py')) ? (nsfx ? ` (${nsfx} efectos)` : ` — FALTAN efectos: python3 brands/${id}/_shared/fetch_sfx.py`) : ''));
     console.log('diseño: ' + (d.main ? `${d.main.path} ${d.main.exists ? '' : '(NO existe en este equipo: pedir la ruta al usuario)'}` : '(sin archivo: pedir la ruta al usuario o usar el CSS del sitio)') + (d.extra.length ? ' · extra: ' + d.extra.filter(e => e.exists).map(e => e.path).join(', ') : ''));
+    const logos = ls(join(TOOL, 'brands', id, 'logos')).map(e => e.name);
+    if (logos.length) console.log(`logos (en el repo): ${logos.map(n => `brands/${id}/logos/${n}`).join(', ')}`);
     console.log(`datos y reglas de la marca: brands/${id}.md   plantilla de video: ${existsSync(join(sh, 'video-template.html')) ? 'sí' : 'NO'}`);
     console.log(`piezas: ${ps.length} (${cars.length} carruseles, ${ps.length - cars.length} videos)`);
     const caps = ps.map(p => join(p, 'caption.txt')).filter(existsSync).sort((a, z) => mtime(z) - mtime(a)).slice(0, 10);
@@ -137,48 +139,15 @@ function cmdBrand(args) {
   if (sub !== 'add') die('Uso: posts brand list | posts brand show <marca> | posts brand add <id> --name "Nombre" --dark #hex --light #hex --accent #hex --head "Fuente" [--body "Fuente"] [--short "SIGLA"] [--whatsapp ...] [--web ...] [--design ruta]');
   const a = [...rest], id = a.shift();
   const f = n => flag(a, n);
-  const o = {name: f('--name'), short: f('--short'), dark: f('--dark'), light: f('--light'), accent: f('--accent'), head: f('--head'),
+  const o = {id, name: f('--name'), short: f('--short'), dark: f('--dark'), light: f('--light'), accent: f('--accent'), head: f('--head'),
     body: f('--body') || 'Inter', wa: f('--whatsapp') || 'WhatsApp', web: f('--web') || 'tusitio.com', design: f('--design'), email: f('--email')};
-  if (!id || !/^[a-z0-9-]+$/.test(id)) die('El id de la marca va en minúsculas, sin espacios (ej. mimarca)');
-  if (existsSync(join(TOOL, 'brands', id + '.json'))) die(`La marca "${id}" ya existe`);
-  for (const [k, v] of [['--dark', o.dark], ['--light', o.light], ['--accent', o.accent]]) if (!hex(v)) die(`${k} debe ser un color #RRGGBB`);
   if (!o.name || !o.head) die('Faltan --name y --head (fuente de Google Fonts para los títulos)');
-  o.short = o.short || o.name.toUpperCase();
-  const gf = n => 'family=' + n.replace(/ /g, '+') + ':wght@400;700';
-  const fonts = 'https://fonts.googleapis.com/css2?' + [...new Set([o.head, o.body])].map(gf).join('&') + '&display=swap';
-  const bg2 = mix(o.dark, 255, 0.1), accentDark = mix(o.accent, 0, 0.25);
-  const bdir = join(TOOL, 'brands', id, '_shared');
-  mkdirSync(bdir, {recursive: true});
-  const fill = t => t.replaceAll('__BRAND__', o.short).replaceAll('__FONTS__', fonts).replaceAll('__HEAD__', `'${o.head}'`).replaceAll('__BODY__', `'${o.body}'`)
-    .replaceAll('__WA__', o.wa).replaceAll('__WEB__', o.web)
-    .replaceAll('__VARS__', `  --bg:${o.dark};--bg2:${bg2};--accent:${o.accent};--accent-dark:${accentDark};--light:${o.light};`);
-  writeFileSync(join(bdir, 'video-template.html'), fill(read(join(TOOL, '_shared', 'base', 'video-template.html'))));
-  copyFileSync(join(TOOL, '_shared', 'base', 'synth.py'), join(bdir, 'synth.py'));
-  copyFileSync(join(TOOL, '_shared', 'base', 'gen_audio.template.py'), join(bdir, 'gen_audio.template.py'));
-  writeFileSync(join(TOOL, 'brands', id + '.json'), JSON.stringify({name: o.name, short: o.short, sound: 'synth (sin música)', designFile: o.design || null, designExtra: [], contact: {whatsapp: o.wa, ...(o.email ? {email: o.email} : {}), web: o.web},
-    fonts, headFont: o.head, bodyFont: o.body, dark: o.dark, light: o.light, accent: o.accent, legacyMonths: {}}, null, 2) + '\n');
-  writeFileSync(join(TOOL, 'brands', id + '.md'), `# Marca: ${id}
-
-${o.name}
-
-DATOS A COMPLETAR (verificar contra el sitio real antes de usarlos)
-  Sitio web:   ${o.web}
-  Contacto:    ${o.wa}
-  Logo:        (ruta de los archivos del logo)
-  Tipografía:  ${o.head} (títulos) + ${o.body} (texto)
-  Colores:     fondo oscuro ${o.dark}, claro ${o.light}, acento ${o.accent}
-  Diseño:      ${o.design || '(sin archivo de diseño: pedir la ruta al usuario o usar el CSS del sitio)'}
-
-RECURSOS
-  brands/${id}/_shared/: video-template.html, synth.py (sonido sintetizado, sin descargas ni música), gen_audio.template.py.
-  Sonido: SINTETIZADO (docs/audio.md, enfoque C).
-`);
+  let r;
+  try { r = createFileStore({TOOL, POSTS}).create(o); } catch (e) { if (e instanceof BrandError) die(e.message); throw e; }
   console.log(`✓ Marca "${id}" creada en ${join(TOOL, 'brands')}`);
-  if (POSTS) {
-    const dest = join(POSTS, id, '_shared');
-    try { lstatSync(dest); } catch { mkdirSync(dirname(dest), {recursive: true}); symlinkSync(bdir, dest); console.log(`✓ Enlazada en ${dest}`); }
-  } else console.log('Falta definir la carpeta de posts: posts init <ruta> (enlaza los recursos de la marca).');
-  console.log(`Completa brands/${id}.md y contact en brands/${id}.json. Para subirla al repo: git add brands/${id}.* brands/${id}/ && git commit && git push (solo si el usuario lo pide).`);
+  if (r.linked) console.log(`✓ Enlazada en ${r.linked}`);
+  else if (!POSTS) console.log('Falta definir la carpeta de posts: posts init <ruta> (enlaza los recursos de la marca).');
+  console.log(`Completa brands/${id}.md y contact en brands/${id}.json (o usa la UI: posts catalog). Para subirla al repo: git add brands/${id}.* brands/${id}/ && git commit && git push (solo si el usuario lo pide).`);
 }
 
 // ---- sound: activar/desactivar el sonido de una pieza de video ----
