@@ -1,0 +1,25 @@
+{
+  "id": "light-burst",
+  "name": "Explosión de luz",
+  "kind": "transition",
+  "medium": "video",
+  "brands": [
+    "pirotecnia"
+  ],
+  "tags": [
+    "fuego",
+    "destello",
+    "transicion",
+    "pirotecnia"
+  ],
+  "source": {
+    "piece": "pirotecnia/december/reels/diciembre/reel1",
+    "symbol": "@keyframes fl"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": {
+    "sfx": "explosión / estallido",
+    "sync": "mismo `--s` en gen_audio.py (hit=True si debe sacudir)"
+  }
+}

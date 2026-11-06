@@ -1,0 +1,21 @@
+{
+  "id": "line-draw",
+  "name": "Trazo que se dibuja",
+  "kind": "overlay",
+  "medium": "video",
+  "brands": [
+    "pirotecnia"
+  ],
+  "tags": [
+    "svg",
+    "icono",
+    "trazo"
+  ],
+  "source": {
+    "piece": "pirotecnia/december/postVideos/postVideo4",
+    "symbol": "@keyframes draw"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

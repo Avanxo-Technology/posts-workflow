@@ -1,0 +1,21 @@
+{
+  "id": "cell-in",
+  "name": "Celdas que entran",
+  "kind": "transition",
+  "medium": "video",
+  "brands": [
+    "gremco"
+  ],
+  "tags": [
+    "collage",
+    "celdas",
+    "entrada"
+  ],
+  "source": {
+    "file": "brands/gremco/_shared/video-template.html",
+    "symbol": "@keyframes cellL"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

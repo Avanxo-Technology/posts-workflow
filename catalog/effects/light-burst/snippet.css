@@ -1,0 +1,8 @@
+/* Explosión de luz — extraído de pirotecnia/december/reels/diciembre/reel1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
+@keyframes fl{0%{opacity:1;transform:translate(-50%,-50%) scale(0)}36%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)}}
+@keyframes rg{0%{opacity:.95;transform:translate(-50%,-50%) scale(0)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}}
+.flash{position:absolute;z-index:80;left:var(--x);top:var(--y);width:3400px;height:3400px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,#fff 0,#fff3c4 22%,#facc15 38%,#d23344 62%,#4a0a12 80%,rgba(74,10,18,0) 100%);
+  transform:translate(-50%,-50%) scale(0);animation:fl .95s cubic-bezier(.5,0,.3,1) var(--s) both}
+.ring{position:absolute;z-index:81;left:var(--x);top:var(--y);width:1400px;height:1400px;border-radius:50%;border:10px solid var(--gold-hi);pointer-events:none;
+  transform:translate(-50%,-50%) scale(0);animation:rg .9s cubic-bezier(.2,.7,.3,1) var(--s) both}

@@ -1,0 +1,25 @@
+{
+  "id": "product-in",
+  "name": "Producto que entra",
+  "kind": "entrance",
+  "medium": "video",
+  "brands": [
+    "pirotecnia"
+  ],
+  "tags": [
+    "producto",
+    "imagen",
+    "giro",
+    "rebote"
+  ],
+  "source": {
+    "file": "brands/pirotecnia/_shared/video-template.html",
+    "symbol": "@keyframes inL"
+  },
+  "snippet": "snippet.css",
+  "params": {
+    "--s": "segundo de entrada (delay absoluto)",
+    "--t": "duración"
+  },
+  "audio": null
+}

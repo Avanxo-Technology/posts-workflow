@@ -1,0 +1,26 @@
+{
+  "id": "up",
+  "name": "Subida suave",
+  "kind": "entrance",
+  "medium": "video",
+  "brands": [
+    "gmaq",
+    "gremco",
+    "pirotecnia"
+  ],
+  "tags": [
+    "texto",
+    "subtitulo",
+    "entrada"
+  ],
+  "source": {
+    "file": "_shared/base/video-template.html",
+    "symbol": "@keyframes up"
+  },
+  "snippet": "snippet.css",
+  "params": {
+    "--s": "segundo de entrada (delay absoluto)",
+    "--t": "duración"
+  },
+  "audio": null
+}

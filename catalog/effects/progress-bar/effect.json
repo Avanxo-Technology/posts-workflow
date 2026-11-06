@@ -1,0 +1,21 @@
+{
+  "id": "progress-bar",
+  "name": "Barra de progreso global",
+  "kind": "overlay",
+  "medium": "video",
+  "brands": [
+    "gremco"
+  ],
+  "tags": [
+    "progreso",
+    "barra",
+    "overlay"
+  ],
+  "source": {
+    "file": "brands/gremco/_shared/video-template.html",
+    "symbol": ".prog"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

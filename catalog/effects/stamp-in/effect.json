@@ -1,0 +1,24 @@
+{
+  "id": "stamp-in",
+  "name": "Sello (zoom desde grande)",
+  "kind": "entrance",
+  "medium": "video",
+  "brands": [
+    "pirotecnia"
+  ],
+  "tags": [
+    "sello",
+    "impacto",
+    "zoom"
+  ],
+  "source": {
+    "piece": "pirotecnia/december/postVideos/postVideo4",
+    "symbol": "@keyframes stampIn"
+  },
+  "snippet": "snippet.css",
+  "params": {
+    "--s": "segundo de entrada (delay absoluto)",
+    "--t": "duración"
+  },
+  "audio": null
+}

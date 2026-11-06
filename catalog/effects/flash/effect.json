@@ -1,0 +1,21 @@
+{
+  "id": "flash",
+  "name": "Destello blanco",
+  "kind": "overlay",
+  "medium": "video",
+  "brands": [
+    "gremco"
+  ],
+  "tags": [
+    "flash",
+    "golpe",
+    "transicion"
+  ],
+  "source": {
+    "file": "brands/gremco/_shared/video-template.html",
+    "symbol": "@keyframes flash"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

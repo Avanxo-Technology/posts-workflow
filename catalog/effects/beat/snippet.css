@@ -1,0 +1,2 @@
+/* Latido — extraído de gremco/octubre/reel1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}

@@ -1,0 +1,22 @@
+{
+  "id": "goal-celebration",
+  "name": "Celebración de gol",
+  "kind": "overlay",
+  "medium": "video",
+  "brands": [
+    "pirotecnia"
+  ],
+  "tags": [
+    "gol",
+    "red",
+    "texto",
+    "compuesto"
+  ],
+  "source": {
+    "piece": "pirotecnia/december/postVideos/postVideo1",
+    "symbol": "@keyframes goal"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

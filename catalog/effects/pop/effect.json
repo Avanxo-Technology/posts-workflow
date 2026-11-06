@@ -1,0 +1,26 @@
+{
+  "id": "pop",
+  "name": "Pop (rebote con giro)",
+  "kind": "entrance",
+  "medium": "video",
+  "brands": [
+    "gmaq",
+    "gremco",
+    "pirotecnia"
+  ],
+  "tags": [
+    "etiqueta",
+    "chip",
+    "entrada"
+  ],
+  "source": {
+    "file": "_shared/base/video-template.html",
+    "symbol": "@keyframes pop"
+  },
+  "snippet": "snippet.css",
+  "params": {
+    "--s": "segundo de entrada (delay absoluto)",
+    "--t": "duración"
+  },
+  "audio": null
+}

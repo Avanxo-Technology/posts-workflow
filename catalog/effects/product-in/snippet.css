@@ -1,0 +1,6 @@
+/* Producto que entra — extraído de pirotecnia/december/postVideos/postVideo1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
+.k{animation:var(--n) var(--t,.7s) cubic-bezier(.2,.8,.2,1) var(--s) both}
+@keyframes inD{0%{opacity:0;transform:translateY(-500px) scale(1.2) rotate(var(--r))}70%{opacity:1;transform:translateY(12px) scale(.98) rotate(var(--r))}100%{opacity:1;transform:rotate(var(--r))}}
+@keyframes inL{0%{opacity:0;transform:translateX(-520px) rotate(-50deg)}70%{opacity:1;transform:translateX(14px) rotate(var(--r))}100%{opacity:1;transform:rotate(var(--r))}}
+@keyframes inR{0%{opacity:0;transform:translateX(520px) rotate(50deg)}70%{opacity:1;transform:translateX(-14px) rotate(var(--r))}100%{opacity:1;transform:rotate(var(--r))}}
+@keyframes inU{0%{opacity:0;transform:translateY(700px) rotate(var(--r))}70%{opacity:1;transform:translateY(-16px) rotate(var(--r))}100%{opacity:1;transform:rotate(var(--r))}}

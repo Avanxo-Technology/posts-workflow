@@ -1,0 +1,21 @@
+{
+  "id": "scene-push",
+  "name": "Empuje de escena",
+  "kind": "transition",
+  "medium": "video",
+  "brands": [
+    "gremco"
+  ],
+  "tags": [
+    "transicion",
+    "escena",
+    "empuje"
+  ],
+  "source": {
+    "file": "brands/gremco/_shared/video-template.html",
+    "symbol": "@keyframes inPush"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

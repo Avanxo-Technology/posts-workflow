@@ -1,0 +1,24 @@
+{
+  "id": "num-stamp",
+  "name": "Número gigante (sello)",
+  "kind": "text",
+  "medium": "video",
+  "brands": [
+    "gremco"
+  ],
+  "tags": [
+    "numero",
+    "cifra",
+    "texto-grande"
+  ],
+  "source": {
+    "file": "brands/gremco/_shared/video-template.html",
+    "symbol": "@keyframes num"
+  },
+  "snippet": "snippet.css",
+  "params": {
+    "--s": "segundo de entrada (delay absoluto)",
+    "--t": "duración"
+  },
+  "audio": null
+}

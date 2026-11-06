@@ -1,0 +1,20 @@
+{
+  "id": "scene-up",
+  "name": "Escena sube",
+  "kind": "transition",
+  "medium": "video",
+  "brands": [
+    "gremco"
+  ],
+  "tags": [
+    "transicion",
+    "escena"
+  ],
+  "source": {
+    "file": "brands/gremco/_shared/video-template.html",
+    "symbol": "@keyframes inUp"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

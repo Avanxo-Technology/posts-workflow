@@ -31,6 +31,8 @@ export function checkCatalog(TOOL, POSTS) {
     if (!existsSync(join(e.dir, 'effect.md'))) err.push(`effects/${id}: falta effect.md`);
     if (e.snippet && !existsSync(join(e.dir, e.snippet))) err.push(`effects/${id}: snippet "${e.snippet}" no existe`);
     if (e.source?.file && !existsSync(join(TOOL, e.source.file))) err.push(`effects/${id}: source.file "${e.source.file}" no existe`);
+    if (e.source?.piece && POSTS && !existsSync(join(POSTS, e.source.piece, 'index.html'))) warn.push(`effects/${id}: la pieza de origen no está en este equipo (${e.source.piece}); el código está en snippet.css`);
+    if (e.source && !e.source.file && !e.source.piece) err.push(`effects/${id}: source necesita "file" o "piece"`);
     if (!e.uses.length) warn.push(`effects/${id}: ningún post lo usa`);
   }
   const seen = new Set();
@@ -64,9 +66,9 @@ export function cmdEffect(args, {TOOL, POSTS, die, flag}) {
     const e = c.effects.get(rest[0]); if (!e) die(`Efecto desconocido "${rest[0] || ''}". Ver: posts effect list`);
     console.log(`${e.id}: ${e.name}  [${e.kind} · ${e.medium} · ${(e.brands || []).join(', ')}]`);
     if (e.tags?.length) console.log('tags: ' + e.tags.join(', '));
-    if (e.source) console.log(`código: ${e.source.file} → ${e.source.symbol}`);
+    if (e.source) console.log(`código: ${e.source.file || 'pieza ' + e.source.piece} → ${e.source.symbol}`);
     console.log('guía: ' + join(e.dir, 'effect.md') + (e.snippet ? `\nsnippet: ${join(e.dir, e.snippet)}` : ''));
-    if (e.params) console.log('parámetros: ' + Object.entries(e.params).map(([k, v]) => `${k} (${v})`).join(' · '));
+    if (e.params && Object.keys(e.params).length) console.log('parámetros: ' + Object.entries(e.params).map(([k, v]) => `${k} (${v})`).join(' · '));
     if (e.audio) console.log(`audio: ${e.audio.sfx} — ${e.audio.sync}`);
     const by = new Map();
     for (const u of e.uses) { if (!by.has(u.post)) by.set(u.post, []); by.get(u.post).push(u); }

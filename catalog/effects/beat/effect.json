@@ -1,0 +1,22 @@
+{
+  "id": "beat",
+  "name": "Latido",
+  "kind": "loop",
+  "medium": "video",
+  "brands": [
+    "gremco",
+    "pirotecnia"
+  ],
+  "tags": [
+    "pulso",
+    "cta",
+    "bucle"
+  ],
+  "source": {
+    "file": "brands/gremco/_shared/video-template.html",
+    "symbol": "@keyframes beat"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

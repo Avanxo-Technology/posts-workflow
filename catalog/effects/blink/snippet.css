@@ -1,0 +1,2 @@
+/* Parpadeo — extraído de pirotecnia/december/postVideos/postVideo4/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
+@keyframes blink{0%{opacity:1}50%{opacity:.25}100%{opacity:1}}

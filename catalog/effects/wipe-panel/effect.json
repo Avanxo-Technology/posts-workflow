@@ -1,0 +1,24 @@
+{
+  "id": "wipe-panel",
+  "name": "Panel naranja que barre",
+  "kind": "transition",
+  "medium": "video",
+  "brands": [
+    "gremco"
+  ],
+  "tags": [
+    "transicion",
+    "panel",
+    "pantalla-completa"
+  ],
+  "source": {
+    "file": "brands/gremco/_shared/video-template.html",
+    "symbol": "@keyframes wipe"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": {
+    "sfx": "whoosh de transición",
+    "sync": "en el mismo `--s` en gen_audio.py"
+  }
+}

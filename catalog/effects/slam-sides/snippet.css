@@ -1,0 +1,4 @@
+/* Slam lateral — extraído de pirotecnia/december/postVideos/postVideo1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
+.k{animation:var(--n) var(--t,.7s) cubic-bezier(.2,.8,.2,1) var(--s) both}
+@keyframes slamL{0%{opacity:0;transform:translateX(-420px) scale(1.25)}60%{opacity:1;transform:translateX(14px) scale(.98)}100%{opacity:1;transform:none}}
+@keyframes slamR{0%{opacity:0;transform:translateX(420px) scale(1.25)}60%{opacity:1;transform:translateX(-14px) scale(.98)}100%{opacity:1;transform:none}}

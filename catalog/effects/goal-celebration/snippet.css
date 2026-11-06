@@ -1,0 +1,8 @@
+/* Celebración de gol — extraído de pirotecnia/december/postVideos/postVideo1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
+@keyframes goal{0%{opacity:0;transform:scale(2.6)}35%{opacity:1;transform:scale(.94)}55%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes netin{0%{opacity:0;transform:scale(1.2)}40%{opacity:.9;transform:scale(.97)}100%{opacity:.55;transform:scale(1)}}
+@keyframes outf{0%{opacity:1}100%{opacity:0}}
+@keyframes flick{0%,100%{opacity:.8}30%{opacity:1}55%{opacity:.65}80%{opacity:.95}}
+.s3 .flood{position:absolute;top:-60px;width:760px;height:1700px;background:linear-gradient(180deg,rgba(220,235,255,.30),rgba(220,235,255,.05) 70%,transparent);clip-path:polygon(44% 0,56% 0,100% 100%,0 100%);transform-origin:50% 0;z-index:3;animation:flick 3.1s linear infinite}
+.s3 .net{position:absolute;left:0;right:0;top:0;height:1100px;z-index:4;opacity:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.42) 0 2px,transparent 2px 46px),repeating-linear-gradient(-45deg,rgba(255,255,255,.42) 0 2px,transparent 2px 46px);-webkit-mask-image:linear-gradient(180deg,#000 30%,transparent 95%);mask-image:linear-gradient(180deg,#000 30%,transparent 95%);animation:netin .3s ease-out 9.3s both,outf .4s linear 10.2s forwards}
+.s3 .goal{left:0;right:0;top:960px;text-align:center;z-index:19;font-family:Oswald;font-weight:700;font-size:330px;line-height:1;letter-spacing:.01em;color:#fff;text-shadow:-8px 0 var(--blue-hi),8px 0 var(--red-hi),0 0 70px rgba(255,255,255,.55);animation:goal .55s cubic-bezier(.2,.8,.2,1) 9.3s both,outf .3s linear 10.3s forwards}

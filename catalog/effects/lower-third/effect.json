@@ -1,0 +1,21 @@
+{
+  "id": "lower-third",
+  "name": "Tercio inferior animado",
+  "kind": "overlay",
+  "medium": "video",
+  "brands": [
+    "gremco"
+  ],
+  "tags": [
+    "rotulo",
+    "tercio-inferior",
+    "compuesto"
+  ],
+  "source": {
+    "file": "brands/gremco/_shared/video-template.html",
+    "symbol": ".lt"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

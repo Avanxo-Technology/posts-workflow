@@ -1,0 +1,21 @@
+{
+  "id": "glow-pulse",
+  "name": "Resplandor que late",
+  "kind": "loop",
+  "medium": "video",
+  "brands": [
+    "pirotecnia"
+  ],
+  "tags": [
+    "brillo",
+    "fondo",
+    "bucle"
+  ],
+  "source": {
+    "piece": "pirotecnia/december/reels/diciembre/reel1",
+    "symbol": "@keyframes glowp"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

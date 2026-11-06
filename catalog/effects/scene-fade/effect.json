@@ -1,0 +1,21 @@
+{
+  "id": "scene-fade",
+  "name": "Escena con fade",
+  "kind": "transition",
+  "medium": "video",
+  "brands": [
+    "gremco"
+  ],
+  "tags": [
+    "transicion",
+    "escena",
+    "fade"
+  ],
+  "source": {
+    "file": "brands/gremco/_shared/video-template.html",
+    "symbol": "@keyframes inFade"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

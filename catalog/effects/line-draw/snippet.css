@@ -1,0 +1,3 @@
+/* Trazo que se dibuja — extraído de pirotecnia/december/postVideos/postVideo4/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
+@keyframes draw{from{stroke-dashoffset:260}to{stroke-dashoffset:0}}
+.tile svg path{fill:none;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:260;stroke-dashoffset:260;animation:draw .4s cubic-bezier(.4,0,.2,1) var(--cs) both}

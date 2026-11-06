@@ -1,0 +1,4 @@
+/* Panel naranja que barre — extraído de gremco/noviembre/reel1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
+@keyframes wipe{0%{transform:translateX(-112%) skewX(-12deg)}50%{transform:translateX(0) skewX(-12deg)}100%{transform:translateX(112%) skewX(-12deg)}}
+.wipe{position:absolute;inset:0;z-index:90;background:var(--orange);width:140%;left:-20%;animation:wipe .8s cubic-bezier(.65,0,.35,1) var(--s) both;pointer-events:none}
+.wipe:after{content:"";position:absolute;right:0;top:0;bottom:0;width:90px;background:var(--navy-deep)}

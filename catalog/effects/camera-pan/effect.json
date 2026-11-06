@@ -1,0 +1,21 @@
+{
+  "id": "camera-pan",
+  "name": "Paneo de cámara",
+  "kind": "camera",
+  "medium": "video",
+  "brands": [
+    "gremco"
+  ],
+  "tags": [
+    "foto",
+    "paneo",
+    "video-fondo"
+  ],
+  "source": {
+    "file": "brands/gremco/_shared/video-template.html",
+    "symbol": "@keyframes kbl"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

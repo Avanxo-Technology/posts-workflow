@@ -3,15 +3,35 @@
   "name": "Slam (golpe desde abajo)",
   "kind": "entrance",
   "medium": "video",
-  "brands": ["gmaq", "gremco", "pirotecnia"],
-  "tags": ["texto", "titulo", "impacto", "entrada"],
-  "source": { "file": "_shared/base/video-template.html", "symbol": "@keyframes slam" },
+  "brands": [
+    "gmaq",
+    "gremco",
+    "pirotecnia"
+  ],
+  "tags": [
+    "texto",
+    "titulo",
+    "impacto",
+    "entrada"
+  ],
+  "source": {
+    "file": "_shared/base/video-template.html",
+    "symbol": "@keyframes slam"
+  },
   "snippet": "snippet.css",
-  "variants": ["slamL", "slamR"],
+  "variants": [
+    "slamB (Pirotecnia: sube 520 px sin escala)"
+  ],
   "params": {
     "--n": "nombre de la animación (slam | slamL | slamR)",
     "--s": "segundo de entrada (delay absoluto)",
     "--t": "duración, por defecto .7s"
   },
-  "audio": { "sfx": "sugerido: golpe/whoosh en --s", "sync": "mismo instante en gen_audio.py; usar hit=True si debe sacudir pantalla" }
+  "audio": {
+    "sfx": "sugerido: golpe/whoosh en --s",
+    "sync": "mismo instante en gen_audio.py; usar hit=True si debe sacudir pantalla"
+  },
+  "related": [
+    "slam-sides"
+  ]
 }

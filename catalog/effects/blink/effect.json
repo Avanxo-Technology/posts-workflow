@@ -1,0 +1,20 @@
+{
+  "id": "blink",
+  "name": "Parpadeo",
+  "kind": "loop",
+  "medium": "video",
+  "brands": [
+    "pirotecnia"
+  ],
+  "tags": [
+    "parpadeo",
+    "opacidad"
+  ],
+  "source": {
+    "piece": "pirotecnia/december/postVideos/postVideo4",
+    "symbol": "@keyframes blink"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

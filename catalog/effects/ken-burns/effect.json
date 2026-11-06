@@ -1,0 +1,23 @@
+{
+  "id": "ken-burns",
+  "name": "Zoom lento (Ken Burns)",
+  "kind": "camera",
+  "medium": "video",
+  "brands": [
+    "gmaq",
+    "gremco",
+    "pirotecnia"
+  ],
+  "tags": [
+    "foto",
+    "zoom",
+    "video-fondo"
+  ],
+  "source": {
+    "file": "_shared/base/video-template.html",
+    "symbol": "@keyframes kb"
+  },
+  "snippet": "snippet.css",
+  "params": {},
+  "audio": null
+}

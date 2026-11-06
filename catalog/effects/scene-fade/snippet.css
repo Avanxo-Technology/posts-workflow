@@ -1,0 +1,3 @@
+/* Escena con fade — extraído de gremco/noviembre/reel1/index.html (pieza real). Requiere las variables --s/--t/--d de la plantilla de video. */
+@keyframes inFade{from{opacity:0}to{opacity:1}}
+.wrap{position:absolute;inset:0;overflow:hidden;background:var(--navy-deep);animation:var(--in,nomo) var(--ti,.55s) cubic-bezier(.16,.84,.2,1) var(--s) both,var(--out,nomo) .5s ease-in calc(var(--s) + var(--d) - .5s) forwards}
