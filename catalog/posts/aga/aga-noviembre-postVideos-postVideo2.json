@@ -1,0 +1,13 @@
+{
+  "id": "aga-noviembre-postVideos-postVideo2",
+  "brand": "aga",
+  "medium": "video",
+  "path": "aga/noviembre/postVideos/postVideo2",
+  "uses": [
+    { "effect": "aga-iris", "t": 4.3, "note": "swap 4.75" },
+    { "effect": "aga-wipe", "t": 10.9, "note": "swap 11.4" },
+    { "effect": "aga-bars", "t": 16.9, "note": "swap 17.42" },
+    { "effect": "aga-iris", "t": 22.55, "note": "swap 23.0" },
+    { "effect": "aga-wipe", "t": 27.5, "note": "swap 28.0" }
+  ]
+}

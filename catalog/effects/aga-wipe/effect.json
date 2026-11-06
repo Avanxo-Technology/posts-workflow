@@ -1,0 +1,16 @@
+{
+  "id": "aga-wipe",
+  "name": "Wipe lima/navy",
+  "kind": "transition",
+  "medium": "video",
+  "brands": ["aga"],
+  "tags": ["transicion", "canvas", "pantalla-completa"],
+  "source": { "file": "brands/aga/_shared/engine.js", "symbol": "wipe" },
+  "snippet": null,
+  "params": {
+    "t0": "segundo en que empieza",
+    "dur": "duración (los posts usan .9)",
+    "type": "'wipe' en VIDEO.trans"
+  },
+  "audio": { "sfx": "tr_wipe + tr_wipe2 (hit=True)", "sync": "la pantalla queda 100% cubierta en t0+.504; la escena siguiente empieza ahí" }
+}

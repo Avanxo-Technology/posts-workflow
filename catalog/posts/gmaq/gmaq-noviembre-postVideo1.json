@@ -1,0 +1,10 @@
+{
+  "id": "gmaq-noviembre-postVideo1",
+  "brand": "gmaq",
+  "medium": "video",
+  "path": "gmaq/noviembre/postVideo1",
+  "uses": [
+    { "effect": "slam", "t": 0.30, "note": "cifra grande de apertura" },
+    { "effect": "slam", "t": 13.25, "note": "cierre (Gracias)" }
+  ]
+}

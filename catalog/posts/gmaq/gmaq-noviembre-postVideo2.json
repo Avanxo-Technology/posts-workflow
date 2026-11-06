@@ -1,0 +1,10 @@
+{
+  "id": "gmaq-noviembre-postVideo2",
+  "brand": "gmaq",
+  "medium": "video",
+  "path": "gmaq/noviembre/postVideo2",
+  "uses": [
+    { "effect": "slam", "t": 0.30 },
+    { "effect": "slam", "t": 16.05 }
+  ]
+}

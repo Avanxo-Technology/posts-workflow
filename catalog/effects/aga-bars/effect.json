@@ -1,0 +1,16 @@
+{
+  "id": "aga-bars",
+  "name": "Persianas alternas",
+  "kind": "transition",
+  "medium": "video",
+  "brands": ["aga"],
+  "tags": ["transicion", "canvas", "pantalla-completa"],
+  "source": { "file": "brands/aga/_shared/engine.js", "symbol": "bars" },
+  "snippet": null,
+  "params": {
+    "t0": "segundo en que empieza",
+    "dur": "duración (los posts usan .9)",
+    "type": "'bars' en VIDEO.trans"
+  },
+  "audio": { "sfx": "tr_bars", "sync": "la pantalla queda 100% cubierta en ~t0+.52; la escena siguiente empieza ahí" }
+}
