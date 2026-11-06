@@ -1,6 +1,8 @@
 /* scene-push — la escena nueva entra empujando a la anterior. Parámetros: --fx-duration, --fx-delay, --fx-parallax, --fx-dx/--fx-dy (dirección), --fx-ease */
 .fx-push{position:absolute;inset:0;overflow:hidden}
 .fx-push>*{position:absolute;inset:0}
+.fx-push-out{background:var(--fx-bg-a,transparent)}
+.fx-push-in{background:var(--fx-bg-b,transparent)}
 @keyframes fx-push-in{from{transform:translate(calc(var(--fx-dx,1) * 104%),calc(var(--fx-dy,0) * 104%))}to{transform:none}}
 @keyframes fx-push-out{to{transform:translate(calc(var(--fx-dx,1) * var(--fx-parallax,24%) * -1),calc(var(--fx-dy,0) * var(--fx-parallax,24%) * -1))}}
 .fx-push-in{animation:fx-push-in var(--fx-duration,.55s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}

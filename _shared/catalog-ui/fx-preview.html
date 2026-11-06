@@ -36,6 +36,7 @@ function apply() {
   anims.forEach(function (a) { try { a.currentTime = t * 1000; } catch (e) { /* animación ya terminada o inválida */ } });
   seek.value = Math.round(t / end * 1000);
   clock.textContent = t.toFixed(2) + ' / ' + total.toFixed(2) + ' s';
+  parent.postMessage({type: 'fx-time', t: t, end: end}, '*');
 }
 function tick(ts) {
   if (playing) {
@@ -50,11 +51,15 @@ requestAnimationFrame(tick);
 pp.onclick = function () { playing = !playing; pp.textContent = playing ? '❚❚' : '▶'; if (playing && t >= end) t = 0; };
 seek.oninput = function () { playing = false; pp.textContent = '▶'; t = seek.value / 1000 * end; apply(); };
 addEventListener('message', function (e) {
-  if (e.source !== parent || !e.data || e.data.type !== 'fx') return;
+  if (e.source !== parent || !e.data) return;
+  if (e.data.type === 'seek') { playing = false; pp.textContent = '▶'; t = Math.max(0, Math.min(end, +e.data.t || 0)); apply(); return; }
+  if (e.data.type !== 'fx') return;
   var m = e.data, p = m.palette || {};
   var rs = document.documentElement.style;
   rs.setProperty('--p-dark', p.dark || '#14181c'); rs.setProperty('--p-light', p.light || '#f4f1ea'); rs.setProperty('--p-accent', p.accent || '#c46a2b');
   rs.setProperty('--p-on', /^#[0-9a-f]{6}$/i.test(p.accent || '') && lum(p.accent) > .4 ? '#111111' : '#ffffff');
+  rs.setProperty('--kit-dark', p.dark || '#14181c'); rs.setProperty('--kit-light', p.light || '#f4f1ea'); rs.setProperty('--kit-accent', p.accent || '#c46a2b'); rs.setProperty('--kit-on', getComputedStyle(document.documentElement).getPropertyValue('--p-on'));
+  rs.setProperty('--fx-bg-a', p.dark || '#14181c'); rs.setProperty('--fx-bg-b', p.light || '#f4f1ea');
   style.textContent = m.css || ''; root.innerHTML = m.html || '';
   total = m.total || 1; end = total + HOLD;
   wrap.querySelectorAll('.mk').forEach(function (n) { n.remove(); });

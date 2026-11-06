@@ -90,3 +90,16 @@ Migrados a spec 1: `slam`, `pop`, `scene-push`, `sweep-panel` e `iris-reveal`. L
 - `GET /api/v1/effects?kind=&brand=&tag=&q=`: lista.
 - `GET /api/v1/effects/<id>?duration=0.6&delay=2&palette=gmaq`: ficha con `params`, `values`, `code.css`, `code.html`, `vars`, `markers` y `totalSeconds`. Los valores fuera de rango devuelven 400 con el detalle.
 La UI guarda los valores en la URL (`#/efecto/slam?duration=1.5&palette=gmaq`), así que una configuración se puede compartir.
+
+## Kit (carrito)
+En la pestaña **Kit** de `posts catalog` se reúnen varios efectos spec 1 para usarlos en una misma pieza. Se añaden desde la ficha de cada efecto («+ Añadir al kit») con los valores que tenga en ese momento.
+- **Línea de tiempo**: un bloque por efecto. Arrastrar el bloque cambia su inicio (`delay`) y estirar su borde derecho cambia su `duration`. Las marcas blancas son los marcadores del efecto. Pulsar en la regla mueve la vista previa a ese instante.
+- **Cada elemento** tiene su texto, todos sus parámetros, y se puede subir/bajar (orden de apilado: el último queda encima), duplicar o quitar.
+- **Paleta** del kit: una marca o colores propios. Todo se guarda en el navegador (`localStorage`); no hay cuentas.
+- **Paquete**: copiar CSS + HTML ya compuestos, descargar `kit.html` (página autónoma con reproductor; `?t=<seg>` congela un instante y `?rec=1` oculta los controles), copiar el JSON o copiar el enlace del kit (`#/kit?k=…`, que al abrirse carga el kit).
+- Los elementos de tipo texto van en contenedores `.kit-slot` de ejemplo (posiciones y estilo de muestra que se sustituyen por el diseño real); las transiciones con escenas cubren la pantalla, así que en una pieza real se aplican entre tus propias escenas.
+
+**API del kit** (para agentes), con `k` = el valor del enlace del kit:
+- `GET /api/v1/kit?k=<kit>`: JSON con `items[]` (inicio, duración, marcadores y HTML de cada uno), `code.css`, `code.html`, `markers` y `howTo`. Un kit no válido devuelve 400 con el detalle.
+- `GET /api/v1/kit?k=<kit>&format=html`: la página autónoma (con política de seguridad restrictiva).
+Solo admiten efectos spec 1 (parametrizados) y hasta 40 elementos. Las etiquetas se escapan siempre.

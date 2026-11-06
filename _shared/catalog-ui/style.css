@@ -119,3 +119,23 @@ button.mini{padding:0;width:26px;height:26px;border-radius:6px;line-height:1}
 .detail>div{min-width:0}
 .ctl{grid-template-columns:200px minmax(0,1fr) 28px}
 pre{max-width:100%}
+
+.cnt{display:inline-block;min-width:18px;padding:0 6px;margin-left:4px;border-radius:99px;background:var(--acc);color:#07131d;font-size:11px;font-weight:800;text-align:center}
+/* ---- kit: línea de tiempo ---- */
+.kt{position:relative;padding-top:24px;box-sizing:border-box;user-select:none;touch-action:none}
+.kt-ruler{position:absolute;top:0;height:24px;border-bottom:1px solid var(--line);cursor:col-resize}
+.kt-ruler span{position:absolute;top:5px;font:10px ui-monospace,monospace;color:var(--mut);transform:translateX(-50%);pointer-events:none}
+.kt-ruler span:before{content:"";position:absolute;left:50%;top:14px;height:5px;border-left:1px solid var(--line)}
+.kt-row{display:flex;border-bottom:1px solid var(--line)}
+.kt-row.on{background:rgba(124,196,255,.06)}
+.kt-lab{display:flex;flex-direction:column;justify-content:center;padding:0 8px;font-size:12px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-right:1px solid var(--line);box-sizing:border-box}
+.kt-lab span{color:var(--mut);overflow:hidden;text-overflow:ellipsis}
+.kt-track{position:relative;flex:none;background:repeating-linear-gradient(90deg,transparent 0 calc(16.66% - 1px),rgba(255,255,255,.04) calc(16.66% - 1px) 16.66%)}
+.kt-block{position:absolute;top:5px;bottom:5px;border-radius:7px;cursor:grab;opacity:.78;display:flex;align-items:center;min-width:10px;overflow:hidden}
+.kt-block.on{opacity:1;outline:2px solid #fff}
+.kt-block:active{cursor:grabbing}
+.kt-t{padding:0 8px;font:700 11px system-ui;color:#0b0d10;pointer-events:none;white-space:nowrap}
+.kt-h{position:absolute;right:0;top:0;bottom:0;width:9px;cursor:ew-resize;background:rgba(0,0,0,.28)}
+.kt-mk{position:absolute;inset:0;pointer-events:none}
+.kt-mk u{position:absolute;top:0;bottom:0;width:2px;background:#fff;text-decoration:none;opacity:.9}
+.kt-play{position:absolute;top:0;bottom:0;width:2px;background:#ff5a5a;pointer-events:none;z-index:3}

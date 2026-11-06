@@ -63,3 +63,41 @@ test('todos los efectos spec 1 del catálogo cumplen el contrato', () => {
   }
   assert.ok(n >= 5);
 });
+
+const effects = () => Object.fromEntries(['slam', 'pop', 'sweep-panel', 'scene-push'].map(id => [id, load(id)]));
+
+test('kit: composición, orden, tiempos y marcadores absolutos', () => {
+  const kit = {name: 'K', palette: pal, items: [{effect: 'slam', label: 'Hola', params: {delay: 0.3, duration: 0.8}}, {effect: 'pop', params: {delay: 1.2}}, {effect: 'sweep-panel', params: {delay: 3}}]};
+  const b = FX.buildKit(effects(), kit, {});
+  assert.deepEqual(b.errors, []);
+  assert.equal(b.total, 3.8);                                  // sweep: delay 3 + duration 0.8
+  assert.equal(b.markers[0].at, 3.4);                          // 3 + 0.5 * 0.8
+  assert.equal((b.html.match(/kit-slot/g) || []).length, 2);   // slam y pop van en huecos; el barrido es una capa
+  assert.equal((b.css.match(/@keyframes fx-slam/g) || []).length, 1);
+});
+
+test('kit: etiquetas escapadas y sin inyección por $& / $\'', () => {
+  const kit = {palette: pal, items: [{effect: 'slam', label: '<img src=x onerror=alert(1)> $& $\' $`'}]};
+  const b = FX.buildKit(effects(), kit, {});
+  assert.ok(!b.html.includes('<img'));
+  assert.ok(b.html.includes('&lt;img src=x onerror=alert(1)&gt; $&amp; $&#39; $`'));
+  assert.equal((b.html.match(/<h1/g) || []).length, 1);        // un solo elemento: $& no duplicó el HTML
+  assert.ok(!FX.pageHtml(b).includes('<img'));
+});
+
+test('kit: errores por efecto desconocido, parámetro fuera de rango y exceso de elementos', () => {
+  const b = FX.buildKit(effects(), {palette: pal, items: [{effect: 'nope'}, {effect: 'slam', params: {duration: 99}}]}, {});
+  assert.equal(b.errors.length, 2);
+  const many = {palette: pal, items: Array.from({length: FX.KIT_MAX + 1}, () => ({effect: 'pop'}))};
+  assert.ok(FX.buildKit(effects(), many, {}).errors.some(m => /hasta/.test(m)));
+});
+
+test('kit: codificación ida y vuelta, omite valores por defecto y rechaza basura', () => {
+  const kit = {name: 'Ñandú ✓', palette: 'gmaq', items: [{effect: 'slam', label: 'Título ñ', params: {delay: 2, duration: 0.7}}]};
+  const enc = FX.encodeKit(kit, effects()), dec = FX.decodeKit(enc);
+  assert.deepEqual(dec.items[0].params, {delay: 2});           // duration 0.7 es el valor por defecto: no se guarda
+  assert.equal(dec.name, 'Ñandú ✓'); assert.equal(dec.items[0].label, 'Título ñ');
+  assert.ok(/^[A-Za-z0-9_-]+$/.test(enc));
+  assert.equal(FX.decodeKit('esto no es un kit'), null);
+  assert.equal(FX.decodeKit(Buffer.from('{"v":2}').toString('base64url')), null);
+});
