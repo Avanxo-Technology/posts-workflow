@@ -8,6 +8,7 @@ import {existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, copyFil
 import {dirname, join, resolve, basename, relative, isAbsolute} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
+import {cmdEffect} from './catalog.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TOOL = resolve(HERE, '..');
@@ -449,6 +450,10 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   posts export <pieza> [N] [--out DIR]                              carrusel -> PNG (Chrome, una sesión); N = una sola lámina
   posts export <video> --yes [--sound on|off] [--workers N]         video -> reel.mp4. SOLO cuando el usuario lo indica: sin --yes no graba. N = Chrome en paralelo (auto por defecto)
   posts export <video> --frame <seg> <salida.png>                   un fotograma de revisión (no toca reel.mp4)
+  posts effect list [--brand b] [--kind k] [--tag t]                catálogo de efectos (catalog/README.md)
+  posts effect show <id>                                            cómo está hecho, parámetros, audio y en qué posts se usó
+  posts effect at <post> [segundo]                                  efectos de un post / el más cercano a ese segundo ("el efecto del seg 3 de X")
+  posts effect check                                                valida el catálogo
   posts check <pieza> [-v]                                          validaciones automáticas (solo avisos/errores; -v muestra todo)
 
   <pieza> = carpeta (ej. aga/noviembre/postVideos/postVideo1), relativa a la raíz o absoluta.
@@ -456,5 +461,5 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   Carpeta de proyectos (para los archivos de diseño): ${PROJECTS} (PROJECTS_DIR)`;
 
 const [cmd, ...rest] = process.argv.slice(2);
-if (!['init', 'brand', 'help', 'doctor'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
-({doctor: cmdDoctor, init: cmdInit, sound: cmdSound, analyze: cmdAnalyze, brand: cmdBrand, new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);
+if (!['init', 'brand', 'help', 'doctor', 'effect'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
+({doctor: cmdDoctor, init: cmdInit, sound: cmdSound, analyze: cmdAnalyze, brand: cmdBrand, effect: a => cmdEffect(a, {TOOL, POSTS, die, flag}), new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);
