@@ -1,0 +1,7 @@
+/* check-in — el icono ✓ aparece girando y rebota. Parámetros: --fx-duration, --fx-delay, --fx-from, --fx-rotate, --fx-overshoot, --fx-ease */
+@keyframes fx-check{
+  0%{opacity:0;transform:scale(var(--fx-from,.2)) rotate(var(--fx-rotate,-30deg))}
+  70%{opacity:1;transform:scale(var(--fx-overshoot,1.15)) rotate(calc(var(--fx-rotate,-30deg) * -.133))}
+  100%{opacity:1;transform:none}
+}
+.fx-check{display:inline-block;animation:fx-check var(--fx-duration,.35s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}

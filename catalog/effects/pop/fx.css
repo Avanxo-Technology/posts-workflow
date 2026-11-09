@@ -1,0 +1,7 @@
+/* pop — aparece pequeño y girado, rebasa su tamaño y se asienta. Parámetros: --fx-duration, --fx-delay, --fx-from, --fx-rotate, --fx-overshoot, --fx-ease */
+@keyframes fx-pop{
+  0%{opacity:0;transform:scale(var(--fx-from,.3)) rotate(var(--fx-rotate,-8deg))}
+  70%{opacity:1;transform:scale(var(--fx-overshoot,1.12)) rotate(calc(var(--fx-rotate,-8deg) * -.25))}
+  100%{opacity:1;transform:scale(1) rotate(0)}
+}
+.fx-pop{animation:fx-pop var(--fx-duration,.5s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}

@@ -1,0 +1,85 @@
+{
+  "id": "light-burst",
+  "name": "Explosión de luz",
+  "kind": "transition",
+  "medium": "video",
+  "tags": [
+    "fuego",
+    "destello",
+    "transicion"
+  ],
+  "snippet": "fx.css",
+  "audio": {
+    "sfx": "explosión / estallido",
+    "sync": "mismo `--s` en gen_audio.py (hit=True si debe sacudir)"
+  },
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración",
+        "type": "number",
+        "unit": "s",
+        "default": 0.95,
+        "min": 0.1,
+        "max": 3,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "x": {
+        "label": "Centro horizontal",
+        "type": "number",
+        "unit": "%",
+        "default": 50,
+        "min": 0,
+        "max": 100,
+        "step": 1
+      },
+      "y": {
+        "label": "Centro vertical",
+        "type": "number",
+        "unit": "%",
+        "default": 50,
+        "min": 0,
+        "max": 100,
+        "step": 1
+      },
+      "core": {
+        "label": "Núcleo",
+        "type": "color",
+        "default": "#ffffff"
+      },
+      "mid": {
+        "label": "Zona media",
+        "type": "color",
+        "default": "#facc15"
+      },
+      "edge": {
+        "label": "Borde",
+        "type": "color",
+        "default": "#d23344"
+      },
+      "ringColor": {
+        "label": "Color del anillo",
+        "type": "color",
+        "default": "#f5c542"
+      }
+    },
+    "markers": [
+      {
+        "at": 0.36,
+        "label": "Luz a pantalla completa: cambia la escena aquí"
+      }
+    ]
+  }
+}

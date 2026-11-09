@@ -1,0 +1,92 @@
+{
+  "id": "double-wipe",
+  "name": "Doble barrido",
+  "kind": "transition",
+  "medium": "video",
+  "tags": [
+    "transicion",
+    "canvas",
+    "pantalla-completa"
+  ],
+  "snippet": "fx.css",
+  "audio": {
+    "sfx": "tr_wipe + tr_wipe2 (hit=True)",
+    "sync": "la pantalla queda 100% cubierta en t0+.504; la escena siguiente empieza ahí"
+  },
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración",
+        "type": "number",
+        "unit": "s",
+        "default": 0.9,
+        "min": 0.1,
+        "max": 3,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "color1": {
+        "label": "Primer panel",
+        "type": "color",
+        "default": "palette.accent"
+      },
+      "color2": {
+        "label": "Segundo panel",
+        "type": "color",
+        "default": "palette.dark"
+      },
+      "ease": {
+        "label": "Curva",
+        "type": "enum",
+        "default": "in-out",
+        "options": [
+          {
+            "value": "suave",
+            "label": "Rebote suave",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.2,.8,.2,1)"
+            }
+          },
+          {
+            "value": "lineal",
+            "label": "Lineal",
+            "vars": {
+              "--fx-ease": "linear"
+            }
+          },
+          {
+            "value": "in-out",
+            "label": "Entrada y salida",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.65,0,.35,1)"
+            }
+          },
+          {
+            "value": "brusco",
+            "label": "Brusco",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.7,0,.3,1)"
+            }
+          }
+        ]
+      }
+    },
+    "markers": [
+      {
+        "at": 0.57,
+        "label": "Pantalla cubierta: cambia la escena aquí"
+      }
+    ]
+  }
+}

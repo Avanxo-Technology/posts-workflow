@@ -1,0 +1,48 @@
+{
+  "id": "label-rise",
+  "name": "Etiqueta que sube",
+  "kind": "text",
+  "medium": "video",
+  "tags": [
+    "etiqueta",
+    "texto"
+  ],
+  "snippet": "fx.css",
+  "audio": null,
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Tiempo visible",
+        "type": "number",
+        "unit": "s",
+        "default": 3,
+        "min": 0.1,
+        "max": 10,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "distance": {
+        "label": "Recorrido",
+        "type": "number",
+        "unit": "px",
+        "default": 40,
+        "min": 0,
+        "max": 200,
+        "step": 2
+      }
+    },
+    "markers": [],
+    "label": "Etiqueta"
+  }
+}

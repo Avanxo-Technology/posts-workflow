@@ -1,8 +1,44 @@
 # posts-workflow
 
+## Qué es
+**Transitions** (el nombre del sitio; el repo se llama `posts-workflow`) es una **biblioteca de transiciones y efectos de animación (HTML/CSS puro) para videos de Instagram y otras redes**, pensada para que una IA los use sin darle vueltas. Tú eliges qué quieres y se lo dices a Claude: «usa esto, esto y esto».
+
+- **Explora:** cada efecto tiene vista previa en vivo en formato vertical (1080x1920).
+- **Edita sin código:** ajusta duración, retraso, distancia y colores con controles visuales y elige una paleta o crea la tuya.
+- **Guarda:** tus configuraciones se guardan con nombre en tu navegador.
+- **Arma un kit:** añade varios efectos al carrito, ordénalos en una línea de tiempo y copia el enlace del kit.
+- **Pásaselo a tu IA:** pega el enlace del kit (o la URL de un efecto) en tu chat con Claude. La API devuelve el CSS y el HTML ya ajustados, con los tiempos de cada efecto.
+
+Ejemplo de prompt: «Aplica este kit en mi video: `https://<tu-sitio>/api/v1/kit?k=…`».
+Los agentes pueden empezar por `/llms.txt`, que explica la API (`/api/v1/effects`, `/api/v1/effects/<id>?duration=0.6&palette=oceano`, `/api/v1/kit?k=…`).
+
+**Probarlo en local** (solo Node 22+, sin dependencias):
+```
+git clone <este-repo> && cd posts-workflow
+./posts site build && ./posts site serve      # abre http://127.0.0.1:4748/
+./posts site serve --lan                       # además lo sirve en tu red local (solo lectura) y muestra la URL
+```
+Más abajo está el flujo de producción de piezas del equipo (carruseles y reels con el CLI `posts`), que es opcional para quien solo quiere los efectos.
+
+---
+
+## Flujo de producción (CLI `posts`)
 Herramientas para producir carruseles (HTML -> PNG 1080x1350) y videos/reels (HTML + audio -> MP4 1080x1920) de Instagram para
-GMAQ, AGA, GREMCO y Pirotecnia Favio Favio Domino. Este repositorio guarda **las herramientas, plantillas y documentación**;
+las marcas del equipo. Este repositorio guarda **las herramientas, plantillas y documentación**;
 las piezas (index.html, PNG, MP4, clips) viven aparte, en la carpeta de posts de cada equipo.
+
+## Cómo se usa: el sitio y GitHub tienen papeles distintos
+- **Quien solo quiere usar los efectos** entra al **sitio** (no necesita GitHub ni instalar nada): explora el catálogo, ajusta duración y colores, arma un kit y copia el código, o le pasa a su Claude la URL del efecto o del kit (`/llms.txt` explica la API a los agentes).
+- **GitHub** es el taller del equipo: guarda la fuente de verdad (los efectos de `catalog/`, las marcas de `brands/` y el código). Los cambios se revisan con PR y, al fusionarse a `main`, el sitio se regenera (`.github/workflows/site.yml`).
+- **El equipo** produce las piezas con el CLI `posts` y Claude Code en su equipo, y registra los efectos nuevos con `posts effect scan --write`.
+
+Comandos del catálogo y del sitio (solo necesitan Node 22+):
+```
+posts catalog --open                 UI local completa (incluye el editor de marcas, que escribe en el repo)
+posts site build [--base https://…]  genera el sitio público en dist/ (estático + función de la API)
+posts site serve                     lo prueba en local emulando el hosting
+```
+Detalles, contrato de efectos y API: `catalog/README.md`. El sitio publicado **no** incluye el editor de marcas: las marcas son paletas de solo lectura y cada persona puede usar colores propios en su navegador.
 
 ## Requisitos
 Node 22+, Google Chrome (o Chromium con `CHROME=chromium`), ffmpeg/ffprobe, Python 3 y git. Para trabajar con proyectos gosite: Docker y `gosite`.
@@ -12,7 +48,7 @@ exacto de instalación para tu sistema (apt, dnf, pacman o brew). Si se lo pides
 falte con esos comandos y repite la comprobación. Si un comando necesita `sudo`, te lo indica para que lo corras tú con `! comando` en el chat.
 
 **Proyecto gosite apagado:** si el sitio local del proyecto no responde, se levanta con los comandos de gosite: `gosite infra up` (una vez; Traefik, Redis, MinIO)
-y `gosite start <proyecto>` (app + Cockpit). Ejemplo, GMAQ: app en http://localhost:8000 y Cockpit en http://localhost:8001. Con Docker cerrado, primero se abre Docker.
+y `gosite start <proyecto>` (app + Cockpit). Ejemplo: app en http://localhost:8000 y Cockpit en http://localhost:8001. Con Docker cerrado, primero se abre Docker.
 
 ## Instalación
 ```
@@ -21,9 +57,14 @@ cd ~/tools/posts-workflow
 ./posts init /ruta/a/la/carpeta/de/posts      # guarda la ruta (.posts-dir) y enlaza recursos dentro de esa carpeta
 ln -s ~/tools/posts-workflow/posts ~/.local/bin/posts   # opcional: usar `posts` desde cualquier carpeta
 ```
-Sonido: GMAQ, Pirotecnia y cualquier marca nueva usan sonido sintetizado (sin descargas). AGA trae sus 48 efectos en el repo
-(`brands/aga/_shared/sfx/`) y su música de fondo es OPCIONAL: sin `brands/aga/_shared/music/33.mp3` el video queda solo con efectos.
-Los efectos de GREMCO se descargan una vez: `python3 brands/gremco/_shared/fetch_sfx.py`.
+Sonido: las marcas genéricas y cualquier marca nueva usan sonido sintetizado (sin descargas). Una marca puede traer sus propios efectos o música en su `_shared/`; la música es siempre OPCIONAL.
+
+## Marcas privadas
+El repo trae 8 marcas **genéricas** (`brands/`: carbon, oceano, bosque, fuego, uva, lima, rosa, claro), que también son las paletas del sitio público. Las marcas reales de un equipo (colores, logos, motores, sonidos, registros de posts) no se suben aquí: van en una carpeta privada.
+```
+echo /ruta/privada/marcas > .posts-brands      # o POSTS_BRANDS_DIR=/ruta/privada/marcas
+```
+Ahí se guardan `<id>.json`, `<id>.md`, `<id>/_shared/`, `catalog-posts/<marca>/*.json` y, opcionalmente, `scan-map.overlay.json`. Si un id está en las dos carpetas, gana la privada. El sitio público solo usa las genéricas y su build falla si detecta en lo público el nombre de una marca privada.
 
 ## Uso con Claude Code (la IA usa el CLI)
 Abre Claude Code en la carpeta de posts (o en tu proyecto gosite) tras `posts init`; lee `AGENTS.md` solo. Ejemplo de prompt:

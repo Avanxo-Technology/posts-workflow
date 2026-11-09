@@ -1,11 +1,15 @@
 # configuración local de cada equipo (ruta de las piezas)
 .posts-dir
-# música de AGA (opcional; licencia Mixkit) y efectos de GREMCO (se descargan con fetch_sfx.py)
+# carpeta PRIVADA con las marcas reales del equipo (fuera del repo; ver _shared/brands-dirs.mjs)
+.posts-brands
+# música y efectos descargados de una marca (opcionales)
 brands/*/_shared/music/
-brands/gremco/_shared/sfx/
+brands/*/_shared/sfx/
 # salidas de cada pieza
 *.mp4
 sfx.wav
 _sfx_raw.wav
 __pycache__/
 node_modules/
+# build del sitio público (se regenera con `posts site build`)
+dist/

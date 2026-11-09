@@ -1,0 +1,8 @@
+/* light-burst — explosión de luz que cubre la pantalla desde un punto, con un anillo. Parámetros: --fx-duration, --fx-delay, --fx-x, --fx-y, --fx-core, --fx-mid, --fx-edge, --fx-ring-color */
+.fx-burst{position:absolute;z-index:80;left:var(--fx-x,50%);top:var(--fx-y,50%);width:3400px;height:3400px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,var(--fx-core,#fff) 0,color-mix(in srgb,var(--fx-core,#fff) 70%,var(--fx-mid,#facc15)) 22%,var(--fx-mid,#facc15) 38%,var(--fx-edge,#d23344) 62%,color-mix(in srgb,var(--fx-edge,#d23344) 30%,#000) 80%,transparent 100%);
+  transform:translate(-50%,-50%) scale(0);animation:fx-burst var(--fx-duration,.95s) cubic-bezier(.5,0,.3,1) var(--fx-delay,0s) both}
+.fx-burst-ring{position:absolute;z-index:81;left:var(--fx-x,50%);top:var(--fx-y,50%);width:1400px;height:1400px;border-radius:50%;border:10px solid var(--fx-ring-color,#f5c542);pointer-events:none;
+  transform:translate(-50%,-50%) scale(0);animation:fx-burst-ring calc(var(--fx-duration,.95s) * .95) cubic-bezier(.2,.7,.3,1) var(--fx-delay,0s) both}
+@keyframes fx-burst{0%{opacity:1;transform:translate(-50%,-50%) scale(0)}36%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)}}
+@keyframes fx-burst-ring{0%{opacity:.95;transform:translate(-50%,-50%) scale(0)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}}

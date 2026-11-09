@@ -1,0 +1,5 @@
+/* glow-pulse — resplandor radial que late detrás del contenido. Parámetros: --fx-duration, --fx-delay, --fx-color, --fx-size, --fx-low */
+.fx-glow{position:absolute;left:50%;top:50%;width:var(--fx-size,780px);height:var(--fx-size,780px);margin:calc(var(--fx-size,780px) / -2) 0 0 calc(var(--fx-size,780px) / -2);border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,color-mix(in srgb,var(--fx-color,#c46a2b) 40%,transparent),color-mix(in srgb,var(--fx-color,#c46a2b) 22%,transparent) 40%,transparent 68%);
+  animation:fx-glow var(--fx-duration,1.2s) ease-in-out var(--fx-delay,0s) infinite}
+@keyframes fx-glow{0%,100%{opacity:var(--fx-low,.75)}50%{opacity:1}}

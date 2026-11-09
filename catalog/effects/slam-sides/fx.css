@@ -1,0 +1,7 @@
+/* slam-sides — variante lateral de slam. Parámetros: --fx-duration, --fx-delay, --fx-distance, --fx-scale, --fx-settle, --fx-dir, --fx-ease */
+@keyframes fx-slamside{
+  0%{opacity:0;transform:translateX(calc(var(--fx-dir,-1) * var(--fx-distance,420px))) scale(var(--fx-scale,1.25))}
+  60%{opacity:1;transform:translateX(calc(var(--fx-dir,-1) * var(--fx-distance,420px) * -.033)) scale(var(--fx-settle,.98))}
+  100%{opacity:1;transform:none}
+}
+.fx-slamside{animation:fx-slamside var(--fx-duration,.7s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}

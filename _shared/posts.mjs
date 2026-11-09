@@ -6,15 +6,20 @@
 //         (lo escribe `posts init <ruta>`).
 import {existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, copyFileSync, statSync, symlinkSync, lstatSync} from 'node:fs';
 import {dirname, join, resolve, basename, relative, isAbsolute} from 'node:path';
+import {brandRoot, brandIds} from './brands-dirs.mjs';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
+import {cmdEffect} from './catalog.mjs';
+import {startCatalogServer} from './catalog-server.mjs';
+import {createFileStore, BrandError} from './brand-store.mjs';
+import {cmdSite} from './site/cmd.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TOOL = resolve(HERE, '..');
 const cfg = join(TOOL, '.posts-dir');
 const POSTS_RAW = process.env.POSTS_DIR || (existsSync(cfg) ? read0(cfg).trim() : '');
 const POSTS = POSTS_RAW ? resolve(POSTS_RAW) : '';
-// Carpeta que contiene los proyectos (aga-growth-website, gmaq, ...). Los archivos de diseño de brands/*.json son relativos a ella.
+// Carpeta que contiene los proyectos (mi-sitio, otra-marca, ...). Los archivos de diseño de brands/*.json son relativos a ella.
 const PROJECTS = resolve(process.env.PROJECTS_DIR || (POSTS ? dirname(POSTS) : '.'));
 function read0(p) { return readFileSync(p, 'utf8'); }
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -25,11 +30,11 @@ const mtime = p => statSync(p).mtimeMs;
 const die = m => { console.error('✗ ' + m); process.exit(1); };
 
 function brandOf(name) {
-  const p = join(TOOL, 'brands', name + '.json');
+  const p = join(brandRoot(TOOL, name), name + '.json');
   if (!existsSync(p)) die(`Marca desconocida "${name}". Marcas: ${brands().join(', ')}`);
   return {id: name, ...JSON.parse(read(p))};
 }
-function brands() { return ls(join(TOOL, 'brands')).filter(e => e.name.endsWith('.json')).map(e => e.name.slice(0, -5)); }
+function brands() { return brandIds(TOOL); }
 function flag(args, name, takesValue = true) {
   const i = args.indexOf(name); if (i < 0) return null;
   const v = takesValue ? args[i + 1] : true; args.splice(i, takesValue ? 2 : 1); return v;
@@ -42,7 +47,8 @@ const probe = (f, entries) => {
 
 function designOf(b) {
   const r = p => { if (!p) return null; const abs = isAbsolute(p) ? p : join(PROJECTS, p); return {path: abs, exists: existsSync(abs)}; };
-  return {main: r(b.designFile), extra: (b.designExtra || []).map(r)};
+  const own = join(brandRoot(TOOL, b.id || ''), b.id || '', 'design.md');   // design.md subido desde la UI (vive en el repo)
+  return {main: b.id && existsSync(own) ? {path: own, exists: true} : r(b.designFile), extra: (b.designExtra || []).map(r)};
 }
 function piecesOf(name, b) {
   const base = join(POSTS, name), out = [];
@@ -60,7 +66,7 @@ const checkSoundArg = v => { if (v !== null && !['on', 'off'].includes(v)) die('
 
 // ---- localizar una pieza ----
 function resolvePiece(arg) {
-  if (!arg) die('Falta la carpeta de la pieza (ej. aga/noviembre/postVideos/postVideo1)');
+  if (!arg) die('Falta la carpeta de la pieza (ej. carbon/noviembre/postVideos/postVideo1)');
   // orden: ruta absoluta; relativa a la raíz de posts (POSTS_DIR); y por último relativa a la carpeta actual
   const parts = arg.split('/').filter(Boolean);
   const cands = arg.startsWith('/') ? [arg] : [join(POSTS, arg), ...(parts.length >= 3 ? [join(POSTS, ...parts.slice(0, -1), 'postVideos', parts.at(-1))] : []), resolve(arg)];
@@ -93,9 +99,9 @@ function cmdInit(args) {
   writeFileSync(cfg, target + '\n');
   const links = [['_shared', '_shared'], ['brands', 'brands'], ['docs', 'docs'], ['AGENTS.md', 'AGENTS.md'], ['CLAUDE.md', 'CLAUDE.md'],
     ['WORKFLOW.md', 'WORKFLOW.md'], ['guia-posts.txt', 'guia-posts.txt'], ['posts', 'posts'],
-    ...brands().map(b => [join('brands', b, '_shared'), join(b, '_shared')])];
+    ...brands().map(b => [join(brandRoot(TOOL, b), b, '_shared'), join(b, '_shared')])];
   for (const [from, to] of links) {
-    const dest = join(target, to), src = join(TOOL, from);
+    const dest = join(target, to), src = isAbsolute(from) ? from : join(TOOL, from);
     if (!existsSync(src)) continue;
     let state = 'enlazado';
     try { lstatSync(dest); state = 'ya existe (no se toca)'; } catch { mkdirSync(dirname(dest), {recursive: true}); symlinkSync(src, dest); }
@@ -106,14 +112,12 @@ function cmdInit(args) {
 
 
 // ---- brand: alta de marcas nuevas (todo lo necesario sale de _shared/base, sin descargas) ----
-const hex = v => /^#[0-9a-fA-F]{6}$/.test(v || '');
-const mix = (h, t, k) => '#' + [1, 3, 5].map(i => Math.round(parseInt(h.slice(i, i + 2), 16) * (1 - k) + t * k).toString(16).padStart(2, '0')).join('');
 function cmdBrand(args) {
   const [sub, ...rest] = args;
   if (sub === 'show') {
     const id = rest[0]; if (!id) die('Uso: posts brand show <marca>');
     const b = brandOf(id), c = b.contact || {}, d = designOf(b);
-    const sh = join(TOOL, 'brands', id, '_shared'), sfx = join(sh, 'sfx');
+    const sh = join(brandRoot(TOOL, id), id, '_shared'), sfx = join(sh, 'sfx');
     const nsfx = existsSync(sfx) ? ls(sfx).filter(e => e.name.endsWith('.wav')).length : 0;
     const ps = piecesOf(id, b), cars = ps.filter(isCarousel);
     console.log(`${id}: ${b.name}`);
@@ -121,6 +125,8 @@ function cmdBrand(args) {
     console.log('contacto: ' + (Object.entries(c).map(([k, v]) => `${k} ${v}`).join(' · ') || '(sin datos: completar brands/' + id + '.json)'));
     console.log(`sonido: ${b.sound}` + (existsSync(join(sh, 'fetch_sfx.py')) ? (nsfx ? ` (${nsfx} efectos)` : ` — FALTAN efectos: python3 brands/${id}/_shared/fetch_sfx.py`) : ''));
     console.log('diseño: ' + (d.main ? `${d.main.path} ${d.main.exists ? '' : '(NO existe en este equipo: pedir la ruta al usuario)'}` : '(sin archivo: pedir la ruta al usuario o usar el CSS del sitio)') + (d.extra.length ? ' · extra: ' + d.extra.filter(e => e.exists).map(e => e.path).join(', ') : ''));
+    const logos = ls(join(brandRoot(TOOL, id), id, 'logos')).map(e => e.name);
+    if (logos.length) console.log(`logos (en el repo): ${logos.map(n => `brands/${id}/logos/${n}`).join(', ')}`);
     console.log(`datos y reglas de la marca: brands/${id}.md   plantilla de video: ${existsSync(join(sh, 'video-template.html')) ? 'sí' : 'NO'}`);
     console.log(`piezas: ${ps.length} (${cars.length} carruseles, ${ps.length - cars.length} videos)`);
     const caps = ps.map(p => join(p, 'caption.txt')).filter(existsSync).sort((a, z) => mtime(z) - mtime(a)).slice(0, 10);
@@ -135,48 +141,15 @@ function cmdBrand(args) {
   if (sub !== 'add') die('Uso: posts brand list | posts brand show <marca> | posts brand add <id> --name "Nombre" --dark #hex --light #hex --accent #hex --head "Fuente" [--body "Fuente"] [--short "SIGLA"] [--whatsapp ...] [--web ...] [--design ruta]');
   const a = [...rest], id = a.shift();
   const f = n => flag(a, n);
-  const o = {name: f('--name'), short: f('--short'), dark: f('--dark'), light: f('--light'), accent: f('--accent'), head: f('--head'),
+  const o = {id, name: f('--name'), short: f('--short'), dark: f('--dark'), light: f('--light'), accent: f('--accent'), head: f('--head'),
     body: f('--body') || 'Inter', wa: f('--whatsapp') || 'WhatsApp', web: f('--web') || 'tusitio.com', design: f('--design'), email: f('--email')};
-  if (!id || !/^[a-z0-9-]+$/.test(id)) die('El id de la marca va en minúsculas, sin espacios (ej. mimarca)');
-  if (existsSync(join(TOOL, 'brands', id + '.json'))) die(`La marca "${id}" ya existe`);
-  for (const [k, v] of [['--dark', o.dark], ['--light', o.light], ['--accent', o.accent]]) if (!hex(v)) die(`${k} debe ser un color #RRGGBB`);
   if (!o.name || !o.head) die('Faltan --name y --head (fuente de Google Fonts para los títulos)');
-  o.short = o.short || o.name.toUpperCase();
-  const gf = n => 'family=' + n.replace(/ /g, '+') + ':wght@400;700';
-  const fonts = 'https://fonts.googleapis.com/css2?' + [...new Set([o.head, o.body])].map(gf).join('&') + '&display=swap';
-  const bg2 = mix(o.dark, 255, 0.1), accentDark = mix(o.accent, 0, 0.25);
-  const bdir = join(TOOL, 'brands', id, '_shared');
-  mkdirSync(bdir, {recursive: true});
-  const fill = t => t.replaceAll('__BRAND__', o.short).replaceAll('__FONTS__', fonts).replaceAll('__HEAD__', `'${o.head}'`).replaceAll('__BODY__', `'${o.body}'`)
-    .replaceAll('__WA__', o.wa).replaceAll('__WEB__', o.web)
-    .replaceAll('__VARS__', `  --bg:${o.dark};--bg2:${bg2};--accent:${o.accent};--accent-dark:${accentDark};--light:${o.light};`);
-  writeFileSync(join(bdir, 'video-template.html'), fill(read(join(TOOL, '_shared', 'base', 'video-template.html'))));
-  copyFileSync(join(TOOL, '_shared', 'base', 'synth.py'), join(bdir, 'synth.py'));
-  copyFileSync(join(TOOL, '_shared', 'base', 'gen_audio.template.py'), join(bdir, 'gen_audio.template.py'));
-  writeFileSync(join(TOOL, 'brands', id + '.json'), JSON.stringify({name: o.name, short: o.short, sound: 'synth (sin música)', designFile: o.design || null, designExtra: [], contact: {whatsapp: o.wa, ...(o.email ? {email: o.email} : {}), web: o.web},
-    fonts, headFont: o.head, bodyFont: o.body, dark: o.dark, light: o.light, accent: o.accent, legacyMonths: {}}, null, 2) + '\n');
-  writeFileSync(join(TOOL, 'brands', id + '.md'), `# Marca: ${id}
-
-${o.name}
-
-DATOS A COMPLETAR (verificar contra el sitio real antes de usarlos)
-  Sitio web:   ${o.web}
-  Contacto:    ${o.wa}
-  Logo:        (ruta de los archivos del logo)
-  Tipografía:  ${o.head} (títulos) + ${o.body} (texto)
-  Colores:     fondo oscuro ${o.dark}, claro ${o.light}, acento ${o.accent}
-  Diseño:      ${o.design || '(sin archivo de diseño: pedir la ruta al usuario o usar el CSS del sitio)'}
-
-RECURSOS
-  brands/${id}/_shared/: video-template.html, synth.py (sonido sintetizado, sin descargas ni música), gen_audio.template.py.
-  Sonido: SINTETIZADO (docs/audio.md, enfoque C).
-`);
+  let r;
+  try { r = createFileStore({TOOL, POSTS}).create(o); } catch (e) { if (e instanceof BrandError) die(e.message); throw e; }
   console.log(`✓ Marca "${id}" creada en ${join(TOOL, 'brands')}`);
-  if (POSTS) {
-    const dest = join(POSTS, id, '_shared');
-    try { lstatSync(dest); } catch { mkdirSync(dirname(dest), {recursive: true}); symlinkSync(bdir, dest); console.log(`✓ Enlazada en ${dest}`); }
-  } else console.log('Falta definir la carpeta de posts: posts init <ruta> (enlaza los recursos de la marca).');
-  console.log(`Completa brands/${id}.md y contact en brands/${id}.json. Para subirla al repo: git add brands/${id}.* brands/${id}/ && git commit && git push (solo si el usuario lo pide).`);
+  if (r.linked) console.log(`✓ Enlazada en ${r.linked}`);
+  else if (!POSTS) console.log('Falta definir la carpeta de posts: posts init <ruta> (enlaza los recursos de la marca).');
+  console.log(`Completa brands/${id}.md y contact en brands/${id}.json (o usa la UI: posts catalog). Para subirla al repo: git add brands/${id}.* brands/${id}/ && git commit && git push (solo si el usuario lo pide).`);
 }
 
 // ---- sound: activar/desactivar el sonido de una pieza de video ----
@@ -296,7 +269,7 @@ function cmdNew(args) {
     setSound(dir, sound === 'on');
     const ga = join(shared, 'gen_audio.template.py');
     if (sound === 'on' && existsSync(ga)) copyFileSync(ga, join(dir, 'gen_audio.py'));
-    if (bn === 'aga') { // los logos viven en el img/ de cada video: heredar los del último video de AGA
+    if (b.inheritLogos) { // marcas cuyos logos viven en el img/ de cada video (brands/<id>.json: "inheritLogos": true): heredar los del último video
       const old = [...dirs(base)].flatMap(m => dirs(join(base, m, 'postVideos')).map(v => join(base, m, 'postVideos', v)))
         .filter(v => v !== dir && existsSync(join(v, 'img', 'logo-white.png'))).sort((a, c) => mtime(c) - mtime(a))[0];
       if (old) for (const f of ['logo-white.png', 'logo-dark.png']) if (existsSync(join(old, 'img', f))) copyFileSync(join(old, 'img', f), join(dir, 'img', f));
@@ -449,12 +422,27 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   posts export <pieza> [N] [--out DIR]                              carrusel -> PNG (Chrome, una sesión); N = una sola lámina
   posts export <video> --yes [--sound on|off] [--workers N]         video -> reel.mp4. SOLO cuando el usuario lo indica: sin --yes no graba. N = Chrome en paralelo (auto por defecto)
   posts export <video> --frame <seg> <salida.png>                   un fotograma de revisión (no toca reel.mp4)
+  posts catalog [--port N] [--open]                                 UI local del catálogo de efectos (galería, demos en vivo, dónde se usó cada uno)
+  posts site build [--out dist] [--base https://mi-sitio.com]       genera el sitio público (estático + función de la API) listo para publicar
+  posts site serve [--dir dist] [--port 4748]                       lo sirve en local emulando el hosting
+  posts effect list [--brand b] [--kind k] [--tag t]                catálogo de efectos (catalog/README.md)
+  posts effect show <id>                                            cómo está hecho, parámetros, audio y en qué posts se usó
+  posts effect at <post> [segundo]                                  efectos de un post / el más cercano a ese segundo ("el efecto del seg 3 de X")
+  posts effect scan <pieza>|--all [--write] [--check]               detecta los efectos que usa un video y su segundo; --write actualiza el catálogo
+  posts effect check                                                valida el catálogo
   posts check <pieza> [-v]                                          validaciones automáticas (solo avisos/errores; -v muestra todo)
 
-  <pieza> = carpeta (ej. aga/noviembre/postVideos/postVideo1), relativa a la raíz o absoluta.
+  <pieza> = carpeta (ej. carbon/noviembre/postVideos/postVideo1), relativa a la raíz o absoluta.
   Marcas: ${brands().join(', ')}
   Carpeta de proyectos (para los archivos de diseño): ${PROJECTS} (PROJECTS_DIR)`;
 
 const [cmd, ...rest] = process.argv.slice(2);
-if (!['init', 'brand', 'help', 'doctor'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
-({doctor: cmdDoctor, init: cmdInit, sound: cmdSound, analyze: cmdAnalyze, brand: cmdBrand, new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);
+if (!['init', 'brand', 'help', 'doctor', 'effect', 'catalog', 'site'].includes(cmd) && cmd && !POSTS) die('No hay carpeta de posts definida. Ejecuta: posts init <ruta>  (o define POSTS_DIR)');
+({doctor: cmdDoctor, init: cmdInit, sound: cmdSound, analyze: cmdAnalyze, brand: cmdBrand, catalog: async a => {
+    const port = flag(a, '--port'), open = flag(a, '--open', false);
+    const {url} = await startCatalogServer({TOOL, POSTS, port: port ? parseInt(port, 10) : 4747}).catch(e => die('No pude abrir el servidor: ' + e.message));
+    console.log(`Catálogo de efectos en ${url}  (solo este equipo · Ctrl+C para cerrar)`);
+    if (open) run('xdg-open', [url]);
+  },
+  site: a => cmdSite(a, {TOOL, die, flag}),
+  effect: a => cmdEffect(a, {TOOL, POSTS, die, flag, resolvePiece, isCarousel, allPieces: () => brands().flatMap(n => piecesOf(n, brandOf(n))).filter(d => !isCarousel(d))}), new: cmdNew, list: cmdList, preview: cmdPreview, audio: cmdAudio, export: cmdExport, check: cmdCheck}[cmd] || (() => { console.log(HELP); process.exit(cmd && cmd !== 'help' ? 1 : 0); }))(rest);

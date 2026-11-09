@@ -1,0 +1,3 @@
+/* grow-bar — una barra o línea que crece. Parámetros: --fx-duration, --fx-delay, --fx-width, --fx-height, --fx-color, --fx-sx0/--fx-sy0/--fx-ox/--fx-oy (dirección), --fx-ease */
+@keyframes fx-grow{from{transform:scale(var(--fx-sx0,0),var(--fx-sy0,1))}to{transform:scale(1,1)}}
+.fx-grow{width:var(--fx-width,520px);height:var(--fx-height,14px);border-radius:999px;background:var(--fx-color,#c46a2b);transform-origin:var(--fx-ox,0%) var(--fx-oy,50%);animation:fx-grow var(--fx-duration,.5s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}

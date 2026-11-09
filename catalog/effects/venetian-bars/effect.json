@@ -1,0 +1,105 @@
+{
+  "id": "venetian-bars",
+  "name": "Persianas",
+  "kind": "transition",
+  "medium": "video",
+  "tags": [
+    "transicion",
+    "persianas",
+    "pantalla-completa"
+  ],
+  "snippet": "fx.css",
+  "audio": {
+    "sfx": "whoosh de transición + golpe (hit)",
+    "sync": "el golpe en el instante de cierre total (~`--s1`+.56); añádelo a HITS y a gen_audio.py"
+  },
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración de cada barra",
+        "type": "number",
+        "unit": "s",
+        "default": 0.34,
+        "min": 0.1,
+        "max": 1,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "hold": {
+        "label": "Tiempo cubierto",
+        "type": "number",
+        "unit": "s",
+        "default": 0.28,
+        "min": 0,
+        "max": 2,
+        "step": 0.02
+      },
+      "stagger": {
+        "label": "Desfase entre barras",
+        "type": "number",
+        "unit": "s",
+        "default": 0.03,
+        "min": 0,
+        "max": 0.2,
+        "step": 0.005
+      },
+      "color1": {
+        "label": "Color de las barras impares",
+        "type": "color",
+        "default": "palette.accent"
+      },
+      "color2": {
+        "label": "Color de las barras pares",
+        "type": "color",
+        "default": "palette.dark"
+      },
+      "orientation": {
+        "label": "Orientación",
+        "type": "enum",
+        "default": "vertical",
+        "options": [
+          {
+            "value": "vertical",
+            "label": "Barras verticales",
+            "vars": {
+              "--fx-flow": "row",
+              "--fx-sx0": "1",
+              "--fx-sy0": "0",
+              "--fx-oin": "50% 0",
+              "--fx-oout": "50% 100%"
+            }
+          },
+          {
+            "value": "horizontal",
+            "label": "Barras horizontales",
+            "vars": {
+              "--fx-flow": "column",
+              "--fx-sx0": "0",
+              "--fx-sy0": "1",
+              "--fx-oin": "0 50%",
+              "--fx-oout": "100% 50%"
+            }
+          }
+        ]
+      }
+    },
+    "markers": [
+      {
+        "expr": "delay + duration + hold / 2 + 3 * stagger",
+        "label": "Pantalla cubierta: cambia la escena aquí"
+      }
+    ],
+    "total": "delay + 2 * duration + hold + 6 * stagger"
+  }
+}

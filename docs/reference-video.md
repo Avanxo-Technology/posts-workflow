@@ -15,9 +15,9 @@ no se copian sus imágenes, textos ni sonidos; la pieza usa el material y la mar
 | Se ve en la referencia | Cómo se hace |
 |---|---|
 | Panel de color que barre la pantalla y revela la escena nueva | `.sw` + `@keyframes swp` en video-template.html (cubre del todo en `--s`+0.4 s; cambiar escena en ese instante) |
-| Persianas verticales u horizontales | varias franjas `scaleY`/`scaleX` escalonadas (ver `.bar` en gmaq/noviembre/postVideo1/index.html) |
+| Persianas verticales u horizontales | varias franjas `scaleY`/`scaleX` escalonadas (ver el efecto `venetian-bars` del catálogo) |
 | Círculo que abre o cierra (iris) | `clip-path: circle()` animado + aro de luz (`.ring`) |
-| Empuje lateral/vertical de la escena | `translateX/Y` de la escena entrante y saliente (ver `inPush`/`inUp` en gremco/noviembre/reel1/index.html) |
+| Empuje lateral/vertical de la escena | `translateX/Y` de la escena entrante y saliente (ver los efectos `scene-push` y `scene-up` del catálogo) |
 | Zoom de entrada/salida | `scale()` con opacidad (`inZoom`/`outZoom`) |
 | Destello blanco / sacudida | `.flash` + lista HITS (el reproductor sacude la pantalla en esos segundos) |
 | Corte seco | sin transición: `--s` de la escena siguiente = fin de la anterior |

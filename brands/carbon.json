@@ -1,0 +1,19 @@
+{
+  "name": "Carbón",
+  "short": "CARBÓN",
+  "sound": "synth (sin música)",
+  "designFile": null,
+  "designExtra": [],
+  "contact": {
+    "whatsapp": "WhatsApp",
+    "web": "tusitio.com"
+  },
+  "fonts": "https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap",
+  "headFont": "Inter",
+  "bodyFont": "Inter",
+  "dark": "#14181c",
+  "light": "#f4f1ea",
+  "accent": "#c46a2b",
+  "legacyMonths": {},
+  "generated": true
+}

@@ -1,0 +1,122 @@
+{
+  "id": "scene-push",
+  "name": "Empuje de escena",
+  "kind": "transition",
+  "medium": "video",
+  "tags": [
+    "transicion",
+    "escena",
+    "empuje"
+  ],
+  "snippet": "fx.css",
+  "audio": null,
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración",
+        "type": "number",
+        "unit": "s",
+        "default": 0.55,
+        "min": 0.1,
+        "max": 3,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "parallax": {
+        "label": "Desplazamiento de la escena saliente",
+        "type": "number",
+        "unit": "%",
+        "default": 24,
+        "min": 0,
+        "max": 100,
+        "step": 1
+      },
+      "direction": {
+        "label": "Dirección",
+        "type": "enum",
+        "default": "right",
+        "options": [
+          {
+            "value": "right",
+            "label": "Entra desde la derecha",
+            "vars": {
+              "--fx-dx": "1",
+              "--fx-dy": "0"
+            }
+          },
+          {
+            "value": "left",
+            "label": "Entra desde la izquierda",
+            "vars": {
+              "--fx-dx": "-1",
+              "--fx-dy": "0"
+            }
+          },
+          {
+            "value": "bottom",
+            "label": "Entra desde abajo",
+            "vars": {
+              "--fx-dx": "0",
+              "--fx-dy": "1"
+            }
+          },
+          {
+            "value": "top",
+            "label": "Entra desde arriba",
+            "vars": {
+              "--fx-dx": "0",
+              "--fx-dy": "-1"
+            }
+          }
+        ]
+      },
+      "ease": {
+        "label": "Curva",
+        "type": "enum",
+        "default": "suave",
+        "options": [
+          {
+            "value": "suave",
+            "label": "Rebote suave",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.2,.8,.2,1)"
+            }
+          },
+          {
+            "value": "lineal",
+            "label": "Lineal",
+            "vars": {
+              "--fx-ease": "linear"
+            }
+          },
+          {
+            "value": "in-out",
+            "label": "Entrada y salida",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.65,0,.35,1)"
+            }
+          },
+          {
+            "value": "brusco",
+            "label": "Brusco",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.7,0,.3,1)"
+            }
+          }
+        ]
+      }
+    },
+    "markers": []
+  }
+}

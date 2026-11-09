@@ -1,0 +1,5 @@
+/* line-up — la línea del titular sube desde detrás de una máscara. Parámetros: --fx-duration, --fx-delay, --fx-distance, --fx-ease */
+.fx-lineup-clip{display:block;overflow:hidden;padding:.22em 0 .06em;margin-top:-.22em}
+.fx-lineup{display:block}
+@keyframes fx-lineup{from{opacity:0;transform:translateY(var(--fx-distance,115%))}to{opacity:1;transform:none}}
+.fx-lineup{animation:fx-lineup var(--fx-duration,.6s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}

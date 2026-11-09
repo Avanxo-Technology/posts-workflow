@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Posts · catálogo y marcas</title>
+<meta name="posts-token" content="__TOKEN__">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="#/">Posts</a>
+  <nav id="nav"><a href="#/" data-r="efectos">Efectos</a><a href="#/posts" data-r="posts">Posts</a><a href="#/marcas" data-r="marcas">Marcas</a><a href="#/guardadas" data-r="guardadas">Guardadas</a><a href="#/kit" data-r="kit">Kit <span id="kitbadge" class="cnt" style="display:none"></span></a></nav>
+  <input id="q" type="search" placeholder="Buscar efecto, etiqueta o post…" autocomplete="off">
+  <button id="reload" title="Releer el catálogo del disco">Recargar</button>
+</header>
+<main id="app"></main>
+<div id="toast" role="status"></div>
+<script src="/fx-core.js"></script>
+<script src="/app.js"></script>
+<script src="/brands.js"></script>
+<script src="/kit.js"></script>
+</body>
+</html>

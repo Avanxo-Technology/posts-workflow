@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<style>
+html,body{margin:0;height:100%;background:#0b0d10;font-family:system-ui,sans-serif;overflow:hidden}
+#row{display:flex;gap:12px;height:100%;padding:12px;box-sizing:border-box;align-items:center;justify-content:center}
+.wrap{position:relative;flex:1;min-width:0;aspect-ratio:4/5;max-height:100%;overflow:hidden;border-radius:10px}
+.poster{position:absolute;left:0;top:0;width:1080px;height:1350px;transform-origin:0 0;overflow:hidden;display:flex;flex-direction:column;padding:90px 80px;box-sizing:border-box}
+.logo{height:92px;display:flex;align-items:center;font-size:64px;font-weight:900;letter-spacing:-.03em}
+.logo img{max-height:92px;max-width:360px;object-fit:contain}
+.chip{align-self:flex-start;margin-top:auto;padding:16px 34px;border-radius:99px;font-size:34px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+h1{margin:26px 0 0;font-size:150px;line-height:.92;letter-spacing:-.04em;text-transform:uppercase;font-weight:900}
+.bar{width:260px;height:16px;border-radius:8px;margin:34px 0}
+p{margin:0;font-size:46px;line-height:1.25;max-width:820px}
+.cta{margin-top:46px;align-self:flex-start;padding:28px 52px;border-radius:26px;font-size:42px;font-weight:800}
+.foot{margin-top:auto;padding-top:40px;font-size:34px;opacity:.85;display:flex;gap:40px}
+</style></head><body>
+<div id="row">
+  <div class="wrap"><div class="poster" id="p1"></div></div>
+  <div class="wrap"><div class="poster" id="p2"></div></div>
+</div>
+<script>
+var S={name:'Marca',short:'MARCA',dark:'#1A1A2E',light:'#F5F5F5',accent:'#E94560',headFont:'Montserrat',bodyFont:'Inter',fontsUrl:'',logo:'',web:'tusitio.com',whatsapp:''};
+var linkEl=null,lastFonts='';
+function build(el,bg,fg,onAccent,accent){
+  el.replaceChildren();
+  el.style.background=bg;el.style.color=fg;el.style.fontFamily="'"+S.bodyFont+"',system-ui,sans-serif";
+  var logo=document.createElement('div');logo.className='logo';logo.style.fontFamily="'"+S.headFont+"',system-ui,sans-serif";
+  if(S.logo&&/^\/api\/brands\/[a-z0-9-]+\/logos\/[\w.-]+/.test(S.logo)){var i=document.createElement('img');i.src=S.logo;i.alt='';logo.appendChild(i)}else logo.textContent=S.short||S.name;
+  var h1=document.createElement('h1');h1.textContent='Título de ejemplo';h1.style.fontFamily="'"+S.headFont+"',system-ui,sans-serif";
+  var bar=document.createElement('div');bar.className='bar';bar.style.background=accent;
+  var p=document.createElement('p');p.textContent='Así se ve el texto de apoyo con la fuente y los colores de tu marca.';
+  var cta=document.createElement('div');cta.className='cta';cta.textContent='Escríbenos hoy';cta.style.background=accent;cta.style.color=onAccent;
+  var chip=document.createElement('div');chip.className='chip';chip.textContent='Novedad';chip.style.background=accent;chip.style.color=onAccent;chip.style.marginTop='60px';
+  var foot=document.createElement('div');foot.className='foot';
+  [S.web,S.whatsapp].filter(Boolean).forEach(function(t){var s=document.createElement('span');s.textContent=t;foot.appendChild(s)});
+  el.append(logo,chip,h1,bar,p,cta,foot);
+}
+function lum(h){var c=[1,3,5].map(function(i){var v=parseInt(h.slice(i,i+2),16)/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+function onColor(bg){return lum(bg)>.4?'#111111':'#ffffff'}
+function render(){
+  if(S.fontsUrl&&S.fontsUrl!==lastFonts&&/^https:\/\/fonts\.googleapis\.com\/css2\?[\w=&:+;@.%-]+$/.test(S.fontsUrl)){
+    lastFonts=S.fontsUrl;if(linkEl)linkEl.remove();linkEl=document.createElement('link');linkEl.rel='stylesheet';linkEl.href=S.fontsUrl;document.head.appendChild(linkEl)}
+  build(document.getElementById('p1'),S.dark,S.light,onColor(S.accent),S.accent);
+  build(document.getElementById('p2'),S.light,S.dark,onColor(S.accent),S.accent);
+  fit();
+}
+function fit(){Array.prototype.forEach.call(document.querySelectorAll('.wrap'),function(w){var k=w.clientWidth/1080;w.firstElementChild.style.transform='scale('+k+')'})}
+addEventListener('resize',fit);
+addEventListener('message',function(e){if(e.origin!==location.origin||!e.data||e.data.type!=='brand')return;Object.keys(e.data.state).forEach(function(k){S[k]=e.data.state[k]});render()});
+render();
+parent.postMessage({type:'preview-ready'},location.origin);
+</script></body></html>

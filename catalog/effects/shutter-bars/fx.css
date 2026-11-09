@@ -1,0 +1,11 @@
+/* shutter-bars — 8 persianas horizontales que entran y salen alternando sentido y color. Parámetros: --fx-duration, --fx-delay, --fx-color1, --fx-color2 */
+.fx-abars{position:absolute;inset:0;z-index:90;pointer-events:none;display:flex;flex-direction:column}
+.fx-abars>i{flex:1;display:block;background:var(--fx-color2,#a8cb18);
+  animation:fx-abars-in-l calc(var(--fx-duration,.9s) * .38) cubic-bezier(.65,0,.35,1) calc(var(--fx-delay,0s) + var(--fx-duration,.9s) * .035 * var(--i,0)) both,
+            fx-abars-out-r calc(var(--fx-duration,.9s) * .38) cubic-bezier(.65,0,.35,1) calc(var(--fx-delay,0s) + var(--fx-duration,.9s) * (.58 + .021 * var(--i,0))) forwards}
+.fx-abars>i:nth-child(odd){background:var(--fx-color1,#0b2938);
+  animation-name:fx-abars-in-r,fx-abars-out-l}
+@keyframes fx-abars-in-l{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
+@keyframes fx-abars-out-r{from{clip-path:inset(0)}to{clip-path:inset(0 0 0 100%)}}
+@keyframes fx-abars-in-r{from{clip-path:inset(0 0 0 100%)}to{clip-path:inset(0)}}
+@keyframes fx-abars-out-l{from{clip-path:inset(0)}to{clip-path:inset(0 100% 0 0)}}

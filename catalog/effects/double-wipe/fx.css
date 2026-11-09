@@ -1,0 +1,5 @@
+/* double-wipe — dos paneles consecutivos barren la pantalla de izquierda a derecha (el segundo con un pequeño retraso). Parámetros: --fx-duration, --fx-delay, --fx-color1, --fx-color2, --fx-ease */
+.fx-awipe-a,.fx-awipe-b{position:absolute;inset:0;z-index:90;pointer-events:none}
+.fx-awipe-a{background:var(--fx-color1,#a8cb18);animation:fx-awipe calc(var(--fx-duration,.9s) * .86) var(--fx-ease,cubic-bezier(.65,0,.35,1)) var(--fx-delay,0s) both}
+.fx-awipe-b{background:var(--fx-color2,#0b2938);animation:fx-awipe calc(var(--fx-duration,.9s) * .86) var(--fx-ease,cubic-bezier(.65,0,.35,1)) calc(var(--fx-delay,0s) + var(--fx-duration,.9s) * .14) both}
+@keyframes fx-awipe{0%{clip-path:inset(0 100% 0 0)}50%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 0 100%)}}

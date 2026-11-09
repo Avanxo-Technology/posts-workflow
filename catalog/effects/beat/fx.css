@@ -1,0 +1,3 @@
+/* beat — latido en bucle (escala). Parámetros: --fx-duration (un latido), --fx-delay, --fx-scale */
+@keyframes fx-beat{0%,100%{transform:scale(1)}50%{transform:scale(var(--fx-scale,1.05))}}
+.fx-beat{animation:fx-beat var(--fx-duration,1.2s) ease-in-out var(--fx-delay,0s) infinite}

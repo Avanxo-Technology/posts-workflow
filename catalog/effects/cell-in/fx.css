@@ -1,0 +1,3 @@
+/* cell-in — una celda del collage entra deslizándose desde un borde. Parámetros: --fx-duration, --fx-delay, --fx-dx/--fx-dy (dirección), --fx-ease */
+@keyframes fx-cell{from{transform:translate(calc(var(--fx-dx,-1) * 102%),calc(var(--fx-dy,0) * 102%))}to{transform:none}}
+.fx-cell{animation:fx-cell var(--fx-duration,.5s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) var(--fx-delay,0s) both}

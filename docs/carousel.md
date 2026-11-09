@@ -1,9 +1,9 @@
 # Carruseles (1080x1350, HTML -> PNG)
 
 Reglas del carrusel:
-  - Láminas de 1080 x 1350 px. Normalmente 3 (no todos los posts necesitan 8 o 9; GMAQ post1 tuvo 9 por ser catálogo).
+  - Láminas de 1080 x 1350 px. Normalmente 3 (no todos los posts necesitan 8 o 9).
   - Orden típico: 1) portada que atrapa, 2) contenido central, 3) contacto / llamada a la acción.
-  - Cabecera mínima: GMAQ solo el texto "GMAQ"; AGA el logo oficial; GREMCO el logo/símbolo; Pirotecnia el logo del dragón.
+  - Cabecera mínima: el logo oficial de la marca o, si no hay, solo su nombre en texto.
 
 Estilo: la pieza debe verse como un póster/anuncio profesional, NO como una página web.
   HACER:
@@ -61,7 +61,7 @@ Plantilla mínima de index.html del carrusel (cambiar fuentes y colores por los 
     </script></body></html>
 
 PNG: `posts export <pieza>` (una sola sesión de Chrome; ~3 s por carrusel). Después de generar, ABRIR los PNG y comprobar 1080x1350, sin textos cortados.
-Extra que usa Pirotecnia: resumen.txt en cada post (de qué trata, objetivo, estructura, diseño, pendientes por confirmar).
+Extra opcional: resumen.txt en cada post (de qué trata, objetivo, estructura, diseño, pendientes por confirmar).
 Conviene hacerlo siempre que haya datos por confirmar con el cliente.
 
 Crear la carpeta: `posts new <marca> carousel --title "Tema"` (mes y número automáticos; deja index.html con la plantilla y colores de la marca).

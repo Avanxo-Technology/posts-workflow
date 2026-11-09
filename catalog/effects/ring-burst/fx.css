@@ -1,0 +1,6 @@
+/* ring-burst — un aro de luz crece desde el centro con un destello blanco. Parámetros: --fx-duration, --fx-delay, --fx-color, --fx-border, --fx-flash, --fx-ease */
+.fx-ring{position:absolute;left:50%;top:50%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;border:var(--fx-border,70px) solid var(--fx-color,#c46a2b);z-index:81;pointer-events:none;
+  animation:fx-ring var(--fx-duration,.65s) var(--fx-ease,cubic-bezier(.4,0,.2,1)) var(--fx-delay,0s) both}
+.fx-ring-flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:80;pointer-events:none;animation:fx-ring-flash calc(var(--fx-duration,.65s) * .65) ease-out var(--fx-delay,0s) forwards}
+@keyframes fx-ring{0%{transform:scale(0);opacity:1}100%{transform:scale(13);opacity:0}}
+@keyframes fx-ring-flash{0%{opacity:var(--fx-flash,.85)}100%{opacity:0}}

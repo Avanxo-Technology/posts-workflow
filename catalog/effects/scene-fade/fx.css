@@ -1,0 +1,7 @@
+/* scene-fade — la escena nueva aparece con un fundido sobre la anterior. Parámetros: --fx-duration, --fx-delay, --fx-ease */
+.fx-scenefade{position:absolute;inset:0;overflow:hidden}
+.fx-scenefade>*{position:absolute;inset:0}
+.fx-scenefade-out{background:var(--fx-bg-a,transparent)}
+.fx-scenefade-in{background:var(--fx-bg-b,transparent)}
+@keyframes fx-scenefade-in{from{opacity:0}to{opacity:1}}
+.fx-scenefade-in{animation:fx-scenefade-in var(--fx-duration,.55s) var(--fx-ease,linear) var(--fx-delay,0s) both}

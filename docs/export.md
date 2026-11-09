@@ -24,7 +24,7 @@ Ante un cambio posterior a un export, avisar que los PNG/MP4 quedaron desactuali
   - 8-13 hashtags al final (marca + tema + ciudad/país). En videos se añade #Reels.
   - Texto plano (Instagram no muestra negritas): sin **markdown**.
   - Debe coincidir EXACTO con lo que dicen las láminas/escenas y con los datos del sitio.
-  - Marcas con tono propio: GREMCO cierra con su lema; Pirotecnia añade el aviso de uso solo para adultos.
+  - Marcas con tono propio: seguir lo que diga `brands/<marca>.md` (lema de cierre, avisos legales, etc.).
 
 ## Checklist de calidad
 Contenido
@@ -33,7 +33,7 @@ Contenido
   [ ] Sin promesas no verificadas (ej. "respondemos en menos de 12 horas"): el cliente pidió quitarlas.
   [ ] Contactos y dominio correctos (brands/<marca>.md).
   [ ] Fechas, horarios y lugares de eventos coinciden con el artículo/flyer/fuente.
-  [ ] Si hay un flujo real (diagnóstico de AGA), se probó y se copiaron su interfaz y textos reales.
+  [ ] Si hay un flujo real (diagnóstico, formulario…), se probó y se copiaron su interfaz y textos reales.
   [ ] Datos pendientes de confirmar quedaron anotados (resumen.txt o respuesta al usuario).
 Diseño (carrusel y video)
   [ ] Sin número de lámina. Cabecera mínima. Tipografía de la marca.

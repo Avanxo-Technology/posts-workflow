@@ -1,0 +1,11 @@
+/* goal-celebration — texto de gol que cae con rebote sobre una red que aparece. Parámetros: --fx-duration, --fx-delay, --fx-hold, --fx-color-a/--fx-color-b (sombras laterales), --fx-net, --fx-size */
+.fx-goal-net{position:absolute;left:0;right:0;top:0;height:1100px;z-index:4;opacity:0;pointer-events:none;
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.42) 0 2px,transparent 2px 46px),repeating-linear-gradient(-45deg,rgba(255,255,255,.42) 0 2px,transparent 2px 46px);
+  -webkit-mask-image:linear-gradient(180deg,#000 30%,transparent 95%);mask-image:linear-gradient(180deg,#000 30%,transparent 95%);
+  animation:fx-goal-netin .3s ease-out var(--fx-delay,0s) both,fx-goal-out .3s linear calc(var(--fx-delay,0s) + var(--fx-duration,.55s) + var(--fx-hold,1s)) forwards}
+.fx-goal{position:absolute;left:0;right:0;top:calc(50% - var(--fx-size,330px) / 2);text-align:center;z-index:19;font-family:Oswald,Impact,system-ui,sans-serif;font-weight:700;font-size:var(--fx-size,330px);line-height:1;letter-spacing:.01em;color:#fff;
+  text-shadow:-8px 0 var(--fx-color-a,#2b6cff),8px 0 var(--fx-color-b,#ff2d3d),0 0 70px rgba(255,255,255,.55);
+  animation:fx-goal var(--fx-duration,.55s) cubic-bezier(.2,.8,.2,1) var(--fx-delay,0s) both,fx-goal-out .3s linear calc(var(--fx-delay,0s) + var(--fx-duration,.55s) + var(--fx-hold,1s)) forwards}
+@keyframes fx-goal{0%{opacity:0;transform:scale(2.6)}35%{opacity:1;transform:scale(.94)}55%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes fx-goal-netin{0%{opacity:0;transform:scale(1.2)}40%{opacity:.9;transform:scale(.97)}100%{opacity:var(--fx-net,.55);transform:scale(1)}}
+@keyframes fx-goal-out{from{opacity:1}to{opacity:0}}
