@@ -1,5 +1,5 @@
 # Empuje de escena
-La escena nueva entra empujando a la anterior, que se desplaza un poco (efecto de paralaje). Es la transición básica entre fotos en los reels de GREMCO.
+La escena nueva entra empujando a la anterior, que se desplaza un poco (efecto de paralaje). Es una transición básica entre fotos.
 
 ## Cómo aplicarlo
 1. Copia `fx.css` en el CSS de la pieza.

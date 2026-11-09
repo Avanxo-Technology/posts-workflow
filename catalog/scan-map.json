@@ -7,8 +7,8 @@
  ],
  "hits": "screen-shake",
  "transitions": {
-  "wipe": "aga-wipe",
-  "bars": "aga-bars",
+  "wipe": "double-wipe",
+  "bars": "shutter-bars",
   "iris": "aga-iris"
  },
  "animations": {
@@ -443,7 +443,7 @@
   "fx-lt": "lower-third",
   "fx-goal": "goal-celebration",
   "fx-shake": "screen-shake",
-  "fx-awipe-a": "aga-wipe",
-  "fx-abars": "aga-bars"
+  "fx-awipe-a": "double-wipe",
+  "fx-abars": "shutter-bars"
  }
 }

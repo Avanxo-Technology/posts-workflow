@@ -120,6 +120,8 @@ El sitio es lo que usa el visitante; GitHub guarda la fuente y publica. `posts s
 - `posts site serve [--dir dist]` lo sirve en local emulando el hosting (un archivo estático tiene prioridad sobre la función, como en Cloudflare/Netlify).
 - Adaptadores incluidos: **Cloudflare Pages Functions** y **Netlify Functions**. Se verifican en las pruebas cargándolos desde la carpeta generada, pero **no se han desplegado en una plataforma real**.
 - `build` no pisa una carpeta que no sea un build anterior (lleva un marcador `.posts-site-build`).
+- **Versión pública sin marcas**: el build solo publica los efectos spec 1 (`_shared/site/public.mjs`), sin `source`, `brands`, `uses`, posts ni `catalog/posts`, con las paletas neutras de `catalog/palettes.json` (en lugar de las de las marcas) y sin las viñetas de «## Notas» que cuentan el origen interno. Si queda cualquier rastro de una marca, una ruta del repo o un post, **el build falla** y dice en qué efecto. Al añadir un efecto, no nombres marcas fuera de «## Notas» ni pongas marcas en `name` ni `tags`.
+- La UI pública no muestra marcas ni posts; permite ajustar tiempos y colores, **guardar configuraciones** (`#/guardadas`, en el navegador) y usar el **kit** con enlace para Claude.
 - Lo que se publica de cada post son referencias (ids, rutas relativas y segundos), nunca videos ni imágenes ni rutas locales (lo comprueban las pruebas).
 
 **Integración continua** (`.github/workflows/site.yml`): en cada push y PR corre las pruebas, `effect check`, el build y una prueba de humo contra el emulador, y guarda el sitio como artefacto. La publicación en un hosting está **comentada**: hace falta elegir proveedor y crear sus secretos en GitHub.

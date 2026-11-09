@@ -1,5 +1,5 @@
 # Línea que sube (máscara)
-Cada línea del titular vive en un contenedor `.clip` (overflow hidden) y su `span` sube desde 115% con fade, como si saliera de detrás de una máscara. Es el estilo de los titulares de AGA.
+Cada línea del titular vive en un contenedor `.clip` (overflow hidden) y su `span` sube desde 115% con fade, como si saliera de detrás de una máscara. Es un estilo clásico de titulares.
 
 ## Cómo aplicarlo
 1. Copia `fx.css` en el CSS de la pieza (una sola vez).

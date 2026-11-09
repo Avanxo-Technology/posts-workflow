@@ -11,6 +11,7 @@ import {fileURLToPath} from 'node:url';
 import {catalogData} from '../catalog-server.mjs';
 import {createApi, llmsTxt} from './api-core.mjs';
 import {fxCardPage, previewBaseCss} from './card-page.mjs';
+import {publicBundle} from './public.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const UI = join(HERE, '..', 'catalog-ui');
@@ -27,8 +28,8 @@ export async function buildSite({TOOL, out, base = ''}) {
     if (existsSync(join(out, MARKER))) rmSync(out, {recursive: true, force: true});
     else if (readdirSync(out).length) throw new Error(`"${out}" ya existe y no es un build anterior (falta ${MARKER}): elige otra carpeta o bórrala tú.`);
   }
-  const data = catalogData(TOOL, '');                       // sin carpeta de posts: no hay rutas locales en los datos
-  const bundle = {effects: data.effects, brands: data.brands};
+  const data = publicBundle(TOOL, catalogData(TOOL, ''));   // solo efectos autocontenidos y paletas neutras: sin marcas, rutas ni posts (falla si queda algún rastro)
+  const bundle = {effects: data.effects, brands: data.palettes, public: true};
   const pub = join(out, 'public');
   const stats = {effects: data.effects.length, demos: 0, apiFiles: 0};
 
@@ -36,17 +37,19 @@ export async function buildSite({TOOL, out, base = ''}) {
   let index = readFileSync(join(UI, 'index.html'), 'utf8')
     .replace('<meta name="posts-token" content="__TOKEN__">', '<meta name="posts-mode" content="static">')
     .replace('\n<script src="/brands.js"></script>', '')
-    .replace('<a href="#/marcas" data-r="marcas">Marcas</a>', '');
+    .replace('<a href="#/marcas" data-r="marcas">Marcas</a>', '')
+    .replace('<a href="#/posts" data-r="posts">Posts</a>', '')
+    .replace('Buscar efecto, etiqueta o post…', 'Buscar transición o etiqueta…')
+    .replace('<title>Posts · catálogo y marcas</title>', '<title>Transiciones y efectos para videos de redes</title>')
+    .replace('<a class="logo" href="#/">Posts</a>', '<a class="logo" href="#/">Transiciones</a>');
   write(join(pub, 'index.html'), index);
   for (const f of ['app.js', 'kit.js', 'style.css', 'fx-core.js', 'fx-preview.html']) copyFileSync(join(UI, f), join(pub, f));
-  write(join(pub, 'data', 'catalog.json'), JSON.stringify({effects: data.effects, posts: data.posts, brands: data.brands}));
+  write(join(pub, 'data', 'catalog.json'), JSON.stringify({effects: data.effects, posts: [], brands: data.palettes, public: true}));
 
   // ---- miniaturas de la galería ----
   const baseCss = previewBaseCss(readFileSync(join(UI, 'fx-preview.html'), 'utf8'));
   for (const e of data.effects) {
-    const brand = data.brands[e.brands?.[0]] || Object.values(data.brands)[0];
-    if (e.fx) { write(join(pub, 'demo', e.id + '.html'), fxCardPage(FX, e, brand, baseCss)); stats.demos++; }
-    else if (e.demo?.type === 'file') { copyFileSync(join(TOOL, 'catalog', 'effects', e.id, 'demo.html'), join(pub, 'demo', e.id + '.html')); stats.demos++; }
+    write(join(pub, 'demo', e.id + '.html'), fxCardPage(FX, e, Object.values(data.palettes)[0], baseCss)); stats.demos++;
   }
 
   // ---- API por defecto como archivos (la función cubre los valores a medida) ----
@@ -58,7 +61,7 @@ export async function buildSite({TOOL, out, base = ''}) {
   return (async () => {
     write(join(pub, 'api', 'v1', 'effects.json'), await fixed('/api/v1/effects')); stats.apiFiles++;
     for (const e of data.effects) { write(join(pub, 'api', 'v1', 'effects', e.id + '.json'), await fixed('/api/v1/effects/' + e.id)); stats.apiFiles++; }
-    write(join(pub, 'llms.txt'), llmsTxt(base));
+    write(join(pub, 'llms.txt'), llmsTxt(base, true));
     write(join(pub, '_headers'), '/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n/api/*\n  Access-Control-Allow-Origin: *\n');
 
     // ---- código de la función ----
@@ -83,7 +86,7 @@ function deployReadme(s) {
 Generado por \`posts site build\`. No lo edites a mano: se regenera desde el repositorio.
 
 - \`public/\`: sitio estático (${s.effects} efectos, ${s.demos} miniaturas, ${s.apiFiles} JSON de la API con valores por defecto).
-- \`lib/\`, \`functions/\`, \`netlify/\`: la función que responde a \`/api/v1/*\` y \`/llms.txt\` con valores a medida (\`?duration=0.6&palette=gmaq\`, kits).
+- \`lib/\`, \`functions/\`, \`netlify/\`: la función que responde a \`/api/v1/*\` y \`/llms.txt\` con valores a medida (\`?duration=0.6&palette=oceano\`, kits).
 
 ## Probarlo en local (emula el hosting)
 \`\`\`

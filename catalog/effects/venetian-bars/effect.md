@@ -1,5 +1,5 @@
-# Persianas (GMAQ)
-Transición de GMAQ: 7 barras de color (cobre claro, grafito…) de 121 px que cierran la pantalla y la vuelven a abrir, escalonadas .03 s. Cada barra entra en `--s1` y sale en `--s2` (~.62 s después); la escena cambia mientras la pantalla está cubierta. Hay variante vertical (`bar v`) y horizontal (`bar h`). El tiempo de la nota es el `--s1` de la primera barra.
+# Persianas
+7 barras de color (cobre claro, grafito…) de 121 px que cierran la pantalla y la vuelven a abrir, escalonadas .03 s. Cada barra entra en `--s1` y sale en `--s2` (~.62 s después); la escena cambia mientras la pantalla está cubierta. Hay variante vertical (`bar v`) y horizontal (`bar h`). El tiempo de la nota es el `--s1` de la primera barra.
 
 ## Cómo aplicarlo
 1. Copia `fx.css` en el CSS de la pieza (una sola vez).

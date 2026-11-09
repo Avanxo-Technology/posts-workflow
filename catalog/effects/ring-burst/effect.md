@@ -1,5 +1,5 @@
-# Aro de luz (GMAQ)
-Transición "B" de GMAQ: un aro de 200 px (borde grueso cobre, y otro blanco más fino .05 s después) escala de 0 a 13 con fade en .65 s, junto a un flash. El comentario del código indica "aro de luz + la escena nueva se abre en círculo".
+# Aro de luz
+Un aro de 200 px (borde grueso cobre, y otro blanco más fino .05 s después) escala de 0 a 13 con fade en .65 s, junto a un flash. El comentario del código indica "aro de luz + la escena nueva se abre en círculo".
 
 ## Cómo aplicarlo
 1. Copia `fx.css` en el CSS de la pieza (una sola vez).

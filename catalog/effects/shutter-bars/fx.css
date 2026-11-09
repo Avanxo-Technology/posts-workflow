@@ -1,4 +1,4 @@
-/* aga-bars — 8 persianas horizontales que entran y salen alternando sentido y color. Parámetros: --fx-duration, --fx-delay, --fx-color1, --fx-color2 */
+/* shutter-bars — 8 persianas horizontales que entran y salen alternando sentido y color. Parámetros: --fx-duration, --fx-delay, --fx-color1, --fx-color2 */
 .fx-abars{position:absolute;inset:0;z-index:90;pointer-events:none;display:flex;flex-direction:column}
 .fx-abars>i{flex:1;display:block;background:var(--fx-color2,#a8cb18);
   animation:fx-abars-in-l calc(var(--fx-duration,.9s) * .38) cubic-bezier(.65,0,.35,1) calc(var(--fx-delay,0s) + var(--fx-duration,.9s) * .035 * var(--i,0)) both,

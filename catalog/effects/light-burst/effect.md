@@ -1,5 +1,5 @@
 # Explosión de luz
-Transición propia de Pirotecnia: un círculo de luz gigante (`fl`) crece desde un punto (`--x`, `--y`) y cubre la pantalla, acompañado de un anillo (`rg`). Se usa para cambiar de escena como si fuera un estallido.
+Un círculo de luz gigante (`fl`) crece desde un punto (`--x`, `--y`) y cubre la pantalla, acompañado de un anillo (`rg`). Se usa para cambiar de escena como si fuera un estallido.
 
 ## Cómo aplicarlo
 1. Copia `fx.css` en el CSS de la pieza (una sola vez).

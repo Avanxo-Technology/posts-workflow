@@ -1,5 +1,5 @@
 # Iris (apertura circular)
-Una cortina circular: el círculo se cierra hasta cubrir la pantalla y luego se abre revelando la escena nueva (o solo una de las dos fases). Reimplementación genérica en CSS de `aga-iris`, sin canvas y con colores y centro configurables.
+Una cortina circular: el círculo se cierra hasta cubrir la pantalla y luego se abre revelando la escena nueva (o solo una de las dos fases). CSS puro, sin canvas, con colores y centro configurables.
 
 ## Cómo aplicarlo
 1. Copia `fx.css` en el CSS de la pieza.

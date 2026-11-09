@@ -1,5 +1,5 @@
 # Revelado por máscara
-Un `clip-path: inset` que pasa de 100% a 0 por la derecha: la banda o el texto se descubre de izquierda a derecha. En GMAQ se usa en bandas y rótulos; en GREMCO la misma animación (`reveal`) forma parte del tercio inferior.
+Un `clip-path: inset` que pasa de 100% a 0 por la derecha: la banda o el texto se descubre de izquierda a derecha. Sirve para bandas, rótulos y tercios inferiores.
 
 ## Cómo aplicarlo
 1. Copia `fx.css` en el CSS de la pieza (una sola vez).

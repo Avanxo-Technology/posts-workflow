@@ -1,5 +1,5 @@
 # Destello blanco
-Pantalla blanca que sube a .9 de opacidad en el 12 % y se desvanece (.28 s). Marca un corte seco o un golpe. Pirotecnia usa otro recurso con el mismo nombre de clase: ver `light-burst`.
+Pantalla blanca que sube a .9 de opacidad en el 12 % y se desvanece (.28 s). Marca un corte seco o un golpe. Para un estallido con círculo de luz mira `light-burst`.
 
 ## Cómo aplicarlo
 1. Copia `fx.css` en el CSS de la pieza (una sola vez).

@@ -139,3 +139,6 @@ pre{max-width:100%}
 .kt-mk{position:absolute;inset:0;pointer-events:none}
 .kt-mk u{position:absolute;top:0;bottom:0;width:2px;background:#fff;text-decoration:none;opacity:.9}
 .kt-play{position:absolute;top:0;bottom:0;width:2px;background:#ff5a5a;pointer-events:none;z-index:3}
+.saved{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.srow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 8px;border:1px solid var(--line);border-radius:10px}
+.srow b{flex:1;min-width:120px}

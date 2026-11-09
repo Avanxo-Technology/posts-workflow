@@ -1,5 +1,5 @@
 # Sello (zoom desde grande)
-El elemento aparece enorme (escala 2.4-3.4) y se encoge hasta encajar con un pequeño rebote: `zoomIn` (con rotación `--r`), `stampIn` (con -14°) y `stamp` (GMAQ: escala 3 con -24°, para el sello de "25 años"). Efecto de sello o impacto.
+El elemento aparece enorme (escala 2.4-3.4) y se encoge hasta encajar con un pequeño rebote: `zoomIn` (con rotación `--r`), `stampIn` (con -14°) y `stamp` (escala 3 con -24°). Efecto de sello o impacto.
 
 ## Cómo aplicarlo
 1. Copia `fx.css` en el CSS de la pieza (una sola vez).

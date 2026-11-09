@@ -104,9 +104,10 @@
     var set = function (k, v) { return function () { filters[k] = filters[k] === v ? null : v; render(); }; };
     app.replaceChildren(
       h('h1', {text: 'Efectos'}),
-      h('p', {class: 'sub', text: data.effects.length + ' efectos · ' + data.posts.length + ' posts registrados. Haz clic en un efecto para ver cómo está hecho y dónde se usó.'}),
+      h('p', {class: 'sub', text: STATIC ? data.effects.length + ' transiciones y efectos para videos de redes. Elige uno, ajusta tiempos y colores sin escribir código, guarda tu configuración o añádelo al kit y pásale el enlace a Claude.'
+        : data.effects.length + ' efectos · ' + data.posts.length + ' posts registrados. Haz clic en un efecto para ver cómo está hecho y dónde se usó.'}),
       h('div', {class: 'filters'},
-        h('div', {class: 'grp'}, h('b', {text: 'Marca'}), Object.keys(brands).sort().map(function (b) { return chip((data.brands[b] || {}).name || b, filters.brand === b, set('brand', b), brandDot(b)); })),
+        STATIC ? null : h('div', {class: 'grp'}, h('b', {text: 'Marca'}), Object.keys(brands).sort().map(function (b) { return chip((data.brands[b] || {}).name || b, filters.brand === b, set('brand', b), brandDot(b)); })),
         h('div', {class: 'grp'}, h('b', {text: 'Tipo'}), Object.keys(kinds).sort().map(function (k) { return chip(KIND[k] || k, filters.kind === k, set('kind', k)); }))),
       list.length ? h('div', {class: 'grid'}, list.map(function (e) {
         return h('a', {class: 'card', href: '#/efecto/' + e.id},
@@ -114,7 +115,7 @@
           h('div', {class: 'meta'},
             h('div', {class: 'nm', text: e.name}), h('div', {class: 'id mono', text: e.id}),
             h('div', {class: 'row'}, h('span', {class: 'kind k-' + e.kind, text: KIND[e.kind] || e.kind}),
-              h('span', {class: 'dots'}, (e.brands || []).map(brandDot)), h('span', {text: usedCount(e) + ' posts'}))));
+              STATIC ? null : h('span', {class: 'dots'}, (e.brands || []).map(brandDot)), STATIC ? null : h('span', {text: usedCount(e) + ' posts'}))));
       })) : h('div', {class: 'empty', text: 'Ningún efecto coincide con el filtro.'}));
   }
 
@@ -177,6 +178,49 @@
   };
   function kitBadge() { var n = kitStore.get().items.length, b = document.getElementById('kitbadge'); if (b) { b.textContent = n ? String(n) : ''; b.style.display = n ? '' : 'none'; } }
   kitStore.onChange(kitBadge);
+
+  // ---- configuraciones guardadas (en este navegador): efecto + valores + paleta, como un enlace de la propia página ----
+  var SAVE_KEY = 'posts-saved-v1';
+  var saved = {
+    all: function () { try { var s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (Array.isArray(s)) return s; } catch (e) { /* ilegible: se ignora */ } return []; },
+    put: function (list) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(list.slice(-200))); return true; } catch (e) { toast('No se pudo guardar en este navegador'); return false; } },
+  };
+  var currentQs = function () { var hs = location.hash, i = hs.indexOf('?'); return i >= 0 ? hs.slice(i + 1) : ''; };
+  function saveBox(e) {
+    var list = h('div', {class: 'saved'}), name = h('input', {class: 'in', type: 'text', maxlength: 60, placeholder: 'Nombre (p. ej. «Barrido rápido en azul»)'});
+    function draw() {
+      list.replaceChildren();
+      saved.all().filter(function (s) { return s.effect === e.id; }).forEach(function (s) {
+        list.appendChild(h('div', {class: 'srow'}, h('b', {text: s.name}),
+          h('button', {text: 'Aplicar', onclick: function () { routeQuery = new URLSearchParams(s.qs); location.hash = '#/efecto/' + e.id + (s.qs ? '?' + s.qs : ''); render(); }}),
+          h('button', {text: 'Al kit', onclick: function () { var p = new URLSearchParams(s.qs), r = FX.resolve(e.fx, Object.fromEntries(Array.from(p).filter(function (kv) { return e.fx.params[kv[0]]; })));
+            var pal = p.get('palette') === 'custom' ? {dark: p.get('c_dark'), light: p.get('c_light'), accent: p.get('c_accent')} : (p.get('palette') || '');
+            toast('Añadido al kit (' + kitStore.add({effect: e.id, label: e.fx.label || '', params: Object.assign(FX.defaults(e.fx), r.errors.length ? {} : r.values)}, pal).items.length + ')'); }}),
+          h('button', {class: 'mini', title: 'Borrar', text: '✕', onclick: function () { saved.put(saved.all().filter(function (x) { return x !== undefined && !(x.effect === s.effect && x.name === s.name && x.at === s.at); })); draw(); }})));
+      });
+      list.style.display = list.children.length ? '' : 'none';
+    }
+    var save = function () {
+      var n = name.value.trim(); if (!n) { toast('Escribe un nombre para la configuración'); name.focus(); return; }
+      var all = saved.all().filter(function (x) { return !(x.effect === e.id && x.name === n); });
+      all.push({effect: e.id, name: n, qs: currentQs(), at: Date.now()});
+      if (saved.put(all)) { name.value = ''; draw(); toast('Configuración guardada'); }
+    };
+    name.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') save(); });
+    draw();
+    return h('div', {class: 'panel'}, h('div', {class: 'rg'}, name, h('button', {class: 'primary', text: 'Guardar configuración', onclick: save})), list);
+  }
+  function viewSaved() {
+    var all = saved.all().slice().reverse();
+    app.replaceChildren(h('h1', {text: 'Configuraciones guardadas'}),
+      h('p', {class: 'sub', text: 'Se guardan solo en este navegador. Ábrelas para seguir editándolas o añádelas al kit.'}),
+      all.length ? h('div', {class: 'saved'}, all.map(function (s) {
+        var e = effById(s.effect);
+        return h('div', {class: 'srow'}, h('b', {text: s.name}), h('span', {class: 'id mono', text: e ? e.name : s.effect}),
+          e ? h('a', {href: '#/efecto/' + s.effect + (s.qs ? '?' + s.qs : ''), style: 'color:var(--acc)', text: 'Abrir'}) : null,
+          h('button', {class: 'mini', title: 'Borrar', text: '✕', onclick: function () { saved.put(saved.all().filter(function (x) { return !(x.effect === s.effect && x.name === s.name); })); viewSaved(); }}));
+      })) : h('div', {class: 'empty', text: 'Aún no has guardado ninguna. Abre un efecto, ajústalo y pulsa «Guardar configuración».'}));
+  }
 
   // ---- vista: efecto con contrato spec 1 (controles + vista previa + código listo) ----
   function viewEffectFx(e) {
@@ -253,6 +297,7 @@
             h('button', {class: 'primary', text: '+ Añadir al kit', onclick: function () { var n = kitStore.add({effect: e.id, label: fx.label || '', params: Object.assign({}, vals)}, palId === 'custom' ? custom : palId).items.length; toast('Añadido al kit (' + n + ')'); }})),
           md(e.md),
           h('h2', {text: 'Controles'}),
+          saveBox(e),
           h('div', {class: 'panel'}, Object.keys(fx.params).map(function (k) { return control(k, fx.params[k]); }),
             h('div', {class: 'actions'}, h('button', {text: 'Restablecer todo', onclick: function () { routeQuery = new URLSearchParams(palId === 'custom' ? '' : 'palette=' + palId); viewEffectFx(e); }}))),
           markersBox,
@@ -266,7 +311,7 @@
           h('p', {class: 'hint', style: 'color:var(--mut);margin:0 0 8px', text: 'Esta URL devuelve el efecto con tus valores en JSON (código listo, parámetros y marcas de tiempo). Pégala en el prompt de Claude.'}),
           urlBox, h('div', {class: 'actions'}, h('button', {text: 'Copiar URL de la API', onclick: function () { copy(urlBox.textContent, 'URL copiada'); }}),
             h('button', {text: 'Copiar prompt para Claude', onclick: function () { copy(promptText(), 'Prompt copiado'); }})),
-          usesTable(e))));
+          STATIC ? null : usesTable(e))));
     update();
   }
 
@@ -395,10 +440,12 @@
     routeQuery = new URLSearchParams(qi >= 0 ? hash.slice(qi + 1) : '');
     if (qi >= 0) hash = hash.slice(0, qi);
     var parts = hash.split('/');
-    var route = parts[0] === 'posts' || parts[0] === 'post' ? 'posts' : /^marca/.test(parts[0]) ? 'marcas' : parts[0] === 'kit' ? 'kit' : 'efectos';
+    if (STATIC && (parts[0] === 'posts' || parts[0] === 'post')) { location.hash = '#/'; return; }
+    var route = parts[0] === 'guardadas' ? 'guardadas' : parts[0] === 'posts' || parts[0] === 'post' ? 'posts' : /^marca/.test(parts[0]) ? 'marcas' : parts[0] === 'kit' ? 'kit' : 'efectos';
     Array.prototype.forEach.call(document.querySelectorAll('#nav a'), function (a) { a.classList.toggle('on', a.dataset.r === route); });
     if (data.errors && data.errors.length) console.warn('Catálogo con avisos:', data.errors);
-    if (parts[0] === 'kit') { if (window.KitUI) window.KitUI.render(); }
+    if (parts[0] === 'guardadas') viewSaved();
+    else if (parts[0] === 'kit') { if (window.KitUI) window.KitUI.render(); }
     else if (/^marca/.test(parts[0])) { if (window.BrandsUI) window.BrandsUI.render(parts); else location.hash = '#/'; }
     else if (parts[0] === 'efecto' && parts[1]) viewEffect(decodeURIComponent(parts[1]));
     else if (parts[0] === 'post' && parts[1]) viewPost(decodeURIComponent(parts[1]));

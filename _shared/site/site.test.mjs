@@ -25,8 +25,8 @@ test('api: lista, filtros y ficha con valores por defecto', async () => {
 });
 
 test('api: parámetros a medida, paleta, errores y efecto antiguo', async () => {
-  const d = (await get('/api/v1/effects/sweep-panel?delay=3&direction=top&palette=aga')).j;
-  assert.equal(d.values.delay, 3); assert.equal(d.palette.from, 'aga'); assert.equal(d.markers[0].at, 3.4);
+  const d = (await get('/api/v1/effects/sweep-panel?delay=3&direction=top&palette=gmaq')).j;
+  assert.equal(d.values.delay, 3); assert.equal(d.palette.from, 'gmaq'); assert.equal(d.markers[0].at, 3.4);
   const bad = await get('/api/v1/effects/slam?duration=99&foo=1');
   assert.equal(bad.r.status, 400); assert.ok(bad.j.details.length === 2);
   assert.equal((await get('/api/v1/effects/nope')).r.status, 404);
@@ -55,9 +55,9 @@ test('build: estructura, sin rutas locales ni marcadores, UI estática sin edito
   try {
     const dist = join(out, 'dist');
     const r = await buildSite({TOOL, out: dist, base: ''});
-    assert.equal(r.effects, data.effects.length);
+    assert.equal(r.effects, data.effects.filter(e => e.fx && !e.supersededBy).length);
     for (const f of ['public/index.html', 'public/app.js', 'public/kit.js', 'public/fx-core.js', 'public/data/catalog.json', 'public/llms.txt', 'public/api/v1/effects.json', 'public/api/v1/effects/slam.json',
-      'public/demo/slam.html', 'public/demo/aga-iris.html', 'lib/fx-core.mjs', 'lib/api-core.mjs', 'lib/data.mjs', 'functions/api/v1/[[path]].js', 'functions/llms.txt.js', 'netlify/functions/api.mjs', 'netlify.toml', 'README.md'])
+      'public/demo/slam.html', 'public/demo/iris-reveal.html', 'lib/fx-core.mjs', 'lib/api-core.mjs', 'lib/data.mjs', 'functions/api/v1/[[path]].js', 'functions/llms.txt.js', 'netlify/functions/api.mjs', 'netlify.toml', 'README.md'])
       assert.ok(existsSync(join(dist, f)), f);
     assert.ok(!existsSync(join(dist, 'public/brands.js')), 'el editor de marcas no se publica');
     const index = readFileSync(join(dist, 'public/index.html'), 'utf8');
@@ -72,6 +72,25 @@ test('build: estructura, sin rutas locales ni marcadores, UI estática sin edito
     const other = join(out, 'otra'); mkdirSync(other); writeFileSync(join(other, 'a.txt'), 'x');
     await assert.rejects(() => buildSite({TOOL, out: other}), /no es un build anterior/);
     assert.ok(existsSync(join(other, 'a.txt')));
+  } finally { rmSync(out, {recursive: true, force: true}); }
+});
+
+test('build público: sin marcas, rutas, posts ni efectos no autocontenidos', async () => {
+  const out = mkdtempSync(join(tmpdir(), 'posts-site-'));
+  try {
+    const dist = join(out, 'dist'); await buildSite({TOOL, out: dist});
+    const walk = d => readdirSync(d).flatMap(f => (statSync(join(d, f)).isDirectory() ? walk(join(d, f)) : [join(d, f)]));
+    const rx = /\b(aga|gmaq|gremco|pirotecnia)\b|brands\/|engine\.js|postVideo|video-template|catalog\/posts|\/home\//i;
+    for (const f of walk(dist)) { const m = rx.exec(readFileSync(f, 'utf8')); assert.ok(!m, `rastro interno «${m && m[0]}» en ${f}`); }
+    const cat = JSON.parse(readFileSync(join(dist, 'public/data/catalog.json'), 'utf8'));
+    assert.deepEqual(cat.posts, []); assert.ok(cat.effects.every(e => e.fx && !e.uses.length && !e.brands.length && !e.source));
+    assert.ok(!cat.effects.some(e => e.id === 'aga-iris') && Object.keys(cat.brands).includes('oceano'));
+    const d = JSON.parse(readFileSync(join(dist, 'public/api/v1/effects/slam.json'), 'utf8'));
+    assert.ok(!('usedIn' in d) && !('brands' in d));
+    const index = readFileSync(join(dist, 'public/index.html'), 'utf8');
+    assert.ok(!index.includes('#/posts') && index.includes('#/guardadas') && index.includes('#/kit'));
+    const llms = readFileSync(join(dist, 'public/llms.txt'), 'utf8');
+    assert.ok(llms.includes('palette=oceano') && !llms.includes('brand='));
   } finally { rmSync(out, {recursive: true, force: true}); }
 });
 
