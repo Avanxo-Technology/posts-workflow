@@ -4,8 +4,13 @@ import {createServer} from 'node:http';
 import {existsSync, readFileSync, statSync} from 'node:fs';
 import {extname, join, normalize, resolve, sep} from 'node:path';
 import {pathToFileURL} from 'node:url';
+import {networkInterfaces} from 'node:os';
 
 const TYPES = {'.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.txt': 'text/plain', '.svg': 'image/svg+xml', '.png': 'image/png'};
+
+export function lanAddresses() {
+  return Object.values(networkInterfaces()).flat().filter(i => i && i.family === 'IPv4' && !i.internal).map(i => i.address);
+}
 
 export async function serveSite({dir, port = 4748, host = '127.0.0.1'}) {
   dir = resolve(dir);

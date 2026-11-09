@@ -1,5 +1,28 @@
 # posts-workflow
 
+## Qué es
+**Transitions** (el nombre del sitio; el repo se llama `posts-workflow`) es una **biblioteca de transiciones y efectos de animación (HTML/CSS puro) para videos de Instagram y otras redes**, pensada para que una IA los use sin darle vueltas. Tú eliges qué quieres y se lo dices a Claude: «usa esto, esto y esto».
+
+- **Explora:** cada efecto tiene vista previa en vivo en formato vertical (1080x1920).
+- **Edita sin código:** ajusta duración, retraso, distancia y colores con controles visuales y elige una paleta o crea la tuya.
+- **Guarda:** tus configuraciones se guardan con nombre en tu navegador.
+- **Arma un kit:** añade varios efectos al carrito, ordénalos en una línea de tiempo y copia el enlace del kit.
+- **Pásaselo a tu IA:** pega el enlace del kit (o la URL de un efecto) en tu chat con Claude. La API devuelve el CSS y el HTML ya ajustados, con los tiempos de cada efecto.
+
+Ejemplo de prompt: «Aplica este kit en mi video: `https://<tu-sitio>/api/v1/kit?k=…`».
+Los agentes pueden empezar por `/llms.txt`, que explica la API (`/api/v1/effects`, `/api/v1/effects/<id>?duration=0.6&palette=oceano`, `/api/v1/kit?k=…`).
+
+**Probarlo en local** (solo Node 22+, sin dependencias):
+```
+git clone <este-repo> && cd posts-workflow
+./posts site build && ./posts site serve      # abre http://127.0.0.1:4748/
+./posts site serve --lan                       # además lo sirve en tu red local (solo lectura) y muestra la URL
+```
+Más abajo está el flujo de producción de piezas del equipo (carruseles y reels con el CLI `posts`), que es opcional para quien solo quiere los efectos.
+
+---
+
+## Flujo de producción (CLI `posts`)
 Herramientas para producir carruseles (HTML -> PNG 1080x1350) y videos/reels (HTML + audio -> MP4 1080x1920) de Instagram para
 las marcas del equipo. Este repositorio guarda **las herramientas, plantillas y documentación**;
 las piezas (index.html, PNG, MP4, clips) viven aparte, en la carpeta de posts de cada equipo.

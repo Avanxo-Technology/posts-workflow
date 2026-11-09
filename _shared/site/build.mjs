@@ -17,6 +17,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const UI = join(HERE, '..', 'catalog-ui');
 const FX = createRequire(import.meta.url)('../catalog-ui/fx-core.js');
 const MARKER = '.posts-site-build';
+export const SITE_NAME = 'Transitions';   // nombre público del sitio (el repo conserva el suyo)
 const PLACEHOLDER = 'https://site-placeholder.invalid';   // en minúsculas: new URL() normaliza el host y la sustitución debe coincidir   // origen provisional con el que se generan los JSON estáticos; se sustituye por --base o por rutas relativas
 
 const write = (p, data) => { mkdirSync(dirname(p), {recursive: true}); writeFileSync(p, data); };
@@ -40,8 +41,8 @@ export async function buildSite({TOOL, out, base = ''}) {
     .replace('<a href="#/marcas" data-r="marcas">Marcas</a>', '')
     .replace('<a href="#/posts" data-r="posts">Posts</a>', '')
     .replace('Buscar efecto, etiqueta o post…', 'Buscar transición o etiqueta…')
-    .replace('<title>Posts · catálogo y marcas</title>', '<title>Transiciones y efectos para videos de redes</title>')
-    .replace('<a class="logo" href="#/">Posts</a>', '<a class="logo" href="#/">Transiciones</a>');
+    .replace('<title>Posts · catálogo y marcas</title>', `<title>${SITE_NAME} · efectos para videos de redes</title>`)
+    .replace('<a class="logo" href="#/">Posts</a>', `<a class="logo" href="#/">${SITE_NAME}</a>`);
   write(join(pub, 'index.html'), index);
   for (const f of ['app.js', 'kit.js', 'style.css', 'fx-core.js', 'fx-preview.html']) copyFileSync(join(UI, f), join(pub, f));
   write(join(pub, 'data', 'catalog.json'), JSON.stringify({effects: data.effects, posts: [], brands: data.palettes, public: true}));
@@ -61,7 +62,7 @@ export async function buildSite({TOOL, out, base = ''}) {
   return (async () => {
     write(join(pub, 'api', 'v1', 'effects.json'), await fixed('/api/v1/effects')); stats.apiFiles++;
     for (const e of data.effects) { write(join(pub, 'api', 'v1', 'effects', e.id + '.json'), await fixed('/api/v1/effects/' + e.id)); stats.apiFiles++; }
-    write(join(pub, 'llms.txt'), llmsTxt(base, true));
+    write(join(pub, 'llms.txt'), llmsTxt(base, true, SITE_NAME));
     write(join(pub, '_headers'), '/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n/api/*\n  Access-Control-Allow-Origin: *\n');
 
     // ---- código de la función ----
@@ -81,7 +82,7 @@ export async function buildSite({TOOL, out, base = ''}) {
 }
 
 function deployReadme(s) {
-  return `# Sitio del catálogo de efectos (generado)
+  return `# ${SITE_NAME}: sitio del catálogo de efectos (generado)
 
 Generado por \`posts site build\`. No lo edites a mano: se regenera desde el repositorio.
 
