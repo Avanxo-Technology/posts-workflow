@@ -277,7 +277,7 @@
   // assets guarda bg (imagen), bgColor y los ajustes bgFit, bgZoom, bgX, bgY, bgBlur, bgOpacity, bgDim.
   function bgMsg(assets) {
     return {bgImage: assets.bg || null, bgColor: assets.bgColor || null,
-      bgProps: {fit: assets.bgFit || 'cover', zoom: assets.bgZoom != null ? assets.bgZoom : 150, x: assets.bgX != null ? assets.bgX : 50, y: assets.bgY != null ? assets.bgY : 50, blur: assets.bgBlur || 0, opacity: assets.bgOpacity != null ? assets.bgOpacity : 100, dim: assets.bgDim || 0}};
+      bgProps: {fit: assets.bgFit || 'cover', zoom: assets.bgZoom != null ? assets.bgZoom : 100, x: assets.bgX != null ? assets.bgX : 50, y: assets.bgY != null ? assets.bgY : 50, blur: assets.bgBlur || 0, opacity: assets.bgOpacity != null ? assets.bgOpacity : 100, dim: assets.bgDim || 0}};
   }
   function bgControl(assets, onChange) {
     var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: ''}), adj = h('div');
@@ -292,11 +292,16 @@
     function drawAdj() {
       adj.replaceChildren();
       if (!assets.bg) return;
-      var fit = h('select', {class: 'in'}, [['cover', 'Cubrir toda la pantalla'], ['contain', 'Contener (se ve entera)'], ['zoom', 'Zoom a medida']].map(function (o) { return h('option', {value: o[0], text: o[1]}); }));
+      var fit = h('select', {class: 'in'}, [['cover', 'Cubrir toda la pantalla'], ['contain', 'Contener (se ve entera)']].map(function (o) { return h('option', {value: o[0], text: o[1]}); }));
       fit.value = assets.bgFit || 'cover';
-      fit.addEventListener('change', function () { assets.bgFit = fit.value; drawAdj(); onChange(); });
+      fit.addEventListener('change', function () { assets.bgFit = fit.value; onChange(); });
       adj.appendChild(h('label', {class: 'f', style: 'margin:8px 0'}, 'Ajuste de la imagen', fit));
-      if ((assets.bgFit || 'cover') === 'zoom') adj.appendChild(ctl('Zoom', 'bgZoom', 20, 400, 5, '%', 150));
+      // zoom siempre visible: acercar (+) y alejar (−) además del deslizador
+      var zoom = ctl('Zoom (acercar / alejar)', 'bgZoom', 50, 400, 5, '%', 100), zr = zoom.querySelector('input[type=range]');
+      var step = function (d) { zr.value = Math.max(50, Math.min(400, (parseFloat(zr.value) || 100) + d)); zr.dispatchEvent(new Event('input', {bubbles: true})); };
+      zoom.querySelector('.rg').insertBefore(h('button', {class: 'mini', title: 'Alejar', text: '−', onclick: function () { step(-10); }}), zr);
+      zoom.querySelector('.rg').appendChild(h('button', {class: 'mini', title: 'Acercar', text: '+', onclick: function () { step(10); }}));
+      adj.appendChild(zoom);
       adj.appendChild(ctl('Posición horizontal', 'bgX', 0, 100, 1, '%', 50));
       adj.appendChild(ctl('Posición vertical', 'bgY', 0, 100, 1, '%', 50));
       adj.appendChild(ctl('Opacidad (transparencia)', 'bgOpacity', 0, 100, 1, '%', 100));

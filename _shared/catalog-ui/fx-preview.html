@@ -80,8 +80,10 @@ addEventListener('message', function (e) {
   var bp = m.bgProps || {}, num = function (v, d, lo, hi) { v = +v; return isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d; };
   if (/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(m.bgImage || '')) {
     bgl.style.backgroundImage = "url('" + m.bgImage + "')";
-    bgl.style.backgroundSize = bp.fit === 'contain' ? 'contain' : bp.fit === 'zoom' ? num(bp.zoom, 150, 20, 400) + '% auto' : 'cover';
+    bgl.style.backgroundSize = bp.fit === 'contain' ? 'contain' : 'cover';
     bgl.style.backgroundPosition = num(bp.x, 50, 0, 100) + '% ' + num(bp.y, 50, 0, 100) + '%';
+    bgl.style.transformOrigin = num(bp.x, 50, 0, 100) + '% ' + num(bp.y, 50, 0, 100) + '%';   // el zoom crece desde el punto elegido
+    bgl.style.transform = 'scale(' + num(bp.zoom, 100, 50, 400) / 100 + ')';
     bgl.style.opacity = num(bp.opacity, 100, 0, 100) / 100;
     bgl.style.filter = 'blur(' + num(bp.blur, 0, 0, 40) + 'px)';
   } else { bgl.style.backgroundImage = ''; }
