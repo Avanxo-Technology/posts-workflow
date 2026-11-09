@@ -210,8 +210,8 @@
   function elsFromQuery(p) {
     var els = {};
     p.forEach(function (v, k) {
-      var m = /^el_(?:(s[1-9]?|a|b|e[1-8])_)?(text|color|bg|font|size|w|pad|x|y|fx|fy|from|delay|duration|ease)$/.exec(k);
-      if (m) { var id = m[1] || 's'; (els[id] = els[id] || {})[m[2]] = /^(size|w|pad|x|y|fx|fy|delay|duration)$/.test(m[2]) ? parseFloat(v) : v; }
+      var m = /^el_(?:(s[1-9]?|a|b|e[1-8])_)?(text|color|bg|font|size|w|pad|x|y|fx|fy|from|delay|duration|ease|opacity|bga|radius|rot|scale|shadow|ls|weight|bw|bc)$/.exec(k);
+      if (m) { var id = m[1] || 's'; (els[id] = els[id] || {})[m[2]] = /^(size|w|pad|x|y|fx|fy|delay|duration|opacity|bga|radius|rot|scale|shadow|ls|weight|bw)$/.test(m[2]) ? parseFloat(v) : v; }
     });
     return els;
   }
@@ -273,16 +273,65 @@
     pad.addEventListener('pointerup', function () { pad.onpointermove = null; });
     return {pad: pad, read: read};
   }
-  // Fondo de la vista previa: imagen o color. Solo se ve en la vista previa; nunca va al código, a la URL ni a la API.
+  // Fondo de la vista previa: imagen o color, con ajustes. Solo se ve en la vista previa; nunca va al código, a la URL ni a la API.
+  // assets guarda bg (imagen), bgColor y los ajustes bgFit, bgZoom, bgX, bgY, bgBlur, bgOpacity, bgDim.
+  function bgMsg(assets) {
+    return {bgImage: assets.bg || null, bgColor: assets.bgColor || null,
+      bgProps: {fit: assets.bgFit || 'cover', zoom: assets.bgZoom != null ? assets.bgZoom : 150, x: assets.bgX != null ? assets.bgX : 50, y: assets.bgY != null ? assets.bgY : 50, blur: assets.bgBlur || 0, opacity: assets.bgOpacity != null ? assets.bgOpacity : 100, dim: assets.bgDim || 0}};
+  }
   function bgControl(assets, onChange) {
-    var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: assets.bg ? 'imagen puesta' : assets.bgColor ? assets.bgColor : 'el de la paleta'});
-    file.addEventListener('change', function () { var f = file.files && file.files[0]; if (!f) return; readImage(f, function (d) { assets.bg = d; state.textContent = 'imagen puesta'; onChange(); }); file.value = ''; });
+    var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: ''}), adj = h('div');
     var col = h('input', {type: 'color', value: assets.bgColor || '#202830'});
-    col.addEventListener('input', function () { assets.bgColor = col.value; if (!assets.bg) state.textContent = col.value; onChange(); });
+    function status() { state.textContent = assets.bg ? 'imagen puesta' : assets.bgColor ? assets.bgColor : 'el de la paleta'; }
+    function ctl(label, key, min, max, step, unit, def) {
+      var cur = assets[key], rng = h('input', {type: 'range', min: min, max: max, step: step, value: cur != null ? cur : def}), out = h('span', {class: 'val mono', text: (cur != null ? cur : def) + unit});
+      rng.addEventListener('input', function () { assets[key] = parseFloat(rng.value); out.textContent = rng.value + unit; onChange(); });
+      return h('div', {class: 'ctl'}, h('label', {text: label}), h('div', {class: 'rg'}, rng, out),
+        h('button', {class: 'mini', title: 'Valor por defecto', text: '↺', onclick: function () { delete assets[key]; rng.value = def; out.textContent = def + unit; onChange(); }}));
+    }
+    function drawAdj() {
+      adj.replaceChildren();
+      if (!assets.bg) return;
+      var fit = h('select', {class: 'in'}, [['cover', 'Cubrir toda la pantalla'], ['contain', 'Contener (se ve entera)'], ['zoom', 'Zoom a medida']].map(function (o) { return h('option', {value: o[0], text: o[1]}); }));
+      fit.value = assets.bgFit || 'cover';
+      fit.addEventListener('change', function () { assets.bgFit = fit.value; drawAdj(); onChange(); });
+      adj.appendChild(h('label', {class: 'f', style: 'margin:8px 0'}, 'Ajuste de la imagen', fit));
+      if ((assets.bgFit || 'cover') === 'zoom') adj.appendChild(ctl('Zoom', 'bgZoom', 20, 400, 5, '%', 150));
+      adj.appendChild(ctl('Posición horizontal', 'bgX', 0, 100, 1, '%', 50));
+      adj.appendChild(ctl('Posición vertical', 'bgY', 0, 100, 1, '%', 50));
+      adj.appendChild(ctl('Opacidad (transparencia)', 'bgOpacity', 0, 100, 1, '%', 100));
+      adj.appendChild(ctl('Desenfoque', 'bgBlur', 0, 40, 1, 'px', 0));
+      adj.appendChild(ctl('Oscurecer', 'bgDim', 0, 90, 1, '%', 0));
+    }
+    file.addEventListener('change', function () { var f = file.files && file.files[0]; if (!f) return; readImage(f, function (d) { assets.bg = d; status(); drawAdj(); onChange(); }); file.value = ''; });
+    col.addEventListener('input', function () { assets.bgColor = col.value; status(); onChange(); });
+    status(); drawAdj();
     return h('div', {class: 'panel', style: 'margin-top:10px'}, h('div', {class: 'ctl'}, h('label', {text: 'Fondo (solo vista previa)'}),
       h('div', {class: 'rg'}, h('button', {text: 'Imagen…', onclick: function () { file.click(); }}), col, state, file),
-      h('button', {class: 'mini', title: 'Quitar el fondo', text: '✕', onclick: function () { delete assets.bg; delete assets.bgColor; state.textContent = 'el de la paleta'; onChange(); }})));
+      h('button', {class: 'mini', title: 'Quitar el fondo y sus ajustes', text: '✕', onclick: function () { ['bg', 'bgColor', 'bgFit', 'bgZoom', 'bgX', 'bgY', 'bgBlur', 'bgOpacity', 'bgDim'].forEach(function (k) { delete assets[k]; }); status(); drawAdj(); onChange(); }})), adj);
   }
+
+  // Propiedades de aspecto de un elemento (todas van al código como style). level 'sample': completas; 'scene': solo las del texto.
+  function appearanceRows(vals, setProp, level) {
+    var rows = [], full = level !== 'scene';
+    var sl = function (label, k, min, max, step, unit, shown) { rows.push(sliderRow(label, vals[k], min, max, step, unit, shown, function (v) { setProp(k, v); })); };
+    sl('Opacidad (transparencia)', 'opacity', 0, 100, 1, '%', 100);
+    if (full) {
+      sl('Opacidad del fondo', 'bga', 0, 100, 1, '%', 100);
+      sl('Esquinas redondeadas', 'radius', 0, 200, 2, 'px', 44);
+      sl('Giro', 'rot', -180, 180, 1, '°', 0);
+      sl('Escala', 'scale', 20, 300, 5, '%', 100);
+      sl('Sombra', 'shadow', 0, 100, 1, '', 50);
+    }
+    sl('Grosor del texto', 'weight', 100, 900, 100, '', 900);
+    sl('Espaciado entre letras', 'ls', -10, 40, 1, 'px', 0);
+    if (full) {
+      sl('Grosor del borde', 'bw', 0, 30, 1, 'px', 0);
+      rows.push(colorRow('Color del borde', vals.bc && !/^palette\./.test(vals.bc) ? vals.bc : '', function (v) { setProp('bc', v); }));
+    }
+    return rows;
+  }
+
   var FROM_LABEL = {bottom: 'Abajo', top: 'Arriba', left: 'La izquierda', right: 'La derecha', center: 'El centro (crece)', fade: 'Solo aparece (fundido)', custom: 'Un punto de la pantalla…'};
   var EASE_LABEL = {suave: 'Rebote suave', lineal: 'Lineal', 'in-out': 'Entrada y salida', brusco: 'Brusco'};
   // Efectos con elementos añadidos por el usuario ({{items}}): para cada uno se elige dónde termina, de dónde sale y cuándo entra.
@@ -307,6 +356,7 @@
         item.appendChild(colorRow('Color del texto', it.color && !/^palette\./.test(it.color) ? it.color : '', function (v) { setItem(id, 'color', v); }));
         item.appendChild(colorRow('Fondo', it.bg && !/^palette\./.test(it.bg) ? it.bg : '', function (v) { setItem(id, 'bg', v); }));
         item.appendChild(sliderRow('Tamaño del texto', it.size, 20, 400, 5, 'px', 90, function (v) { setItem(id, 'size', v); }));
+        appearanceRows(it, function (k, v) { setItem(id, k, v); }, 'sample').forEach(function (r) { item.appendChild(r); });
         var endPad = pad2d(it.x, it.y, function (px, py) { all2(id, {x: px, y: py}); });
         var pads = h('div', {class: 'pads'}, h('div', null, h('span', {text: 'Termina en (centro)'}), endPad.pad, endPad.read));
         var fromSel = h('select', {class: 'in'}, cfg && ['bottom', 'top', 'left', 'right', 'center', 'fade', 'custom'].map(function (k) { return h('option', {value: k, text: FROM_LABEL[k]}); }));
@@ -386,6 +436,7 @@
           section.appendChild(h('div', {class: 'ctl'}, h('label', {text: sd[1]}), h('div', {class: 'rg'}, rng, out),
             h('button', {class: 'mini', title: 'Volver al tamaño del efecto', text: '↺', onclick: function () { out.textContent = 'auto'; setProp(k, ''); }})));
         });
+        appearanceRows(cur(), setProp, el.kind).forEach(function (r) { section.appendChild(r); });
       }
       if (el.kind === 'label') { box.appendChild(section); return; }   // sin elemento de muestra que sustituir: solo texto
       var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: o.assets[id] ? 'imagen puesta' : 'sin imagen'});
@@ -471,7 +522,7 @@
     function update() {
       var p = palette(), r = FX.build(e, vals, p, {elements: els, assets: assets});
       current = r;
-      if (ready) frame.contentWindow.postMessage({type: 'fx', css: r.css, html: r.previewHtml, total: r.total, markers: r.markers, palette: p, bgImage: assets.bg || null, bgColor: assets.bgColor || null}, '*');
+      if (ready) frame.contentWindow.postMessage(Object.assign({type: 'fx', css: r.css, html: r.previewHtml, total: r.total, markers: r.markers, palette: p}, bgMsg(assets)), '*');
       htmlPre.textContent = r.html; cssPre.textContent = r.css;
       var qs = query(), local = new URLSearchParams(qs.toString());
       if (palId !== 'custom') local.set('palette', palId); else ['dark', 'light', 'accent'].forEach(function (k) { local.set(k, custom[k]); });
@@ -656,7 +707,7 @@
     app.replaceChildren(h('a', {class: 'back', href: '#/', text: '← Volver'}), h('div', {class: 'empty', text: 'No existe ' + what + ' "' + id + '" en el catálogo.'}));
   }
 
-  window.PW = {h: h, toast: toast, copy: copy, app: app, search: q, reload: function () { return load(true); }, data: function () { return data; }, makeControl: makeControl, bgControl: bgControl, elementsPanel: elementsPanel, elsFromQuery: elsFromQuery, elsToQuery: elsToQuery, kit: kitStore, KIND: KIND, routeQuery: function () { return routeQuery; }};
+  window.PW = {h: h, toast: toast, copy: copy, app: app, search: q, reload: function () { return load(true); }, data: function () { return data; }, makeControl: makeControl, bgControl: bgControl, bgMsg: bgMsg, elementsPanel: elementsPanel, elsFromQuery: elsFromQuery, elsToQuery: elsToQuery, kit: kitStore, KIND: KIND, routeQuery: function () { return routeQuery; }};
 
   // ---- router ----
   function render() {

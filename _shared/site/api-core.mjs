@@ -17,12 +17,12 @@ function paletteFrom(q, bundle, effect) {
     from: /^#/.test(q.get('palette') || '') ? 'custom' : (P[q.get('palette')] ? q.get('palette') : b.id || 'default')};
 }
 
-// Elementos editables por la URL: el_text, el_color, el_bg, el_font, el_size, el_w, el_pad (texto de muestra), el_s2_* (otros textos), el_a_* / el_b_* (escenas) y el_e1_* … el_e8_* (elementos que añade el usuario, con x, y, from, fx, fy, delay, duration, ease).
+// Elementos editables por la URL: el_text, el_color, el_bg, el_font, el_size, el_w, el_pad y las de aspecto el_opacity, el_bga, el_radius, el_rot, el_scale, el_shadow, el_ls, el_weight, el_bw, el_bc (texto de muestra), el_s2_* (otros textos), el_a_* / el_b_* (escenas) y el_e1_* … el_e8_* (elementos que añade el usuario, con x, y, from, fx, fy, delay, duration, ease).
 function elementsFrom(q) {
   const els = {}, errors = [];
   for (const [k, v] of q) {
     if (!k.startsWith('el_')) continue;
-    const m = /^el_(?:(s[1-9]?|a|b|e[1-8])_)?(text|color|bg|font|size|w|pad|x|y|fx|fy|from|delay|duration|ease)$/.exec(k);
+    const m = /^el_(?:(s[1-9]?|a|b|e[1-8])_)?(text|color|bg|font|size|w|pad|x|y|fx|fy|from|delay|duration|ease|opacity|bga|radius|rot|scale|shadow|ls|weight|bw|bc)$/.exec(k);
     if (!m) { errors.push(`Parámetro de elemento desconocido: ${k}`); continue; }
     (els[m[1] || 's'] = els[m[1] || 's'] || {})[m[2]] = v;
   }

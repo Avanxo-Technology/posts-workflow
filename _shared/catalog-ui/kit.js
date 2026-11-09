@@ -61,7 +61,7 @@
     function rebuild() { built = FX.buildKit(effects, {name: kit.name, palette: kit.palette, items: kit.items.map(function (it) { var c = Object.assign({}, it); c.assets = assets.get(it) || null; return c; })}, brands); return built; }
     function push(keepTime) {
       if (!ready || !built) return;
-      frame.contentWindow.postMessage({type: 'fx', css: built.css, html: built.previewHtml || built.html, total: Math.max(built.total, 0.1), markers: built.markers, palette: built.palette, bgImage: kitBg.bg || null, bgColor: kitBg.bgColor || null, keepTime: !!keepTime}, '*');
+      frame.contentWindow.postMessage(Object.assign({type: 'fx', css: built.css, html: built.previewHtml || built.html, total: Math.max(built.total, 0.1), markers: built.markers, palette: built.palette, keepTime: !!keepTime}, PW.bgMsg(kitBg)), '*');
     }
     function changed(keepTime, skipTimeline) {
       rebuild(); save(); schedulePush(keepTime);

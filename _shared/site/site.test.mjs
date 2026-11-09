@@ -61,6 +61,15 @@ test('api: elementos que añade el usuario (posición, origen y tiempos) y vario
   assert.deepEqual(t.elements.editable.map(x => x.id).sort(), ['s', 's2', 's3']);
 });
 
+test('api: propiedades de aspecto de los elementos (opacidad, esquinas, giro, escala, sombra…)', async () => {
+  const d = (await get('/api/v1/effects/slam?el_opacity=40&el_radius=12&el_rot=-8&el_scale=120&el_shadow=0&el_ls=3&el_weight=700&el_bw=4&el_bc=%23ff0000&el_bg=%23112233&el_bga=60')).j;
+  for (const frag of ['filter:opacity(40%)', 'border-radius:12px', 'rotate:-8deg', 'scale:1.2', 'box-shadow:none', 'letter-spacing:3px', 'font-weight:700', 'border:4px solid #ff0000', 'color-mix(in srgb,#112233 60%,transparent)'])
+    assert.ok(d.code.html.includes(frag), frag);
+  const it = (await get('/api/v1/effects/fly-elements?el_e1_text=Hola&el_e1_opacity=50&el_e1_rot=10')).j;
+  assert.ok(it.code.html.includes('filter:opacity(50%)') && it.code.html.includes('rotate:10deg'));
+  for (const bad of ['el_opacity=101', 'el_rot=200', 'el_scale=1', 'el_bc=rojo', 'el_weight=50']) assert.equal((await get('/api/v1/effects/slam?' + bad)).r.status, 400, bad);
+});
+
 test('api: fuentes de los elementos y lista de fuentes (marcas y generales)', async () => {
   const d = (await get('/api/v1/effects/slam?el_font=Oswald')).j;
   assert.ok(d.code.html.includes("font-family:'Oswald',sans-serif") && d.code.css.startsWith('@import url('));

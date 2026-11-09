@@ -269,3 +269,20 @@ test('varias plantillas con varios textos: cada elemento se edita por separado',
   assert.ok(r.html.includes('background:#00ff00') && !/<h[1-6]|<section|data-fx/.test(r.html));
   assert.ok(r.css.startsWith('@import'), 'la fuente de un elemento se importa en el CSS');
 });
+
+test('aspecto de los elementos: transparencia, esquinas, giro, escala, sombra, letras, grosor y borde llegan al código', () => {
+  const e = effects().slam;
+  const r = FX.build(e, {}, pal, {elements: {s: {opacity: 40, bg: '#112233', bga: 60, radius: 12, rot: -8, scale: 120, shadow: 0, ls: 3, weight: 700, bw: 4, bc: '#ff0000'}}});
+  assert.deepEqual(r.errors, []);
+  for (const frag of ['filter:opacity(40%)', 'background:color-mix(in srgb,#112233 60%,transparent)', 'border-radius:12px', 'rotate:-8deg', 'scale:1.2', 'box-shadow:none', 'letter-spacing:3px', 'font-weight:700', 'border:4px solid #ff0000'])
+    assert.ok(r.html.includes(frag), frag);
+  assert.ok(!r.html.includes('opacity:0.4') && !/transform/.test(r.html.split('style=')[1]), 'no pisa las animaciones: usa filter, rotate y scale');
+  const s0 = FX.build(e, {}, pal, {elements: {s: {opacity: 100, scale: 100, rot: 0}}});
+  assert.ok(!/[;"](filter|scale|rotate):/.test(s0.html), 'los valores neutros no ensucian el código');
+  assert.equal(FX.build(e, {}, pal, {elements: {s: {shadow: 50}}}).html.includes('box-shadow:0 35px 70px rgba(0,0,0,0.4)'), true);
+  assert.equal(FX.build(e, {}, pal, {elements: {s: {opacity: 101, bga: -1, radius: 301, rot: 181, scale: 5, shadow: 101, ls: 61, weight: 50, bw: 61, bc: 'rojo'}}}).errors.length, 10);
+  const it = FX.build(effects()['fly-elements'], {}, pal, {elements: {e1: {text: 'x', opacity: 50, radius: 0, rot: 10}}});
+  assert.ok(it.html.includes('filter:opacity(50%)') && it.html.includes('border-radius:0px') && it.html.includes('rotate:10deg'), 'también en los elementos añadidos');
+  const sc = FX.build(effects()['scene-push'], {}, pal, {elements: {a: {opacity: 70, weight: 400, ls: 2}}});
+  assert.ok(sc.html.includes('filter:opacity(70%)') && sc.html.includes('font-weight:400'), 'y en las escenas');
+});

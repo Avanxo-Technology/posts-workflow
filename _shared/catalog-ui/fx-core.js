@@ -89,6 +89,25 @@
   var ELEM_RE = /<(\w+)([^>]*?)\sdata-fx-(sample|scene|media)(?:="([^"]*)")?([^>]*)>([^<]*)<\/\1>/g;
   var IMG_RE = /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/=]+$/;
   var validId = function (id) { return /^(s[1-9]?|a|b|e[1-8])$/.test(id); };   // s, s2…: textos de muestra; a, b: escenas; e1…e8: elementos que añade el usuario (efectos con {{items}})
+  // Propiedades numéricas de los elementos y su rango. Todas acaban como style inline del elemento (el código lleva lo mismo que se ve).
+  var NUM_RANGE = {size: [10, 600], w: [10, 100], pad: [0, 300], opacity: [0, 100], bga: [0, 100], radius: [0, 300], rot: [-180, 180], scale: [10, 400], shadow: [0, 100], ls: [-20, 60], weight: [100, 900], bw: [0, 60]};
+  // CSS de un elemento a partir de sus propiedades. Transparencia con filter:opacity y giro/escala con las propiedades rotate y scale, para no chocar con las animaciones (que usan opacity y transform).
+  function styleOf(o, palette) {
+    var css = [], col = function (v) { return colorOf(v, palette); };
+    if (o.bg) css.push('background:' + (o.bga != null ? 'color-mix(in srgb,' + col(o.bg) + ' ' + o.bga + '%,transparent)' : col(o.bg)));
+    if (o.color) css.push('color:' + col(o.color));
+    if (o.font) css.push('font-family:' + fontStack(o.font));
+    if (o.size) css.push('font-size:' + o.size + 'px');
+    if (o.weight) css.push('font-weight:' + o.weight);
+    if (o.ls != null) css.push('letter-spacing:' + o.ls + 'px');
+    if (o.radius != null) css.push('border-radius:' + o.radius + 'px');
+    if (o.bw) css.push('border:' + o.bw + 'px solid ' + (o.bc ? col(o.bc) : 'currentColor'));
+    if (o.shadow != null) css.push(o.shadow ? 'box-shadow:0 ' + Math.round(o.shadow * 0.7) + 'px ' + Math.round(o.shadow * 1.4) + 'px rgba(0,0,0,' + Math.round((0.15 + o.shadow / 200) * 100) / 100 + ')' : 'box-shadow:none');
+    if (o.rot) css.push('rotate:' + o.rot + 'deg');
+    if (o.scale != null && o.scale !== 100) css.push('scale:' + Math.round(o.scale) / 100);
+    if (o.opacity != null && o.opacity < 100) css.push('filter:opacity(' + o.opacity + '%)');
+    return css;
+  }
   function demoRanges(html) {
     var out = [], re = /<!--fx-demo-->[\s\S]*?<!--\/fx-demo-->/g, m;
     while ((m = re.exec(html))) out.push([m.index, m.index + m[0].length]);
@@ -118,10 +137,10 @@
         var v = o[k];
         if (v === '' || v == null) return;
         if (k === 'text') { if (typeof v === 'string' && v.length <= 80) c.text = v; else errors.push(id + '.text: texto de hasta 80 caracteres'); }
-        else if (k === 'color' || k === 'bg') { if (HEX.test(v) || TOKEN.test(v)) c[k] = v; else errors.push(id + '.' + k + ' debe ser #RRGGBB o palette.dark|light|accent'); }
+        else if (k === 'color' || k === 'bg' || k === 'bc') { if (HEX.test(v) || TOKEN.test(v)) c[k] = v; else errors.push(id + '.' + k + ' debe ser #RRGGBB o palette.dark|light|accent'); }
         else if (k === 'font') { if (typeof v === 'string' && FONT_RE.test(v)) c.font = v; else errors.push(id + '.font debe ser el nombre de una fuente (letras, números y espacios)'); }
-        else if (k === 'size' || k === 'w' || k === 'pad') {
-          var R = {size: [10, 600], w: [10, 100], pad: [0, 300]}[k], n = parseFloat(v);
+        else if (NUM_RANGE[k]) {
+          var R = NUM_RANGE[k], n = parseFloat(v);
           if (isFinite(n) && n >= R[0] && n <= R[1]) c[k] = n; else errors.push(id + '.' + k + ' debe estar entre ' + R[0] + ' y ' + R[1]);
         }
         else if (/^(x|y|fx|fy|delay|duration)$/.test(k)) {
@@ -188,10 +207,7 @@
     if (it.delay != null) v.push('--d:' + it.delay + 's');
     if (it.duration != null) v.push('--du:' + it.duration + 's');
     if (it.ease) v.push('--fx-ease:' + EASES[it.ease]);
-    if (it.bg) st.push('background:' + colorOf(it.bg, palette));
-    if (it.color) st.push('color:' + colorOf(it.color, palette));
-    if (it.font) st.push('font-family:' + fontStack(it.font));
-    if (it.size) st.push('font-size:' + it.size + 'px');
+    st = styleOf(it, palette);
     if (it.w) st.push('width:' + it.w + '%');
     if (it.pad != null) st.push('padding:' + it.pad + 'px');
     var img = assets && IMG_RE.test(assets[it.id] || '') ? assets[it.id] : '';
@@ -213,11 +229,7 @@
       var inDemo = ranges.some(function (r) { return off >= r[0] && off < r[1]; });
       if (mode !== 'preview' && inDemo) return whole;   // la escena de muestra se quita del código (y de la vista previa del kit)
       var o = els[id] || {}, css = [], img = mode !== 'export' && IMG_RE.test(assets[id] || '') ? assets[id] : '';
-      var col = function (v) { return colorOf(v, palette); };
-      if (o.bg) css.push('background:' + col(o.bg));
-      if (o.color) css.push('color:' + col(o.color));
-      if (o.font && kind !== 'media') css.push('font-family:' + fontStack(o.font));
-      if (o.size && kind !== 'media') css.push('font-size:' + o.size + 'px');
+      if (kind !== 'media') css = styleOf(o, palette);
       if (o.w && kind === 'sample') css.push('width:' + o.w + '%');
       if (o.pad != null && kind === 'sample') css.push('padding:' + o.pad + 'px');
       if (img) { css.push("background:url('" + img + "') center/cover no-repeat"); css.push('color:transparent'); post += ' data-fx-img'; }
