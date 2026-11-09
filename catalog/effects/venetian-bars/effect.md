@@ -7,5 +7,4 @@
 3. La escena siguiente debe empezar en el marcador (con las barras cubriendo la pantalla). Pon un golpe de audio en ese instante.
 
 ## Notas
-- Origen: transición por persianas de GMAQ (`postVideo1`/`postVideo2`). El número de barras (7) lo fija el marcado.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

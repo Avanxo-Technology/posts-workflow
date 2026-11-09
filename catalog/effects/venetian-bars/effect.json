@@ -3,18 +3,11 @@
   "name": "Persianas",
   "kind": "transition",
   "medium": "video",
-  "brands": [
-    "gmaq"
-  ],
   "tags": [
     "transicion",
     "persianas",
     "pantalla-completa"
   ],
-  "source": {
-    "piece": "gmaq/noviembre/postVideo1",
-    "symbol": ".bar"
-  },
   "snippet": "fx.css",
   "audio": {
     "sfx": "whoosh de transición + golpe (hit)",

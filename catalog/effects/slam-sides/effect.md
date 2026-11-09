@@ -7,5 +7,4 @@ Variante lateral de `slam`: entra desde la izquierda (`slamL`) o la derecha (`sl
 3. Alterna izquierda y derecha en titulares de dos líneas.
 
 ## Notas
-- Equivale a los antiguos `slamL` y `slamR`. En AGA no escalaban y recorrían 700 px: usa `--fx-scale:1` y `--fx-distance:700px`.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

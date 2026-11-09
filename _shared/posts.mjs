@@ -6,6 +6,7 @@
 //         (lo escribe `posts init <ruta>`).
 import {existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, copyFileSync, statSync, symlinkSync, lstatSync} from 'node:fs';
 import {dirname, join, resolve, basename, relative, isAbsolute} from 'node:path';
+import {brandRoot, brandIds} from './brands-dirs.mjs';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import {cmdEffect} from './catalog.mjs';
@@ -18,7 +19,7 @@ const TOOL = resolve(HERE, '..');
 const cfg = join(TOOL, '.posts-dir');
 const POSTS_RAW = process.env.POSTS_DIR || (existsSync(cfg) ? read0(cfg).trim() : '');
 const POSTS = POSTS_RAW ? resolve(POSTS_RAW) : '';
-// Carpeta que contiene los proyectos (aga-growth-website, gmaq, ...). Los archivos de diseño de brands/*.json son relativos a ella.
+// Carpeta que contiene los proyectos (mi-sitio, otra-marca, ...). Los archivos de diseño de brands/*.json son relativos a ella.
 const PROJECTS = resolve(process.env.PROJECTS_DIR || (POSTS ? dirname(POSTS) : '.'));
 function read0(p) { return readFileSync(p, 'utf8'); }
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -29,11 +30,11 @@ const mtime = p => statSync(p).mtimeMs;
 const die = m => { console.error('✗ ' + m); process.exit(1); };
 
 function brandOf(name) {
-  const p = join(TOOL, 'brands', name + '.json');
+  const p = join(brandRoot(TOOL, name), name + '.json');
   if (!existsSync(p)) die(`Marca desconocida "${name}". Marcas: ${brands().join(', ')}`);
   return {id: name, ...JSON.parse(read(p))};
 }
-function brands() { return ls(join(TOOL, 'brands')).filter(e => e.name.endsWith('.json')).map(e => e.name.slice(0, -5)); }
+function brands() { return brandIds(TOOL); }
 function flag(args, name, takesValue = true) {
   const i = args.indexOf(name); if (i < 0) return null;
   const v = takesValue ? args[i + 1] : true; args.splice(i, takesValue ? 2 : 1); return v;
@@ -46,7 +47,7 @@ const probe = (f, entries) => {
 
 function designOf(b) {
   const r = p => { if (!p) return null; const abs = isAbsolute(p) ? p : join(PROJECTS, p); return {path: abs, exists: existsSync(abs)}; };
-  const own = join(TOOL, 'brands', b.id || '', 'design.md');   // design.md subido desde la UI (vive en el repo)
+  const own = join(brandRoot(TOOL, b.id || ''), b.id || '', 'design.md');   // design.md subido desde la UI (vive en el repo)
   return {main: b.id && existsSync(own) ? {path: own, exists: true} : r(b.designFile), extra: (b.designExtra || []).map(r)};
 }
 function piecesOf(name, b) {
@@ -65,7 +66,7 @@ const checkSoundArg = v => { if (v !== null && !['on', 'off'].includes(v)) die('
 
 // ---- localizar una pieza ----
 function resolvePiece(arg) {
-  if (!arg) die('Falta la carpeta de la pieza (ej. aga/noviembre/postVideos/postVideo1)');
+  if (!arg) die('Falta la carpeta de la pieza (ej. carbon/noviembre/postVideos/postVideo1)');
   // orden: ruta absoluta; relativa a la raíz de posts (POSTS_DIR); y por último relativa a la carpeta actual
   const parts = arg.split('/').filter(Boolean);
   const cands = arg.startsWith('/') ? [arg] : [join(POSTS, arg), ...(parts.length >= 3 ? [join(POSTS, ...parts.slice(0, -1), 'postVideos', parts.at(-1))] : []), resolve(arg)];
@@ -98,9 +99,9 @@ function cmdInit(args) {
   writeFileSync(cfg, target + '\n');
   const links = [['_shared', '_shared'], ['brands', 'brands'], ['docs', 'docs'], ['AGENTS.md', 'AGENTS.md'], ['CLAUDE.md', 'CLAUDE.md'],
     ['WORKFLOW.md', 'WORKFLOW.md'], ['guia-posts.txt', 'guia-posts.txt'], ['posts', 'posts'],
-    ...brands().map(b => [join('brands', b, '_shared'), join(b, '_shared')])];
+    ...brands().map(b => [join(brandRoot(TOOL, b), b, '_shared'), join(b, '_shared')])];
   for (const [from, to] of links) {
-    const dest = join(target, to), src = join(TOOL, from);
+    const dest = join(target, to), src = isAbsolute(from) ? from : join(TOOL, from);
     if (!existsSync(src)) continue;
     let state = 'enlazado';
     try { lstatSync(dest); state = 'ya existe (no se toca)'; } catch { mkdirSync(dirname(dest), {recursive: true}); symlinkSync(src, dest); }
@@ -116,7 +117,7 @@ function cmdBrand(args) {
   if (sub === 'show') {
     const id = rest[0]; if (!id) die('Uso: posts brand show <marca>');
     const b = brandOf(id), c = b.contact || {}, d = designOf(b);
-    const sh = join(TOOL, 'brands', id, '_shared'), sfx = join(sh, 'sfx');
+    const sh = join(brandRoot(TOOL, id), id, '_shared'), sfx = join(sh, 'sfx');
     const nsfx = existsSync(sfx) ? ls(sfx).filter(e => e.name.endsWith('.wav')).length : 0;
     const ps = piecesOf(id, b), cars = ps.filter(isCarousel);
     console.log(`${id}: ${b.name}`);
@@ -124,7 +125,7 @@ function cmdBrand(args) {
     console.log('contacto: ' + (Object.entries(c).map(([k, v]) => `${k} ${v}`).join(' · ') || '(sin datos: completar brands/' + id + '.json)'));
     console.log(`sonido: ${b.sound}` + (existsSync(join(sh, 'fetch_sfx.py')) ? (nsfx ? ` (${nsfx} efectos)` : ` — FALTAN efectos: python3 brands/${id}/_shared/fetch_sfx.py`) : ''));
     console.log('diseño: ' + (d.main ? `${d.main.path} ${d.main.exists ? '' : '(NO existe en este equipo: pedir la ruta al usuario)'}` : '(sin archivo: pedir la ruta al usuario o usar el CSS del sitio)') + (d.extra.length ? ' · extra: ' + d.extra.filter(e => e.exists).map(e => e.path).join(', ') : ''));
-    const logos = ls(join(TOOL, 'brands', id, 'logos')).map(e => e.name);
+    const logos = ls(join(brandRoot(TOOL, id), id, 'logos')).map(e => e.name);
     if (logos.length) console.log(`logos (en el repo): ${logos.map(n => `brands/${id}/logos/${n}`).join(', ')}`);
     console.log(`datos y reglas de la marca: brands/${id}.md   plantilla de video: ${existsSync(join(sh, 'video-template.html')) ? 'sí' : 'NO'}`);
     console.log(`piezas: ${ps.length} (${cars.length} carruseles, ${ps.length - cars.length} videos)`);
@@ -268,7 +269,7 @@ function cmdNew(args) {
     setSound(dir, sound === 'on');
     const ga = join(shared, 'gen_audio.template.py');
     if (sound === 'on' && existsSync(ga)) copyFileSync(ga, join(dir, 'gen_audio.py'));
-    if (bn === 'aga') { // los logos viven en el img/ de cada video: heredar los del último video de AGA
+    if (b.inheritLogos) { // marcas cuyos logos viven en el img/ de cada video (brands/<id>.json: "inheritLogos": true): heredar los del último video
       const old = [...dirs(base)].flatMap(m => dirs(join(base, m, 'postVideos')).map(v => join(base, m, 'postVideos', v)))
         .filter(v => v !== dir && existsSync(join(v, 'img', 'logo-white.png'))).sort((a, c) => mtime(c) - mtime(a))[0];
       if (old) for (const f of ['logo-white.png', 'logo-dark.png']) if (existsSync(join(old, 'img', f))) copyFileSync(join(old, 'img', f), join(dir, 'img', f));
@@ -431,7 +432,7 @@ const HELP = `posts — CLI de producción (carruseles y videos). Herramientas: 
   posts effect check                                                valida el catálogo
   posts check <pieza> [-v]                                          validaciones automáticas (solo avisos/errores; -v muestra todo)
 
-  <pieza> = carpeta (ej. aga/noviembre/postVideos/postVideo1), relativa a la raíz o absoluta.
+  <pieza> = carpeta (ej. carbon/noviembre/postVideos/postVideo1), relativa a la raíz o absoluta.
   Marcas: ${brands().join(', ')}
   Carpeta de proyectos (para los archivos de diseño): ${PROJECTS} (PROJECTS_DIR)`;
 

@@ -7,5 +7,4 @@ Cada línea del titular vive en un contenedor `.clip` (overflow hidden) y su `sp
 3. Una línea por contenedor `.fx-lineup-clip`; escalona `--fx-delay` entre líneas (~.25 s).
 
 ## Notas
-- Equivale al antiguo `lineUp` de AGA.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

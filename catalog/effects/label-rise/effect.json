@@ -3,17 +3,10 @@
   "name": "Etiqueta que sube",
   "kind": "text",
   "medium": "video",
-  "brands": [
-    "gremco"
-  ],
   "tags": [
     "etiqueta",
     "texto"
   ],
-  "source": {
-    "file": "brands/gremco/_shared/video-template.html",
-    "symbol": "@keyframes lab"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

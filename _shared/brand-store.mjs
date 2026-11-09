@@ -2,6 +2,7 @@
 // La UI y el CLI usan SOLO esta interfaz: si algún día las marcas pasan a una base de datos, se sustituye este módulo sin tocar lo demás.
 import {existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, symlinkSync, lstatSync, copyFileSync, writeFileSync} from 'node:fs';
 import {dirname, join} from 'node:path';
+import {brandRoot, brandIds} from './brands-dirs.mjs';
 
 export class BrandError extends Error {
   constructor(message, status = 400) { super(message); this.status = status; }
@@ -40,9 +41,9 @@ export function fontsUrl(head, body) {
 }
 
 export function createFileStore({TOOL, POSTS}) {
-  const bdir = id => join(TOOL, 'brands', id);
-  const jsonPath = id => join(TOOL, 'brands', id + '.json');
-  const mdPath = id => join(TOOL, 'brands', id + '.md');
+  const bdir = id => join(brandRoot(TOOL, id), id);
+  const jsonPath = id => join(brandRoot(TOOL, id), id + '.json');
+  const mdPath = id => join(brandRoot(TOOL, id), id + '.md');
   const checkId = id => { if (!ID_RE.test(id || '')) throw new BrandError('El id de la marca va en minúsculas, números o guiones (2-29 caracteres, ej. mimarca)'); return id; };
   const mustExist = id => { checkId(id); if (!existsSync(jsonPath(id))) throw new BrandError(`La marca "${id}" no existe`, 404); return id; };
   const readJson = id => JSON.parse(readFileSync(jsonPath(id), 'utf8'));
@@ -68,8 +69,7 @@ export function createFileStore({TOOL, POSTS}) {
 
   return {
     list() {
-      const dir = join(TOOL, 'brands');
-      return readdirSync(dir).filter(f => f.endsWith('.json')).map(f => f.slice(0, -5)).sort().flatMap(id => { try { return [summary(id)]; } catch { return []; } });
+      return brandIds(TOOL).flatMap(id => { try { return [summary(id)]; } catch { return []; } });
     },
 
     get(id) {

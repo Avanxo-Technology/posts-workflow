@@ -1,0 +1,19 @@
+{
+  "name": "Océano",
+  "short": "OCÉANO",
+  "sound": "synth (sin música)",
+  "designFile": null,
+  "designExtra": [],
+  "contact": {
+    "whatsapp": "WhatsApp",
+    "web": "tusitio.com"
+  },
+  "fonts": "https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Inter:wght@400;700&display=swap",
+  "headFont": "Poppins",
+  "bodyFont": "Inter",
+  "dark": "#0b1f33",
+  "light": "#eaf4fb",
+  "accent": "#1fa2d6",
+  "legacyMonths": {},
+  "generated": true
+}

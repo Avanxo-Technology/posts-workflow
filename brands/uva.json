@@ -1,0 +1,19 @@
+{
+  "name": "Uva",
+  "short": "UVA",
+  "sound": "synth (sin música)",
+  "designFile": null,
+  "designExtra": [],
+  "contact": {
+    "whatsapp": "WhatsApp",
+    "web": "tusitio.com"
+  },
+  "fonts": "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Inter:wght@400;700&display=swap",
+  "headFont": "Montserrat",
+  "bodyFont": "Inter",
+  "dark": "#1b1030",
+  "light": "#f3ecfb",
+  "accent": "#8e5be8",
+  "legacyMonths": {},
+  "generated": true
+}

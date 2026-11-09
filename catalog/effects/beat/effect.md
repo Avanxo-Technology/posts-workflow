@@ -7,5 +7,4 @@ Escala 1 a 1.03-1.05 en bucle (`infinite`). Se usa en el CTA o el teléfono para
 3. Llamada a la acción o teléfono hasta el final del video. Es un bucle (`infinite`).
 
 ## Notas
-- Equivale al antiguo `beat` (GREMCO 1.05, Pirotecnia 1.03). La vista previa muestra un ciclo.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

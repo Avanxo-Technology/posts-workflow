@@ -7,5 +7,4 @@
 3. Pon `pathLength="1"` en cada `<path>` para que el dibujo no dependa de su longitud.
 
 ## Notas
-- Equivale al antiguo `draw` de Pirotecnia (que usaba un `stroke-dasharray` fijo de 260).
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

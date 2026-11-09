@@ -3,17 +3,10 @@
   "name": "Parpadeo",
   "kind": "loop",
   "medium": "video",
-  "brands": [
-    "pirotecnia"
-  ],
   "tags": [
     "parpadeo",
     "opacidad"
   ],
-  "source": {
-    "piece": "pirotecnia/december/postVideos/postVideo4",
-    "symbol": "@keyframes blink"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

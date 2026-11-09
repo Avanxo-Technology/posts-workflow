@@ -3,18 +3,11 @@
   "name": "Explosión de luz",
   "kind": "transition",
   "medium": "video",
-  "brands": [
-    "pirotecnia"
-  ],
   "tags": [
     "fuego",
     "destello",
     "transicion"
   ],
-  "source": {
-    "piece": "pirotecnia/december/reels/diciembre/reel1",
-    "symbol": "@keyframes fl"
-  },
   "snippet": "fx.css",
   "audio": {
     "sfx": "explosión / estallido",

@@ -3,24 +3,15 @@
   "name": "Slam (golpe desde abajo)",
   "kind": "entrance",
   "medium": "video",
-  "brands": [
-    "gmaq",
-    "gremco",
-    "pirotecnia"
-  ],
   "tags": [
     "texto",
     "titulo",
     "impacto",
     "entrada"
   ],
-  "source": {
-    "file": "_shared/base/video-template.html",
-    "symbol": "@keyframes slam"
-  },
   "snippet": "fx.css",
   "variants": [
-    "slamB (Pirotecnia: sube 520 px sin escala)"
+    "slamB (sube 520 px sin escala)"
   ],
   "audio": {
     "sfx": "sugerido: golpe/whoosh en --s",

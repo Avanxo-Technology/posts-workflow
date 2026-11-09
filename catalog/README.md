@@ -16,7 +16,7 @@ catalog/
 ## effect.json
 | campo | descripción |
 |---|---|
-| `id` | estable, igual al nombre de la carpeta (`slam`, `aga-iris`) |
+| `id` | estable, igual al nombre de la carpeta (`slam`, `iris-reveal`) |
 | `name` | nombre legible |
 | `kind` | `transition` \| `entrance` \| `text` \| `camera` \| `overlay` |
 | `medium` | `video` \| `carousel` |
@@ -28,7 +28,7 @@ catalog/
 | `audio` | sonido asociado y sincronía con `gen_audio.py` (o `null`) |
 
 ## post (catalog/posts/<marca>/<post-id>.json)
-- `id`: ruta de la pieza bajo `POSTS_DIR` con `/` -> `-` (ej. `gmaq-noviembre-postVideo1`).
+- `id`: ruta de la pieza bajo `POSTS_DIR` con `/` -> `-` (ej. `carbon-noviembre-postVideo1`).
 - `path`: esa ruta relativa a `POSTS_DIR`.
 - `uses`: lista de `{effect, t, note}`; `t` en segundos. **El vínculo se escribe solo aquí.** Los posts de cada efecto se calculan a la inversa (no se duplican a mano).
 - `thumb` (opcional): miniatura pequeña, nunca el video.
@@ -38,9 +38,9 @@ catalog/
 - Los efectos compuestos (`lower-third`, `goal-celebration`) se registran una vez, en el instante en que arrancan.
 - `snippet.css` se extrae de una pieza real; si la pieza se retoca, el snippet no se actualiza solo.
 - Los bucles (`infinite`) se registran en el segundo en que empieza su escena.
-- Los usos de GREMCO y Pirotecnia se extrajeron con un script a partir de los `index.html`; no se revisaron viendo el video.
+- Los usos registrados se extraen con un script a partir de los `index.html`; no se revisan viendo el video.
 - `screen-shake` se registra una vez por cada instante de `HITS`/`hits`; suele coincidir con la entrada de un título.
-- Los keyframes definidos pero sin usar en ninguna pieza (p. ej. `pulse`, `bob`, `float`, `spin` en GMAQ/AGA; `bob`, `bar`, `drift` en Pirotecnia) no se catalogan.
+- Los keyframes definidos pero sin usar en ninguna pieza (p. ej. `pulse`, `bob`, `float`, `spin`) no se catalogan.
 
 ## Mantenerlo al día: `posts effect scan`
 ```
@@ -57,9 +57,9 @@ posts effect scan --all [--check]    revisa todos los videos; --check sale con e
 ```
 posts catalog [--port N] [--open]
 ```
-Abre una página local (solo `127.0.0.1`, solo lectura, sin dependencias) con la galería de efectos, una demo en vivo de cada uno, su ficha y código, y en qué posts y segundos se usó. También hay vista por post con línea de tiempo. Los botones "Copiar prompt" generan una frase lista para pegar a Claude (por ejemplo: usa el efecto `slam` tal como se hizo en `gmaq-noviembre-postVideo1` en el segundo 0.3).
+Abre una página local (solo `127.0.0.1`, solo lectura, sin dependencias) con la galería de efectos, una demo en vivo de cada uno, su ficha y código, y en qué posts y segundos se usó. También hay vista por post con línea de tiempo. Los botones "Copiar prompt" generan una frase lista para pegar a Claude (por ejemplo: usa el efecto `slam` tal como se hizo en `carbon-noviembre-postVideo1` en el segundo 0.3).
 - Lee los JSON en cada recarga: lo que cambie `posts effect scan --write` o Claude se ve al pulsar "Recargar".
-- La demo es automática para los efectos que tienen `@keyframes` en `snippet.css`, aplicados a una pieza de muestra con los colores de la marca. Los de motor JS/canvas (`aga-*`, `screen-shake`) usan un `demo.html` a medida con el código real del motor.
+- La demo es automática para los efectos que tienen `@keyframes` en `snippet.css`, aplicados a una pieza de muestra con los colores de la marca. Los de motor JS/canvas usan un `demo.html` a medida.
 - Para una demo a medida pon un `demo.html` autocontenido en la carpeta del efecto; en `effect.json` puedes ajustar la demo automática con `"demo": {"duration": 2.4, "variants": ["kbin"]}`.
 
 ## Marcas desde la UI
@@ -83,7 +83,7 @@ Un efecto «spec 1» (`"spec": 1` en su `effect.json`) es un módulo portable y 
 - Los efectos funcionan por tiempo (animaciones CSS que se pueden pausar y mover con `seek`), así que sirven para renderizar video.
 - `_shared/catalog-ui/fx-core.js` valida y genera el código; lo usan la UI, la API y las pruebas (`node --test _shared/fx-core.test.mjs`). `posts effect check` comprueba que cada parámetro se use en el CSS.
 
-Migrados a spec 1: todos menos `aga-iris` (39 de 40). `aga-iris` es el original en canvas del motor de AGA y está sustituido por `iris-reveal`. Los efectos con varias piezas (p. ej. `lower-third`, `venetian-bars`) y los envoltorios (`screen-shake`) también cumplen el contrato.
+Todos los efectos del repo (39) están en spec 1. Los efectos con varias piezas (p. ej. `lower-third`, `venetian-bars`) y los envoltorios (`screen-shake`) también cumplen el contrato.
 
 Campos opcionales de `fx` para los casos complejos:
 - `total`: fórmula del tiempo total cuando no es `delay + duration` (p. ej. `"delay + duration * count"`). Solo admite números, nombres de parámetros, `+ - * /` y paréntesis; no ejecuta código.
@@ -95,8 +95,8 @@ Campos opcionales de `fx` para los casos complejos:
 **API (solo lectura)** — la sirve `posts catalog`; el mismo formato servirá el sitio público:
 - `GET /llms.txt`: instrucciones para agentes.
 - `GET /api/v1/effects?kind=&brand=&tag=&q=`: lista.
-- `GET /api/v1/effects/<id>?duration=0.6&delay=2&palette=gmaq`: ficha con `params`, `values`, `code.css`, `code.html`, `vars`, `markers` y `totalSeconds`. Los valores fuera de rango devuelven 400 con el detalle.
-La UI guarda los valores en la URL (`#/efecto/slam?duration=1.5&palette=gmaq`), así que una configuración se puede compartir.
+- `GET /api/v1/effects/<id>?duration=0.6&delay=2&palette=oceano`: ficha con `params`, `values`, `code.css`, `code.html`, `vars`, `markers` y `totalSeconds`. Los valores fuera de rango devuelven 400 con el detalle.
+La UI guarda los valores en la URL (`#/efecto/slam?duration=1.5&palette=oceano`), así que una configuración se puede compartir.
 
 ## Kit (carrito)
 En la pestaña **Kit** de `posts catalog` se reúnen varios efectos spec 1 para usarlos en una misma pieza. Se añaden desde la ficha de cada efecto («+ Añadir al kit») con los valores que tenga en ese momento.
@@ -114,7 +114,7 @@ Solo admiten efectos spec 1 (parametrizados) y hasta 40 elementos. Las etiquetas
 ## Sitio público (`posts site build`)
 El sitio es lo que usa el visitante; GitHub guarda la fuente y publica. `posts site build [--out dist] [--base https://mi-sitio.com]` genera una carpeta lista para publicar (se ignora en git):
 - `public/`: la UI (sin el editor de marcas), los datos del catálogo, las miniaturas, `llms.txt` y la API con **valores por defecto** como archivos (`api/v1/effects.json`, `api/v1/effects/<id>.json`).
-- `functions/`, `netlify/`, `lib/`: la **función** que responde a `/api/v1/*` y `/llms.txt` con valores a medida (`?duration=0.6&palette=gmaq`) y a los kits (`/api/v1/kit?k=…`). Un hosting solo estático no puede calcular eso; sin la función, el agente solo obtiene los valores por defecto.
+- `functions/`, `netlify/`, `lib/`: la **función** que responde a `/api/v1/*` y `/llms.txt` con valores a medida (`?duration=0.6&palette=oceano`) y a los kits (`/api/v1/kit?k=…`). Un hosting solo estático no puede calcular eso; sin la función, el agente solo obtiene los valores por defecto.
 - Sin `--base`, las URL de los JSON estáticos son relativas (`/api/v1/effects/slam`); con `--base`, absolutas. La función siempre usa el origen real de la petición.
 - La lógica de la API es **una sola** (`_shared/site/api-core.mjs`, estándares web `Request`/`Response`): la usan `posts catalog`, la función desplegada y la generación de los JSON, así que lo que pruebas en local es lo que se publica.
 - `posts site serve [--dir dist]` lo sirve en local emulando el hosting (un archivo estático tiene prioridad sobre la función, como en Cloudflare/Netlify).

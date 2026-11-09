@@ -3,23 +3,12 @@
   "name": "Iris (apertura circular)",
   "kind": "transition",
   "medium": "video",
-  "brands": [
-    "aga",
-    "gmaq",
-    "gremco",
-    "pirotecnia"
-  ],
   "tags": [
     "transicion",
     "circulo",
     "pantalla-completa",
     "css"
   ],
-  "source": {
-    "file": "catalog/effects/iris-reveal/fx.css",
-    "symbol": ".fx-iris"
-  },
-  "derivedFrom": "aga-iris",
   "audio": null,
   "spec": 1,
   "snippet": "fx.css",

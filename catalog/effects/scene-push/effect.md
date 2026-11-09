@@ -8,4 +8,3 @@ La escena nueva entra empujando a la anterior, que se desplaza un poco (efecto d
 
 ## Notas
 - La escena saliente debe seguir visible mientras dura el empuje: haz que su `--d` termine al menos en `--fx-delay + --fx-duration`.
-- Equivale a los antiguos `--in:inPush` / `--out:outPush` de las plantillas de GREMCO.

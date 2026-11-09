@@ -3,18 +3,11 @@
   "name": "Panel naranja que barre",
   "kind": "transition",
   "medium": "video",
-  "brands": [
-    "gremco"
-  ],
   "tags": [
     "transicion",
     "panel",
     "pantalla-completa"
   ],
-  "source": {
-    "file": "brands/gremco/_shared/video-template.html",
-    "symbol": "@keyframes wipe"
-  },
   "snippet": "fx.css",
   "audio": {
     "sfx": "whoosh de transición",

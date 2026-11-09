@@ -3,21 +3,11 @@
   "name": "Zoom lento (Ken Burns)",
   "kind": "camera",
   "medium": "video",
-  "brands": [
-    "aga",
-    "gmaq",
-    "gremco",
-    "pirotecnia"
-  ],
   "tags": [
     "foto",
     "zoom",
     "video-fondo"
   ],
-  "source": {
-    "file": "_shared/base/video-template.html",
-    "symbol": "@keyframes kb"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

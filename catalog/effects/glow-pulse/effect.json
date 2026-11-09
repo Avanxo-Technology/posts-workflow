@@ -3,18 +3,11 @@
   "name": "Resplandor que late",
   "kind": "overlay",
   "medium": "video",
-  "brands": [
-    "pirotecnia"
-  ],
   "tags": [
     "brillo",
     "fondo",
     "bucle"
   ],
-  "source": {
-    "piece": "pirotecnia/december/reels/diciembre/reel1",
-    "symbol": "@keyframes glowp"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

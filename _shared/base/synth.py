@@ -1,6 +1,6 @@
-"""Librería de sonido BASE (punto de partida para marcas nuevas; copia de la de GMAQ) (sintetizada con la librería estándar de Python, sin grabaciones ni dependencias).
+"""Librería de sonido BASE (punto de partida para marcas nuevas; copia de una marca de ejemplo) (sintetizada con la librería estándar de Python, sin grabaciones ni dependencias).
 Paleta: cuerdas pulsadas (Karplus-Strong), bloque de madera, matraca de llave, freno de aire hidráulico,
-caídas de bajo, golpes de bajo y colchón de sintetizador. Extraída de los gen_audio.py de gmaq/noviembre/postVideo1 y 2.
+caídas de bajo, golpes de bajo y colchón de sintetizador. Extraída de piezas reales.
 
 Uso en gen_audio.py (dentro de la carpeta del video):
     import sys, os

@@ -3,19 +3,12 @@
   "name": "Celebración de gol",
   "kind": "overlay",
   "medium": "video",
-  "brands": [
-    "pirotecnia"
-  ],
   "tags": [
     "gol",
     "red",
     "texto",
     "compuesto"
   ],
-  "source": {
-    "piece": "pirotecnia/december/postVideos/postVideo1",
-    "symbol": "@keyframes goal"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

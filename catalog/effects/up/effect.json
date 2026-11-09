@@ -3,21 +3,11 @@
   "name": "Subida suave",
   "kind": "entrance",
   "medium": "video",
-  "brands": [
-    "aga",
-    "gmaq",
-    "gremco",
-    "pirotecnia"
-  ],
   "tags": [
     "texto",
     "subtitulo",
     "entrada"
   ],
-  "source": {
-    "file": "_shared/base/video-template.html",
-    "symbol": "@keyframes up"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

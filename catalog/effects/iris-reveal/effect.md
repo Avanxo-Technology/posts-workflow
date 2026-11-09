@@ -8,4 +8,3 @@ Una cortina circular: el círculo se cierra hasta cubrir la pantalla y luego se 
 
 ## Notas
 - Usa `@property` para animar el radio: funciona en Chrome/Edge 85+, Safari 16.4+ y Firefox 128+ (incluido el Chrome con el que se graba el video).
-- `aga-iris` sigue existiendo: es el original en canvas del motor de AGA, con sus colores fijos.

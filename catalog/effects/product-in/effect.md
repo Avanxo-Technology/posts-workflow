@@ -7,5 +7,4 @@ Imagen de producto que entra con giro y rebote desde un lado: `inD` (cae de arri
 3. Ponlo sobre un `<img>` de producto. `--fx-rotate` fija la inclinación final de cada imagen.
 
 ## Notas
-- Reúne los antiguos `inD`, `inL`, `inR`, `inU`, `launch`, `rise`, `drop` y `fly`. Para `inL`/`inR` usa `--fx-spin:∓50deg`.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

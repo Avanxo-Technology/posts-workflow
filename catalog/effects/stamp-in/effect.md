@@ -7,5 +7,4 @@ El elemento aparece enorme (escala 2.4-3.4) y se encoge hasta encajar con un peq
 3. Sellos, cifras y rótulos de impacto.
 
 ## Notas
-- Reúne los antiguos `stampIn`, `stamp` (GMAQ: `--fx-from:3`, `--fx-rotate:-24deg`) y `zoomIn`.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

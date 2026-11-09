@@ -23,7 +23,7 @@ Esta guía no asume que la IA conozca gosite: lo que necesita saber está aquí;
 - Alternativa sin token: leer la página publicada (HTML) y descargar las imágenes por su URL pública.
 
 ## Si el proyecto no está arriba
-Comprobar que el sitio local responde (`gosite list` muestra el estado; los puertos están en el README del proyecto o en su `.env`/`gosite.yml`; p. ej. GMAQ: app :8000, Cockpit :8001). Si no responde, subirlo con gosite:
+Comprobar que el sitio local responde (`gosite list` muestra el estado; los puertos están en el README del proyecto o en su `.env`/`gosite.yml`). Si no responde, subirlo con gosite:
 1. `posts doctor --gosite` (Docker abierto y `gosite` instalado; si falta algo, instalarlo con el comando que indica).
 2. `gosite infra up` (una vez por sesión: Traefik, Redis, MinIO) y `gosite start <proyecto>` (app + Cockpit).
 3. Esperar a que responda (`curl http://localhost:<puerto>`) antes de leer artículos e imágenes. Al terminar, `gosite stop <proyecto>` solo si el usuario lo pide.

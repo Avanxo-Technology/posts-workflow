@@ -3,18 +3,11 @@
   "name": "Doble barrido",
   "kind": "transition",
   "medium": "video",
-  "brands": [
-    "aga"
-  ],
   "tags": [
     "transicion",
     "canvas",
     "pantalla-completa"
   ],
-  "source": {
-    "file": "brands/aga/_shared/engine.js",
-    "symbol": "wipe"
-  },
   "snippet": "fx.css",
   "audio": {
     "sfx": "tr_wipe + tr_wipe2 (hit=True)",

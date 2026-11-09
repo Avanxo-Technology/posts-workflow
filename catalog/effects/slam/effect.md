@@ -9,5 +9,4 @@ Sus variantes laterales están en `slam-sides`.
 
 ## Notas
 - Funciona por tiempo: es una animación CSS que el reproductor puede pausar y mover con `seek`; no usa JS.
-- Con los valores por defecto equivale al antiguo `--n:slam` de las plantillas de video (`.k`), así que ambos sistemas conviven.
 - Los parámetros están en `effect.json` → `fx.params`.

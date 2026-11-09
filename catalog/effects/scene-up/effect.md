@@ -7,5 +7,4 @@ La escena entra desde abajo (`inUp`, translateY 104 % a 0) o sale hacia arriba (
 3. Pon las dos escenas dentro de `.fx-sceneup` y mantén visible la saliente mientras dura la transición.
 
 ## Notas
-- Equivale a los antiguos `inUp`/`outUp` de GREMCO. Para otras direcciones usa `scene-push`.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

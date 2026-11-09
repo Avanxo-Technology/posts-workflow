@@ -7,5 +7,4 @@ Franja naranja de 7 px arriba que crece de 0 a 100 % durante todo el video (`--t
 3. Pon en `--fx-duration` la duración total de la pieza.
 
 ## Notas
-- Equivale a la barra `.prog` de los reels de GREMCO (`--tot`).
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

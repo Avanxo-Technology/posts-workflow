@@ -3,18 +3,11 @@
   "name": "Trazo que se dibuja",
   "kind": "entrance",
   "medium": "video",
-  "brands": [
-    "pirotecnia"
-  ],
   "tags": [
     "svg",
     "icono",
     "trazo"
   ],
-  "source": {
-    "piece": "pirotecnia/december/postVideos/postVideo4",
-    "symbol": "@keyframes draw"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

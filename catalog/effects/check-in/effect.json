@@ -3,18 +3,11 @@
   "name": "Check que aparece",
   "kind": "entrance",
   "medium": "video",
-  "brands": [
-    "aga"
-  ],
   "tags": [
     "check",
     "lista",
     "icono"
   ],
-  "source": {
-    "file": "brands/aga/_shared/aga.css",
-    "symbol": "@keyframes checkIn"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

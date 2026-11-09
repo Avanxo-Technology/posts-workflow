@@ -3,18 +3,11 @@
   "name": "Celdas que entran",
   "kind": "entrance",
   "medium": "video",
-  "brands": [
-    "gremco"
-  ],
   "tags": [
     "collage",
     "celdas",
     "entrada"
   ],
-  "source": {
-    "file": "brands/gremco/_shared/video-template.html",
-    "symbol": "@keyframes cellL"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

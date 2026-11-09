@@ -3,19 +3,11 @@
   "name": "Aro de luz",
   "kind": "transition",
   "medium": "video",
-  "brands": [
-    "gmaq",
-    "pirotecnia"
-  ],
   "tags": [
     "transicion",
     "aro",
     "destello"
   ],
-  "source": {
-    "piece": "gmaq/noviembre/postVideo2",
-    "symbol": ".ring"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

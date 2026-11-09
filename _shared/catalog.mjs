@@ -3,6 +3,7 @@ import {existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync} from 'n
 import {join, relative} from 'node:path';
 import {scanHtml, externalKeyframes} from './catalog-scan.mjs';
 import {createRequire} from 'node:module';
+import {privateBrandsDir} from './brands-dirs.mjs';
 const FX = createRequire(import.meta.url)('./catalog-ui/fx-core.js');
 
 const readJson = p => JSON.parse(readFileSync(p, 'utf8'));
@@ -16,10 +17,14 @@ export function loadCatalog(TOOL) {
     if (!existsSync(f)) { errors.push(`effects/${id}: falta effect.json`); continue; }
     try { effects.set(id, {...readJson(f), dir, uses: []}); } catch (e) { errors.push(`effects/${id}/effect.json: JSON inválido (${e.message})`); }
   }
-  for (const brand of subdirs(join(root, 'posts'))) {
-    const dir = join(root, 'posts', brand);
-    for (const n of readdirSync(dir).filter(n => n.endsWith('.json'))) {
-      try { posts.push({...readJson(join(dir, n)), file: `catalog/posts/${brand}/${n}`}); } catch (e) { errors.push(`posts/${brand}/${n}: JSON inválido (${e.message})`); }
+  const priv = privateBrandsDir(TOOL);   // registros de posts de las marcas reales: viven fuera del repo
+  for (const [base, label] of [[join(root, 'posts'), 'catalog/posts'], [priv ? join(priv, 'catalog-posts') : '', 'catalog-posts (privado)']]) {
+    if (!base) continue;
+    for (const brand of subdirs(base)) {
+      const dir = join(base, brand);
+      for (const n of readdirSync(dir).filter(n => n.endsWith('.json'))) {
+        try { posts.push({...readJson(join(dir, n)), file: `${label}/${brand}/${n}`}); } catch (e) { errors.push(`posts/${brand}/${n}: JSON inválido (${e.message})`); }
+      }
     }
   }
   for (const p of posts) for (const u of p.uses || []) effects.get(u.effect)?.uses.push({post: p.id, t: u.t, note: u.note});
@@ -30,7 +35,7 @@ export function checkCatalog(TOOL, POSTS) {
   const c = loadCatalog(TOOL), err = [...c.errors], warn = [];
   for (const [id, e] of c.effects) {
     if (e.id !== id) err.push(`effects/${id}: id "${e.id}" no coincide con la carpeta`);
-    for (const k of ['name', 'kind', 'medium', 'brands']) if (!e[k]) err.push(`effects/${id}: falta "${k}"`);
+    for (const k of ['name', 'kind', 'medium']) if (!e[k]) err.push(`effects/${id}: falta "${k}"`);
     if (!existsSync(join(e.dir, 'effect.md'))) err.push(`effects/${id}: falta effect.md`);
     if (e.snippet && !existsSync(join(e.dir, e.snippet))) err.push(`effects/${id}: snippet "${e.snippet}" no existe`);
     if (e.source?.file && !existsSync(join(TOOL, e.source.file))) err.push(`effects/${id}: source.file "${e.source.file}" no existe`);
@@ -41,7 +46,7 @@ export function checkCatalog(TOOL, POSTS) {
       if (!e.fx?.params) err.push(`effects/${id}: spec 1 sin fx.params`);
       else for (const m of FX.lint(e.fx, rd(e.fx.css), rd(e.fx.html))) err.push(`effects/${id}: ${m}`);
     }
-    if (!e.uses.length) warn.push(`effects/${id}: ningún post lo usa`);
+    if (c.posts.length && !e.uses.length) warn.push(`effects/${id}: ningún post lo usa`);
   }
   const seen = new Set();
   for (const p of c.posts) {
@@ -121,6 +126,8 @@ export function cmdEffect(args, {TOOL, POSTS, die, flag, resolvePiece, allPieces
     const write = flag(rest, '--write', false), all = flag(rest, '--all', false), check = flag(rest, '--check', false);
     if (!all && !rest[0]) die('Uso: posts effect scan <pieza> | --all  [--write] [--check]');
     const map = JSON.parse(readFileSync(join(c.root, 'scan-map.json'), 'utf8'));
+    const ovf = privateBrandsDir(TOOL) && join(privateBrandsDir(TOOL), 'scan-map.overlay.json');   // entradas propias de las marcas reales (fuera del repo): van primero
+    if (ovf && existsSync(ovf)) { const ov = JSON.parse(readFileSync(ovf, 'utf8')); for (const sec of ['animations', 'elements']) for (const [k, v] of Object.entries(ov[sec] || {})) map[sec][k] = [...v, ...(map[sec][k] || [])]; }
     const dirs = all ? allPieces() : [resolvePiece(rest[0])];
     let changed = 0;
     for (const dir of dirs) {
@@ -151,7 +158,7 @@ export function cmdEffect(args, {TOOL, POSTS, die, flag, resolvePiece, allPieces
         console.log(`   ? sin tiempo deducible: ${u.animation} en "${u.selector}"` + (e?.effect ? ` → efecto ${e.effect}: añade el uso a mano con "manual": true` : ' (sin efecto asignado)'));
       }
       if (write && merged.length && diff) {
-        const dp = join(c.root, 'posts', brand); mkdirSync(dp, {recursive: true});
+        const dp = (privateBrandsDir(TOOL) && existsSync(join(privateBrandsDir(TOOL), brand + '.json'))) ? join(privateBrandsDir(TOOL), 'catalog-posts', brand) : join(c.root, 'posts', brand); mkdirSync(dp, {recursive: true});   // marcas privadas: el registro se guarda fuera del repo
         const {uses: _u, ...rest0} = old || {};
         writeFileSync(join(dp, id + '.json'), formatPost({id, brand, medium: 'video', path: rel, ...rest0, file: undefined, uses: merged}));
         console.log(`   ✓ escrito catalog/posts/${brand}/${id}.json`);

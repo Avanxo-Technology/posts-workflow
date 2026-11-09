@@ -3,18 +3,11 @@
   "name": "Escena con zoom",
   "kind": "transition",
   "medium": "video",
-  "brands": [
-    "gremco"
-  ],
   "tags": [
     "transicion",
     "escena",
     "zoom"
   ],
-  "source": {
-    "file": "brands/gremco/_shared/video-template.html",
-    "symbol": "@keyframes inZoom"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

@@ -7,5 +7,4 @@ Un círculo de luz gigante (`fl`) crece desde un punto (`--x`, `--y`) y cubre la
 3. Colócalo encima de las escenas y cambia la escena en el marcador. Pon una explosión de audio en `--fx-delay`.
 
 ## Notas
-- Origen: transición de Pirotecnia (`reel1`/`reel2`). Los colores por defecto son los de fuego de esa marca.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

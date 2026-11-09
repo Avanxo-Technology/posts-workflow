@@ -3,19 +3,11 @@
   "name": "Destello blanco",
   "kind": "overlay",
   "medium": "video",
-  "brands": [
-    "gmaq",
-    "gremco"
-  ],
   "tags": [
     "flash",
     "golpe",
     "transicion"
   ],
-  "source": {
-    "file": "brands/gremco/_shared/video-template.html",
-    "symbol": "@keyframes flash"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

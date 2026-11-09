@@ -7,5 +7,4 @@ Capa de rayos gigante (1680x2520) que gira 360° en 60 s detrás del contenido. 
 3. Colócalo detrás del contenido de la escena.
 
 ## Notas
-- Equivale al movimiento `spin` de los rayos de Pirotecnia. El dibujo de los rayos aquí es genérico (cono repetido); en las piezas originales era una imagen propia.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

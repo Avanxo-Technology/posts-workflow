@@ -3,20 +3,11 @@
   "name": "Revelado por máscara",
   "kind": "text",
   "medium": "video",
-  "brands": [
-    "gmaq",
-    "gremco",
-    "pirotecnia"
-  ],
   "tags": [
     "texto",
     "mascara",
     "clip-path"
   ],
-  "source": {
-    "file": "_shared/base/video-template.html",
-    "symbol": "@keyframes wipe"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

@@ -7,5 +7,4 @@ Opacidad 1 a .25 a 1; se usa 2 veces seguidas (`animation: blink .45s linear 4.2
 3. Resalta un elemento con un destello de opacidad.
 
 ## Notas
-- Equivale al antiguo `blink` de Pirotecnia.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

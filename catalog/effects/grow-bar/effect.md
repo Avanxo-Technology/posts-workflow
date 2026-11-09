@@ -7,5 +7,4 @@
 3. Subrayados, líneas de acento y barras de datos. Para una barra vertical intercambia ancho y alto.
 
 ## Notas
-- Equivale a los antiguos `grow` (horizontal) y `growY` (vertical, AGA).
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

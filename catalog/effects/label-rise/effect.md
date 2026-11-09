@@ -7,5 +7,4 @@ Etiqueta que sube 40 px con fade, se mantiene y se desvanece al final (entrada y
 3. Pon en `--fx-duration` lo que dura la escena.
 
 ## Notas
-- Equivale al antiguo `lab` de GREMCO.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

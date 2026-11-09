@@ -7,5 +7,4 @@ Solo opacidad 0 a 1. Se usa para logos, marcas y textos secundarios.
 3. Úsalo para logos, marcas y textos secundarios.
 
 ## Notas
-- Equivale al antiguo `--n:fade` de las plantillas.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

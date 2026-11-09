@@ -7,5 +7,4 @@ Un panel de color cruza la pantalla. A mitad del recorrido la pantalla está cub
 3. La escena siguiente debe empezar en `--fx-delay + --fx-duration / 2` (el punto marcado como «pantalla cubierta»). Pon el sonido de transición en `--fx-delay`.
 
 ## Notas
-- Origen: el barrido `swp` de GMAQ (`gmaq-noviembre-postVideos-postVideo3`).
 - El color usa por defecto el acento de la paleta; cámbialo con `--fx-color`.

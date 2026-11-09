@@ -1,0 +1,19 @@
+{
+  "name": "Fuego",
+  "short": "FUEGO",
+  "sound": "synth (sin música)",
+  "designFile": null,
+  "designExtra": [],
+  "contact": {
+    "whatsapp": "WhatsApp",
+    "web": "tusitio.com"
+  },
+  "fonts": "https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;700&display=swap",
+  "headFont": "Oswald",
+  "bodyFont": "Inter",
+  "dark": "#1c0d0a",
+  "light": "#fff3e0",
+  "accent": "#e8431a",
+  "legacyMonths": {},
+  "generated": true
+}

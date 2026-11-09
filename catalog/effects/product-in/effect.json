@@ -3,21 +3,12 @@
   "name": "Producto que entra",
   "kind": "entrance",
   "medium": "video",
-  "brands": [
-    "aga",
-    "gmaq",
-    "pirotecnia"
-  ],
   "tags": [
     "producto",
     "imagen",
     "giro",
     "rebote"
   ],
-  "source": {
-    "file": "brands/pirotecnia/_shared/video-template.html",
-    "symbol": "@keyframes inL"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

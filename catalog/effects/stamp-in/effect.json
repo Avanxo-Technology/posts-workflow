@@ -3,19 +3,11 @@
   "name": "Sello (zoom desde grande)",
   "kind": "entrance",
   "medium": "video",
-  "brands": [
-    "gmaq",
-    "pirotecnia"
-  ],
   "tags": [
     "sello",
     "impacto",
     "zoom"
   ],
-  "source": {
-    "piece": "pirotecnia/december/postVideos/postVideo4",
-    "symbol": "@keyframes stampIn"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

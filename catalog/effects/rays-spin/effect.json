@@ -3,18 +3,11 @@
   "name": "Rayos giratorios",
   "kind": "overlay",
   "medium": "video",
-  "brands": [
-    "pirotecnia"
-  ],
   "tags": [
     "rayos",
     "fondo",
     "giro"
   ],
-  "source": {
-    "piece": "pirotecnia/december/reels/diciembre/reel1",
-    "symbol": "@keyframes spin"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

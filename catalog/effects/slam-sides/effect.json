@@ -3,21 +3,11 @@
   "name": "Slam lateral",
   "kind": "entrance",
   "medium": "video",
-  "brands": [
-    "aga",
-    "gmaq",
-    "gremco",
-    "pirotecnia"
-  ],
   "tags": [
     "texto",
     "titulo",
     "impacto"
   ],
-  "source": {
-    "file": "_shared/base/video-template.html",
-    "symbol": "@keyframes slamL"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

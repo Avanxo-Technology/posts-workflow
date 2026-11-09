@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {randomBytes} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {loadCatalog} from './catalog.mjs';
+import {brandRoot, brandIds} from './brands-dirs.mjs';
 import {createFileStore, BrandError, LIMITS} from './brand-store.mjs';
 import {createApi} from './site/api-core.mjs';
 import {fxCardPage, previewBaseCss} from './site/card-page.mjs';
@@ -18,10 +19,9 @@ const STATIC = {'/': ['index.html', 'text/html'], '/app.js': ['app.js', 'text/ja
 const readIf = p => (existsSync(p) ? readFileSync(p, 'utf8') : null);
 
 function brandsOf(TOOL) {
-  const out = {}, dir = join(TOOL, 'brands');
-  for (const f of existsSync(dir) ? readdirSync(dir) : []) {
-    if (!f.endsWith('.json')) continue;
-    try { const b = JSON.parse(readFileSync(join(dir, f), 'utf8')); out[f.slice(0, -5)] = {id: f.slice(0, -5), name: b.name || f.slice(0, -5), dark: b.dark, light: b.light, accent: b.accent}; } catch { /* marca ilegible: se omite */ }
+  const out = {};
+  for (const id of brandIds(TOOL)) {
+    try { const b = JSON.parse(readFileSync(join(brandRoot(TOOL, id), id + '.json'), 'utf8')); out[id] = {id, name: b.name || id, dark: b.dark, light: b.light, accent: b.accent}; } catch { /* marca ilegible: se omite */ }
   }
   return out;
 }

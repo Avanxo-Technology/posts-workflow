@@ -9,9 +9,12 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 import {catalogData} from '../catalog-server.mjs';
 import {createApi} from './api-core.mjs';
 import {buildSite} from './build.mjs';
+import {privateBrandNames} from '../brands-dirs.mjs';
 
 const TOOL = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const FX = createRequire(import.meta.url)('../catalog-ui/fx-core.js');
+const PRIV = privateBrandNames(TOOL);            // marcas reales de este equipo (si las hay): no pueden aparecer en lo público
+process.env.POSTS_BRANDS_DIR = '/nonexistent';   // las pruebas usan solo lo que trae el repo
 const data = catalogData(TOOL, '');
 const api = createApi({getBundle: () => data, FX});
 const get = async (path, init) => { const r = await api(new Request('https://site.test' + path, init)); return {r, j: r && r.headers.get('content-type')?.includes('json') ? await r.clone().json() : null}; };
@@ -25,18 +28,16 @@ test('api: lista, filtros y ficha con valores por defecto', async () => {
 });
 
 test('api: parámetros a medida, paleta, errores y efecto antiguo', async () => {
-  const d = (await get('/api/v1/effects/sweep-panel?delay=3&direction=top&palette=gmaq')).j;
-  assert.equal(d.values.delay, 3); assert.equal(d.palette.from, 'gmaq'); assert.equal(d.markers[0].at, 3.4);
+  const d = (await get('/api/v1/effects/sweep-panel?delay=3&direction=top&palette=oceano')).j;
+  assert.equal(d.values.delay, 3); assert.equal(d.palette.from, 'oceano'); assert.equal(d.markers[0].at, 3.4);
   const bad = await get('/api/v1/effects/slam?duration=99&foo=1');
   assert.equal(bad.r.status, 400); assert.ok(bad.j.details.length === 2);
   assert.equal((await get('/api/v1/effects/nope')).r.status, 404);
-  const old = (await get('/api/v1/effects/aga-iris')).j;
-  assert.equal(old.parametrized, false); assert.equal(old.supersededBy, 'iris-reveal');
 });
 
 test('api: kits (JSON y página HTML con CSP), límites y métodos', async () => {
   const E = {}; for (const e of data.effects) if (e.fx) E[e.id] = e;
-  const k = FX.encodeKit({name: 'K', palette: 'gmaq', items: [{effect: 'slam', label: 'Hola', params: {delay: 0.3}}, {effect: 'screen-shake', params: {delay: 1}}]}, E);
+  const k = FX.encodeKit({name: 'K', palette: 'oceano', items: [{effect: 'slam', label: 'Hola', params: {delay: 0.3}}, {effect: 'screen-shake', params: {delay: 1}}]}, E);
   const j = (await get('/api/v1/kit?k=' + k)).j;
   assert.equal(j.totalSeconds, 1.5); assert.ok(j.code.html.startsWith('<div class="fx-shake"'));
   const h = await get(`/api/v1/kit?k=${k}&format=html`);
@@ -80,11 +81,11 @@ test('build público: sin marcas, rutas, posts ni efectos no autocontenidos', as
   try {
     const dist = join(out, 'dist'); await buildSite({TOOL, out: dist});
     const walk = d => readdirSync(d).flatMap(f => (statSync(join(d, f)).isDirectory() ? walk(join(d, f)) : [join(d, f)]));
-    const rx = /\b(aga|gmaq|gremco|pirotecnia)\b|brands\/|engine\.js|postVideo|video-template|catalog\/posts|\/home\//i;
+    const rx = new RegExp((PRIV.length ? `\\b(${PRIV.join('|')})\\b|` : '') + 'brands/|engine\\.js|postVideo|video-template|catalog/posts|/home/', 'i');
     for (const f of walk(dist)) { const m = rx.exec(readFileSync(f, 'utf8')); assert.ok(!m, `rastro interno «${m && m[0]}» en ${f}`); }
     const cat = JSON.parse(readFileSync(join(dist, 'public/data/catalog.json'), 'utf8'));
     assert.deepEqual(cat.posts, []); assert.ok(cat.effects.every(e => e.fx && !e.uses.length && !e.brands.length && !e.source));
-    assert.ok(!cat.effects.some(e => e.id === 'aga-iris') && Object.keys(cat.brands).includes('oceano'));
+    assert.ok(Object.keys(cat.brands).includes('oceano') && !Object.keys(cat.brands).some(b => PRIV.includes(b)));
     const d = JSON.parse(readFileSync(join(dist, 'public/api/v1/effects/slam.json'), 'utf8'));
     assert.ok(!('usedIn' in d) && !('brands' in d));
     const index = readFileSync(join(dist, 'public/index.html'), 'utf8');
@@ -101,7 +102,7 @@ test('build: los adaptadores generados (Cloudflare y Netlify) funcionan tal cual
     const imp = f => import(pathToFileURL(join(dist, f)).href);
     const cf = await imp('functions/api/v1/[[path]].js'), cfl = await imp('functions/llms.txt.js'), nl = await imp('netlify/functions/api.mjs');
     const req = u => new Request('https://mi-sitio.test' + u);
-    const a = await (await cf.onRequest({request: req('/api/v1/effects/slam?duration=0.5&palette=aga')})).json();
+    const a = await (await cf.onRequest({request: req('/api/v1/effects/slam?duration=0.5&palette=oceano')})).json();
     assert.equal(a.values.duration, 0.5); assert.equal(a.self, 'https://mi-sitio.test/api/v1/effects/slam');
     assert.ok((await (await cfl.onRequest({request: req('/llms.txt')})).text()).includes('https://mi-sitio.test/api/v1/effects'));
     assert.equal((await cf.onRequest({request: req('/api/v1/zzz')})).status, 404);

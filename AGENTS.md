@@ -1,4 +1,4 @@
-# posts — producción de carruseles y videos de Instagram (GMAQ, AGA, GREMCO, Pirotecnia)
+# posts — producción de carruseles y videos de Instagram (marcas genéricas incluidas; las reales van en una carpeta privada)
 
 Raíz: esta carpeta. CLI: `./posts help` (comandos: new, list, preview, audio, export, check).
 
@@ -8,6 +8,7 @@ y repite la comprobación hasta que diga "Todo listo". Si un comando requiere su
 Si el proyecto gosite no está arriba (su sitio local no responde), levántalo con los comandos de gosite: `gosite infra up` y `gosite start <proyecto>`
 (si Docker está cerrado, ábrelo primero). Ver docs/source-gosite.md.
 
+Marcas: el repo trae marcas genéricas (`brands/`). Las reales del equipo van en una carpeta privada indicada en `.posts-brands` o `POSTS_BRANDS_DIR` (nunca en este repo).
 Primer paso con una marca: `posts brand show <marca>` (datos compactos; evita leer varios archivos).
 
 ## Reglas que siempre aplican

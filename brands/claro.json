@@ -1,0 +1,19 @@
+{
+  "name": "Claro",
+  "short": "CLARO",
+  "sound": "synth (sin música)",
+  "designFile": null,
+  "designExtra": [],
+  "contact": {
+    "whatsapp": "WhatsApp",
+    "web": "tusitio.com"
+  },
+  "fonts": "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Inter:wght@400;700&display=swap",
+  "headFont": "DM Sans",
+  "bodyFont": "Inter",
+  "dark": "#e9e6df",
+  "light": "#ffffff",
+  "accent": "#222831",
+  "legacyMonths": {},
+  "generated": true
+}

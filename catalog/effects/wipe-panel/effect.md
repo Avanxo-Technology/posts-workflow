@@ -7,5 +7,4 @@ Un panel naranja de pantalla completa (con borde navy) que se descubre de izquie
 3. Colócalo encima de las escenas; la escena siguiente empieza en el marcador (`--fx-delay + --fx-duration / 2`).
 
 ## Notas
-- Origen: el panel naranja de las transiciones de GREMCO (`wipe`). Para un barrido sin inclinación ni borde usa `sweep-panel`.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

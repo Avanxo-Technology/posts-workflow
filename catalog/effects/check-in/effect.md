@@ -7,5 +7,4 @@ El icono ✓ aparece desde escala .2 con giro de -30°, rebasa a 1.15 y se asien
 3. Marca los pasos de una lista; escalona `--fx-delay` por fila (~.45 s).
 
 ## Notas
-- Equivale al antiguo `checkIn` de AGA.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

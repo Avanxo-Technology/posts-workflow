@@ -3,21 +3,11 @@
   "name": "Aparición (fade)",
   "kind": "entrance",
   "medium": "video",
-  "brands": [
-    "aga",
-    "gmaq",
-    "gremco",
-    "pirotecnia"
-  ],
   "tags": [
     "opacidad",
     "logo",
     "entrada"
   ],
-  "source": {
-    "file": "_shared/base/video-template.html",
-    "symbol": "@keyframes fade"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

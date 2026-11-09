@@ -7,5 +7,4 @@ Entra horizontalmente ~160 px con fade (`left` desde la izquierda, `right` desde
 3. Más sobrio que `slam-sides`: úsalo para etiquetas y líneas de texto pequeñas.
 
 ## Notas
-- Equivale a los antiguos `left` y `right` de las plantillas.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

@@ -1,6 +1,6 @@
 GUÍA DE POSTS (CARRUSELES Y VIDEOS/REELS) · ÍNDICE Y PROMPT
 ============================================================
-Marcas: GMAQ · AGA Growth Advisors · GREMCO · Pirotecnia (Favio Favio Domino). Carpeta raíz: la carpeta de posts definida con `posts init` (ej. /ruta/a/tus/posts)
+Marcas: las que muestre `posts brand list` (genéricas en el repo; las reales, en la carpeta privada). Carpeta raíz: la carpeta de posts definida con `posts init` (ej. /ruta/a/tus/posts)
 Actualizada 2026-11-04. La guía ahora está dividida por tarea para que la IA lea solo lo que necesita.
 
 ARCHIVOS (todos dentro de la raíz)
@@ -35,7 +35,7 @@ Copiar y pegar en una IA con acceso a terminal y archivos. Reemplazar lo que est
 ----- INICIO DEL PROMPT -----
 Trabaja en la carpeta de posts [/ruta/a/tus/posts] con el CLI `posts`. Lee AGENTS.md y sigue sus instrucciones (te indica qué otros
 archivos leer según la tarea). Eres diseñador/a de contenido para redes. Crea una pieza para la marca
-[GMAQ | AGA | GREMCO | PIROTECNIA | otra] de tipo [carrusel de Instagram | video/reel vertical].
+[una marca de `posts brand list`] de tipo [carrusel de Instagram | video/reel vertical].
 
 TEMA / IDEA: [la idea, el artículo, el evento o el servicio; si lo dejo vacío, propón ideas].
 FUENTE DEL CONTENIDO: [URL del artículo | "en este proyecto gosite ...: el artículo y las imágenes están en Cockpit" | archivos en una ruta] (ver docs/source-gosite.md).

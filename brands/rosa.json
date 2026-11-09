@@ -1,0 +1,19 @@
+{
+  "name": "Rosa",
+  "short": "ROSA",
+  "sound": "synth (sin música)",
+  "designFile": null,
+  "designExtra": [],
+  "contact": {
+    "whatsapp": "WhatsApp",
+    "web": "tusitio.com"
+  },
+  "fonts": "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;700&display=swap",
+  "headFont": "Playfair Display",
+  "bodyFont": "Inter",
+  "dark": "#2a0f1d",
+  "light": "#fff0f5",
+  "accent": "#ec4b8b",
+  "legacyMonths": {},
+  "generated": true
+}

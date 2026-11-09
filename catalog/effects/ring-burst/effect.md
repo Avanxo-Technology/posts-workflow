@@ -7,5 +7,4 @@ Un aro de 200 px (borde grueso cobre, y otro blanco más fino .05 s después) es
 3. Colócalo encima de las escenas. Pon un golpe de audio en `--fx-delay`.
 
 ## Notas
-- Origen: transición «B» de GMAQ (`postVideo2`): aro de luz y flash.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

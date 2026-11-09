@@ -7,5 +7,4 @@ Un `clip-path: inset` que pasa de 100% a 0 por la derecha: la banda o el texto s
 3. Bandas, rótulos y títulos que se descubren.
 
 ## Notas
-- Equivale al antiguo `wipe` aplicado a un elemento (`--n:wipe`) y al `reveal` del tercio inferior de GREMCO.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

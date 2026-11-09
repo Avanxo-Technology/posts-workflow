@@ -3,20 +3,11 @@
   "name": "Barra que crece",
   "kind": "entrance",
   "medium": "video",
-  "brands": [
-    "gmaq",
-    "gremco",
-    "pirotecnia"
-  ],
   "tags": [
     "linea",
     "barra",
     "subrayado"
   ],
-  "source": {
-    "file": "_shared/base/video-template.html",
-    "symbol": "@keyframes grow"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

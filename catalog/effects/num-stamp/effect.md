@@ -7,5 +7,4 @@ Cifra gigante que entra a escala 1.7 y se asienta, se queda y sale encogiendo a 
 3. La animación incluye entrada y salida: pon en `--fx-duration` lo que dura la escena de la cifra.
 
 ## Notas
-- Equivale al antiguo `num` de GREMCO.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

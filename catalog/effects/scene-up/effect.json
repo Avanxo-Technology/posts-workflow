@@ -3,17 +3,10 @@
   "name": "Escena sube",
   "kind": "transition",
   "medium": "video",
-  "brands": [
-    "gremco"
-  ],
   "tags": [
     "transicion",
     "escena"
   ],
-  "source": {
-    "file": "brands/gremco/_shared/video-template.html",
-    "symbol": "@keyframes inUp"
-  },
   "snippet": "fx.css",
   "audio": null,
   "spec": 1,

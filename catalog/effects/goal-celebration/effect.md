@@ -7,5 +7,4 @@ Compuesto de la escena del gol: texto "Gooool" enorme que cae con rebote (`goal`
 3. Ponlo sobre la escena del gol; cambia el texto y los colores de las sombras por los de los equipos.
 
 ## Notas
-- Versión simplificada de la escena de `pirotecnia-december-postVideos-postVideo1`: no incluye el foco de luz con parpadeo (`flick`). La fuente es Oswald si está cargada.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

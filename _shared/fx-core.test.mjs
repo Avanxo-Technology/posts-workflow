@@ -93,7 +93,7 @@ test('kit: errores por efecto desconocido, parámetro fuera de rango y exceso de
 });
 
 test('kit: codificación ida y vuelta, omite valores por defecto y rechaza basura', () => {
-  const kit = {name: 'Ñandú ✓', palette: 'gmaq', items: [{effect: 'slam', label: 'Título ñ', params: {delay: 2, duration: 0.7}}]};
+  const kit = {name: 'Ñandú ✓', palette: 'oceano', items: [{effect: 'slam', label: 'Título ñ', params: {delay: 2, duration: 0.7}}]};
   const enc = FX.encodeKit(kit, effects()), dec = FX.decodeKit(enc);
   assert.deepEqual(dec.items[0].params, {delay: 2});           // duration 0.7 es el valor por defecto: no se guarda
   assert.equal(dec.name, 'Ñandú ✓'); assert.equal(dec.items[0].label, 'Título ñ');

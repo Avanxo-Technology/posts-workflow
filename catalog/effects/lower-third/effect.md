@@ -7,5 +7,4 @@ Rótulo compuesto: barra naranja (crece), kicker (sube), título (revelado por m
 3. Edita el kicker y el subtítulo en el HTML; el título es el texto del kit. Pon en `--fx-duration` lo que dura la escena.
 
 ## Notas
-- Equivale al `.lt` de los reels de GREMCO. Usa la fuente del sistema: añade `font-family` con la de tu marca.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

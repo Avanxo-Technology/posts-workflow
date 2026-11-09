@@ -1,449 +1,424 @@
 {
- "_doc": "Mapa de animaciones -> efectos del catálogo, usado por `posts effect scan`. animations: por nombre de @keyframes; elements: por clase del elemento (con --s). Una entrada con \"brands\" solo aplica a esas marcas; la primera que coincide gana; \"effect\": null = parte de otro efecto, se ignora a propósito.",
- "ignore": [
-  "sc",
-  "grpIn",
-  "grpOut"
- ],
- "hits": "screen-shake",
- "transitions": {
-  "wipe": "double-wipe",
-  "bars": "shutter-bars",
-  "iris": "aga-iris"
- },
- "animations": {
-  "beat": [
-   {
-    "effect": "beat"
-   }
+  "_doc": "Mapa de animaciones -> efectos del catálogo, usado por `posts effect scan`. animations: por nombre de @keyframes; elements: por clase del elemento (con --s). Una entrada con \"brands\" solo aplica a esas marcas; la primera que coincide gana; \"effect\": null = parte de otro efecto, se ignora a propósito.",
+  "ignore": [
+    "sc",
+    "grpIn",
+    "grpOut"
   ],
-  "blink": [
-   {
-    "effect": "blink"
-   }
-  ],
-  "cellD": [
-   {
-    "effect": "cell-in",
-    "note": "cellD"
-   }
-  ],
-  "cellL": [
-   {
-    "effect": "cell-in",
-    "note": "cellL"
-   }
-  ],
-  "cellR": [
-   {
-    "effect": "cell-in",
-    "note": "cellR"
-   }
-  ],
-  "cellU": [
-   {
-    "effect": "cell-in",
-    "note": "cellU"
-   }
-  ],
-  "checkIn": [
-   {
-    "effect": "check-in"
-   }
-  ],
-  "drop": [
-   {
-    "effect": "product-in",
-    "note": "drop"
-   }
-  ],
-  "fade": [
-   {
-    "effect": "fade"
-   }
-  ],
-  "flick": [
-   {
-    "effect": null
-   }
-  ],
-  "fly": [
-   {
-    "effect": "product-in",
-    "note": "fly"
-   }
-  ],
-  "glowp": [
-   {
-    "effect": "glow-pulse"
-   }
-  ],
-  "goal": [
-   {
-    "effect": "goal-celebration"
-   }
-  ],
-  "grow": [
-   {
-    "effect": "grow-bar"
-   }
-  ],
-  "growY": [
-   {
-    "effect": "grow-bar",
-    "note": "growY"
-   }
-  ],
-  "inD": [
-   {
-    "effect": "product-in",
-    "note": "inD"
-   }
-  ],
-  "inFade": [
-   {
-    "effect": "scene-fade",
-    "note": "entrada"
-   }
-  ],
-  "inL": [
-   {
-    "effect": "product-in",
-    "note": "inL"
-   }
-  ],
-  "inPush": [
-   {
-    "effect": "scene-push",
-    "note": "entrada"
-   }
-  ],
-  "inR": [
-   {
-    "effect": "product-in",
-    "note": "inR"
-   }
-  ],
-  "inU": [
-   {
-    "effect": "product-in",
-    "note": "inU"
-   }
-  ],
-  "inUp": [
-   {
-    "effect": "scene-up",
-    "note": "entrada"
-   }
-  ],
-  "inZoom": [
-   {
-    "effect": "scene-zoom",
-    "note": "entrada"
-   }
-  ],
-  "kb": [
-   {
-    "effect": "ken-burns",
-    "note": "kb"
-   }
-  ],
-  "kbin": [
-   {
-    "effect": "ken-burns",
-    "note": "kbin"
-   }
-  ],
-  "kbl": [
-   {
-    "effect": "camera-pan",
-    "note": "kbl"
-   }
-  ],
-  "kbout": [
-   {
-    "effect": "ken-burns",
-    "note": "kbout"
-   }
-  ],
-  "kbr": [
-   {
-    "effect": "camera-pan",
-    "note": "kbr"
-   }
-  ],
-  "kenIn": [
-   {
-    "effect": "ken-burns",
-    "note": "kenIn"
-   }
-  ],
-  "lab": [
-   {
-    "effect": "label-rise"
-   }
-  ],
-  "launch": [
-   {
-    "effect": "product-in",
-    "note": "launch"
-   }
-  ],
-  "left": [
-   {
-    "effect": "slide-side",
-    "note": "left"
-   }
-  ],
-  "lineUp": [
-   {
-    "effect": "line-up"
-   }
-  ],
-  "lt": [
-   {
-    "effect": "lower-third"
-   }
-  ],
-  "ltout": [
-   {
-    "effect": null
-   }
-  ],
-  "netin": [
-   {
-    "effect": null
-   }
-  ],
-  "num": [
-   {
-    "effect": "num-stamp"
-   }
-  ],
-  "outPush": [
-   {
-    "effect": "scene-push",
-    "note": "salida"
-   }
-  ],
-  "outUp": [
-   {
-    "effect": "scene-up",
-    "note": "salida"
-   }
-  ],
-  "outZoom": [
-   {
-    "effect": "scene-zoom",
-    "note": "salida"
-   }
-  ],
-  "outf": [
-   {
-    "effect": null
-   }
-  ],
-  "pan": [
-   {
-    "effect": "camera-pan",
-    "note": "pan"
-   }
-  ],
-  "pop": [
-   {
-    "effect": "pop"
-   }
-  ],
-  "reveal": [
-   {
-    "effect": null
-   }
-  ],
-  "right": [
-   {
-    "effect": "slide-side",
-    "note": "right"
-   }
-  ],
-  "rise": [
-   {
-    "brands": [
-     "gremco"
+  "hits": "screen-shake",
+  "transitions": {
+    "wipe": "double-wipe",
+    "bars": "shutter-bars",
+    "iris": "iris-reveal"
+  },
+  "animations": {
+    "beat": [
+      {
+        "effect": "beat"
+      }
     ],
-    "effect": null
-   },
-   {
-    "brands": [
-     "pirotecnia"
+    "blink": [
+      {
+        "effect": "blink"
+      }
     ],
-    "effect": "product-in",
-    "note": "rise"
-   },
-   {
-    "effect": "up",
-    "note": "rise"
-   }
-  ],
-  "slam": [
-   {
-    "effect": "slam"
-   }
-  ],
-  "slamB": [
-   {
-    "effect": "slam",
-    "note": "variante slamB"
-   }
-  ],
-  "slamL": [
-   {
-    "effect": "slam-sides",
-    "note": "slamL"
-   }
-  ],
-  "slamR": [
-   {
-    "effect": "slam-sides",
-    "note": "slamR"
-   }
-  ],
-  "stamp": [
-   {
-    "effect": "stamp-in",
-    "note": "stamp"
-   }
-  ],
-  "stampIn": [
-   {
-    "effect": "stamp-in",
-    "note": "stampIn"
-   }
-  ],
-  "up": [
-   {
-    "effect": "up"
-   }
-  ],
-  "zoomIn": [
-   {
-    "effect": "stamp-in",
-    "note": "zoomIn"
-   }
-  ],
-  "wipe": [
-   {
-    "effect": "clip-reveal"
-   }
-  ],
-  "flash": [
-   {
-    "brands": [
-     "pirotecnia"
+    "cellD": [
+      {
+        "effect": "cell-in",
+        "note": "cellD"
+      }
     ],
-    "effect": "light-burst"
-   },
-   {
-    "effect": "flash"
-   }
-  ],
-  "prog": [
-   {
-    "effect": null
-   }
-  ],
-  "draw": [
-   {
-    "effect": "line-draw"
-   }
-  ],
-  "spin": [
-   {
-    "effect": "rays-spin"
-   }
-  ]
- },
- "elements": {
-  "flash": [
-   {
-    "brands": [
-     "pirotecnia"
+    "cellL": [
+      {
+        "effect": "cell-in",
+        "note": "cellL"
+      }
     ],
-    "effect": "light-burst"
-   },
-   {
-    "effect": "flash"
-   }
-  ],
-  "wipe": [
-   {
-    "effect": "wipe-panel"
-   }
-  ],
-  "lt": [
-   {
-    "effect": "lower-third"
-   }
-  ],
-  "sw": [
-   {
-    "effect": "sweep-panel"
-   }
-  ],
-  "ring": [
-   {
-    "effect": "ring-burst"
-   }
-  ],
-  "bar": [
-   {
-    "effect": "venetian-bars"
-   }
-  ],
-  "prog": [
-   {
-    "effect": "progress-bar"
-   }
-  ]
- },
- "classes": {
-  "fx-slam": "slam",
-  "fx-pop": "pop",
-  "fx-push-in": "scene-push",
-  "fx-sweep": "sweep-panel",
-  "fx-iris": "iris-reveal",
-  "fx-up": "up",
-  "fx-fade": "fade",
-  "fx-grow": "grow-bar",
-  "fx-slide": "slide-side",
-  "fx-slamside": "slam-sides",
-  "fx-product": "product-in",
-  "fx-stamp": "stamp-in",
-  "fx-check": "check-in",
-  "fx-lineup": "line-up",
-  "fx-num": "num-stamp",
-  "fx-labelrise": "label-rise",
-  "fx-clip": "clip-reveal",
-  "fx-beat": "beat",
-  "fx-blink": "blink",
-  "fx-glow": "glow-pulse",
-  "fx-rays": "rays-spin",
-  "fx-draw": "line-draw",
-  "fx-kb": "ken-burns",
-  "fx-pan": "camera-pan",
-  "fx-sceneup-in": "scene-up",
-  "fx-scenezoom-in": "scene-zoom",
-  "fx-scenefade-in": "scene-fade",
-  "fx-cell": "cell-in",
-  "fx-wipe": "wipe-panel",
-  "fx-bars": "venetian-bars",
-  "fx-ring": "ring-burst",
-  "fx-burst": "light-burst",
-  "fx-flash": "flash",
-  "fx-prog": "progress-bar",
-  "fx-lt": "lower-third",
-  "fx-goal": "goal-celebration",
-  "fx-shake": "screen-shake",
-  "fx-awipe-a": "double-wipe",
-  "fx-abars": "shutter-bars"
- }
+    "cellR": [
+      {
+        "effect": "cell-in",
+        "note": "cellR"
+      }
+    ],
+    "cellU": [
+      {
+        "effect": "cell-in",
+        "note": "cellU"
+      }
+    ],
+    "checkIn": [
+      {
+        "effect": "check-in"
+      }
+    ],
+    "drop": [
+      {
+        "effect": "product-in",
+        "note": "drop"
+      }
+    ],
+    "fade": [
+      {
+        "effect": "fade"
+      }
+    ],
+    "flick": [
+      {
+        "effect": null
+      }
+    ],
+    "fly": [
+      {
+        "effect": "product-in",
+        "note": "fly"
+      }
+    ],
+    "glowp": [
+      {
+        "effect": "glow-pulse"
+      }
+    ],
+    "goal": [
+      {
+        "effect": "goal-celebration"
+      }
+    ],
+    "grow": [
+      {
+        "effect": "grow-bar"
+      }
+    ],
+    "growY": [
+      {
+        "effect": "grow-bar",
+        "note": "growY"
+      }
+    ],
+    "inD": [
+      {
+        "effect": "product-in",
+        "note": "inD"
+      }
+    ],
+    "inFade": [
+      {
+        "effect": "scene-fade",
+        "note": "entrada"
+      }
+    ],
+    "inL": [
+      {
+        "effect": "product-in",
+        "note": "inL"
+      }
+    ],
+    "inPush": [
+      {
+        "effect": "scene-push",
+        "note": "entrada"
+      }
+    ],
+    "inR": [
+      {
+        "effect": "product-in",
+        "note": "inR"
+      }
+    ],
+    "inU": [
+      {
+        "effect": "product-in",
+        "note": "inU"
+      }
+    ],
+    "inUp": [
+      {
+        "effect": "scene-up",
+        "note": "entrada"
+      }
+    ],
+    "inZoom": [
+      {
+        "effect": "scene-zoom",
+        "note": "entrada"
+      }
+    ],
+    "kb": [
+      {
+        "effect": "ken-burns",
+        "note": "kb"
+      }
+    ],
+    "kbin": [
+      {
+        "effect": "ken-burns",
+        "note": "kbin"
+      }
+    ],
+    "kbl": [
+      {
+        "effect": "camera-pan",
+        "note": "kbl"
+      }
+    ],
+    "kbout": [
+      {
+        "effect": "ken-burns",
+        "note": "kbout"
+      }
+    ],
+    "kbr": [
+      {
+        "effect": "camera-pan",
+        "note": "kbr"
+      }
+    ],
+    "kenIn": [
+      {
+        "effect": "ken-burns",
+        "note": "kenIn"
+      }
+    ],
+    "lab": [
+      {
+        "effect": "label-rise"
+      }
+    ],
+    "launch": [
+      {
+        "effect": "product-in",
+        "note": "launch"
+      }
+    ],
+    "left": [
+      {
+        "effect": "slide-side",
+        "note": "left"
+      }
+    ],
+    "lineUp": [
+      {
+        "effect": "line-up"
+      }
+    ],
+    "lt": [
+      {
+        "effect": "lower-third"
+      }
+    ],
+    "ltout": [
+      {
+        "effect": null
+      }
+    ],
+    "netin": [
+      {
+        "effect": null
+      }
+    ],
+    "num": [
+      {
+        "effect": "num-stamp"
+      }
+    ],
+    "outPush": [
+      {
+        "effect": "scene-push",
+        "note": "salida"
+      }
+    ],
+    "outUp": [
+      {
+        "effect": "scene-up",
+        "note": "salida"
+      }
+    ],
+    "outZoom": [
+      {
+        "effect": "scene-zoom",
+        "note": "salida"
+      }
+    ],
+    "outf": [
+      {
+        "effect": null
+      }
+    ],
+    "pan": [
+      {
+        "effect": "camera-pan",
+        "note": "pan"
+      }
+    ],
+    "pop": [
+      {
+        "effect": "pop"
+      }
+    ],
+    "reveal": [
+      {
+        "effect": null
+      }
+    ],
+    "right": [
+      {
+        "effect": "slide-side",
+        "note": "right"
+      }
+    ],
+    "rise": [
+      {
+        "effect": "up",
+        "note": "rise"
+      }
+    ],
+    "slam": [
+      {
+        "effect": "slam"
+      }
+    ],
+    "slamB": [
+      {
+        "effect": "slam",
+        "note": "variante slamB"
+      }
+    ],
+    "slamL": [
+      {
+        "effect": "slam-sides",
+        "note": "slamL"
+      }
+    ],
+    "slamR": [
+      {
+        "effect": "slam-sides",
+        "note": "slamR"
+      }
+    ],
+    "stamp": [
+      {
+        "effect": "stamp-in",
+        "note": "stamp"
+      }
+    ],
+    "stampIn": [
+      {
+        "effect": "stamp-in",
+        "note": "stampIn"
+      }
+    ],
+    "up": [
+      {
+        "effect": "up"
+      }
+    ],
+    "zoomIn": [
+      {
+        "effect": "stamp-in",
+        "note": "zoomIn"
+      }
+    ],
+    "wipe": [
+      {
+        "effect": "clip-reveal"
+      }
+    ],
+    "flash": [
+      {
+        "effect": "flash"
+      }
+    ],
+    "prog": [
+      {
+        "effect": null
+      }
+    ],
+    "draw": [
+      {
+        "effect": "line-draw"
+      }
+    ],
+    "spin": [
+      {
+        "effect": "rays-spin"
+      }
+    ]
+  },
+  "elements": {
+    "flash": [
+      {
+        "effect": "flash"
+      }
+    ],
+    "wipe": [
+      {
+        "effect": "wipe-panel"
+      }
+    ],
+    "lt": [
+      {
+        "effect": "lower-third"
+      }
+    ],
+    "sw": [
+      {
+        "effect": "sweep-panel"
+      }
+    ],
+    "ring": [
+      {
+        "effect": "ring-burst"
+      }
+    ],
+    "bar": [
+      {
+        "effect": "venetian-bars"
+      }
+    ],
+    "prog": [
+      {
+        "effect": "progress-bar"
+      }
+    ]
+  },
+  "classes": {
+    "fx-slam": "slam",
+    "fx-pop": "pop",
+    "fx-push-in": "scene-push",
+    "fx-sweep": "sweep-panel",
+    "fx-iris": "iris-reveal",
+    "fx-up": "up",
+    "fx-fade": "fade",
+    "fx-grow": "grow-bar",
+    "fx-slide": "slide-side",
+    "fx-slamside": "slam-sides",
+    "fx-product": "product-in",
+    "fx-stamp": "stamp-in",
+    "fx-check": "check-in",
+    "fx-lineup": "line-up",
+    "fx-num": "num-stamp",
+    "fx-labelrise": "label-rise",
+    "fx-clip": "clip-reveal",
+    "fx-beat": "beat",
+    "fx-blink": "blink",
+    "fx-glow": "glow-pulse",
+    "fx-rays": "rays-spin",
+    "fx-draw": "line-draw",
+    "fx-kb": "ken-burns",
+    "fx-pan": "camera-pan",
+    "fx-sceneup-in": "scene-up",
+    "fx-scenezoom-in": "scene-zoom",
+    "fx-scenefade-in": "scene-fade",
+    "fx-cell": "cell-in",
+    "fx-wipe": "wipe-panel",
+    "fx-bars": "venetian-bars",
+    "fx-ring": "ring-burst",
+    "fx-burst": "light-burst",
+    "fx-flash": "flash",
+    "fx-prog": "progress-bar",
+    "fx-lt": "lower-third",
+    "fx-goal": "goal-celebration",
+    "fx-shake": "screen-shake",
+    "fx-awipe-a": "double-wipe",
+    "fx-abars": "shutter-bars"
+  }
 }

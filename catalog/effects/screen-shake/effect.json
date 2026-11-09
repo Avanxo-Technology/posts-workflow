@@ -3,20 +3,11 @@
   "name": "Sacudida de pantalla (golpe)",
   "kind": "camera",
   "medium": "video",
-  "brands": [
-    "aga",
-    "gmaq",
-    "pirotecnia"
-  ],
   "tags": [
     "golpe",
     "sacudida",
     "audio"
   ],
-  "source": {
-    "file": "_shared/base/video-template.html",
-    "symbol": "function shake"
-  },
   "snippet": "fx.css",
   "audio": {
     "sfx": "cualquier golpe (pop_bubble, card_place…) con hit=True",

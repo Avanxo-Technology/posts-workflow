@@ -1,0 +1,19 @@
+{
+  "name": "Lima",
+  "short": "LIMA",
+  "sound": "synth (sin música)",
+  "designFile": null,
+  "designExtra": [],
+  "contact": {
+    "whatsapp": "WhatsApp",
+    "web": "tusitio.com"
+  },
+  "fonts": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Inter:wght@400;700&display=swap",
+  "headFont": "Space Grotesk",
+  "bodyFont": "Inter",
+  "dark": "#0f1a3a",
+  "light": "#f6fbe4",
+  "accent": "#b6e22e",
+  "legacyMonths": {},
+  "generated": true
+}

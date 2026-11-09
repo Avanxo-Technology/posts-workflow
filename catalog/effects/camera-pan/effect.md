@@ -7,5 +7,4 @@ Desplazamiento horizontal de la imagen: `kbl`/`kbr` (±3 % con zoom 1.14), `pan`
 3. Sustituye el `<div class="fx-pan-media">` por tu `<img>` o `<video>` con la misma clase.
 
 ## Notas
-- Equivale a los antiguos `kbl` y `kbr`. El paneo por `object-position` (`panx`) no está migrado.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

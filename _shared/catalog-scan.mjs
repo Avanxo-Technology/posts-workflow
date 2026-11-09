@@ -105,7 +105,7 @@ export function scanHtml(html, brand, map, extraKf = new Set()) {
   return {uses: out, unknown: [...unknown].map(([name, where]) => ({name, count: where.length})), unscoped};
 }
 
-// keyframes que viven en hojas de estilo externas (p. ej. aga.css) y que el index.html enlaza con <link rel="stylesheet">
+// keyframes que viven en hojas de estilo externas (p. ej. marca.css) y que el index.html enlaza con <link rel="stylesheet">
 export function externalKeyframes(htmlPath, html, read = p => readFileSync(p, 'utf8')) {
   const set = new Set();
   for (const m of html.matchAll(/<link[^>]*rel="stylesheet"[^>]*href="([^"]+)"/g)) {

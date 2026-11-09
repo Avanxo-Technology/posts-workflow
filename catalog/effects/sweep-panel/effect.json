@@ -3,18 +3,11 @@
   "name": "Barrido de panel",
   "kind": "transition",
   "medium": "video",
-  "brands": [
-    "gmaq"
-  ],
   "tags": [
     "transicion",
     "panel",
     "pantalla-completa"
   ],
-  "source": {
-    "piece": "gmaq/noviembre/postVideos/postVideo3",
-    "symbol": "@keyframes swp"
-  },
   "snippet": "fx.css",
   "audio": {
     "sfx": "whoosh de transición",

@@ -7,5 +7,4 @@ La escena entra desde escala 1.5 con fade (`inZoom`) y sale reduciéndose a .92 
 3. Úsala en escenas de cierre.
 
 ## Notas
-- Equivale a los antiguos `inZoom`/`outZoom` de GREMCO.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

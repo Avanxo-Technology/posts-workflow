@@ -7,5 +7,4 @@ La escena entra solo con opacidad (`inFade`).
 3. La escena saliente queda debajo; no necesita animación.
 
 ## Notas
-- Equivale al antiguo `inFade` de GREMCO.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.

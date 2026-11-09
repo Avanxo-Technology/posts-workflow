@@ -7,5 +7,4 @@ Pantalla blanca que sube a .9 de opacidad en el 12 % y se desvanece (.28 s). Mar
 3. Colócalo encima de la escena y úsalo en un corte seco. Pon un golpe de audio en `--fx-delay`.
 
 ## Notas
-- Equivale al `flash` de GREMCO. GMAQ usaba `flashx` (empezaba en el pico, .42 s): usa `--fx-duration:.42s`.
 - Los parámetros y sus rangos están en `effect.json` → `fx.params`. Es CSS puro por tiempo: se puede pausar y mover con `seek`.
