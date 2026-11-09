@@ -12,6 +12,19 @@
   var kitUrl = function (kit) { return location.origin + '/#/kit?k=' + FX.encodeKit(kit, effectsMap()); };
   var apiUrl = function (kit, extra) { return location.origin + '/api/v1/kit?k=' + FX.encodeKit(kit, effectsMap()) + (extra || ''); };
 
+  // Barra de kits: elegir el activo, crear, duplicar y eliminar
+  function kitBar() {
+    var L = store.list(), cur = L.kits.filter(function (k) { return k.id === L.active; })[0];
+    var sel = h('select', {class: 'in'}, L.kits.map(function (k) { return h('option', {value: k.id, text: k.name + ' (' + k.n + ')'}); }));
+    sel.value = L.active;
+    var again = function () { sessionStorage.setItem('posts-kit-sel', '0'); render(); };
+    sel.addEventListener('change', function () { store.select(sel.value); again(); });
+    return h('div', {class: 'bar', style: 'margin:0 0 14px;flex-wrap:wrap;gap:8px'}, 'Mis kits', sel,
+      h('button', {text: '+ Nuevo kit', onclick: function () { if (store.create('Kit ' + (L.kits.length + 1))) again(); }}),
+      h('button', {text: 'Duplicar', onclick: function () { if (store.duplicate()) again(); }}),
+      h('button', {class: 'danger', text: 'Eliminar kit', onclick: function () { if (confirm('¿Eliminar el kit «' + cur.name + '»? No se puede deshacer.')) { store.remove(L.active); again(); } }}));
+  }
+
   function render() {
     if (disposer) { disposer(); disposer = null; }
     var data = PW.data(), shared = PW.routeQuery().get('k');
@@ -23,15 +36,16 @@
     var kit = store.get();
     if (incoming) {
       app.replaceChildren(h('h1', {text: 'Kit compartido'}),
-        h('div', {class: 'note'}, 'Este enlace trae un kit' + (incoming.name ? ' («' + incoming.name + '»)' : '') + ' con ' + incoming.items.length + ' elementos. Ya tienes un kit en este navegador con ' + kit.items.length + '.'),
-        h('div', {class: 'actions'}, h('button', {class: 'primary', text: 'Cargar este kit (reemplaza el mío)', onclick: function () { store.set(incoming); location.hash = '#/kit'; }}),
-          h('button', {text: 'Seguir con el mío', onclick: function () { location.hash = '#/kit'; }})));
+        h('div', {class: 'note'}, 'Este enlace trae un kit' + (incoming.name ? ' («' + incoming.name + '»)' : '') + ' con ' + incoming.items.length + ' elementos. Tu kit activo («' + kit.name + '») ya tiene ' + kit.items.length + '.'),
+        h('div', {class: 'actions'}, h('button', {class: 'primary', text: 'Guardar como kit nuevo', onclick: function () { store.create(incoming.name || 'Kit compartido', incoming); location.hash = '#/kit'; }}),
+          h('button', {text: 'Reemplazar mi kit activo', onclick: function () { store.set(incoming); location.hash = '#/kit'; }}),
+          h('button', {text: 'Cancelar', onclick: function () { location.hash = '#/kit'; }})));
       return;
     }
     if (!kit.items.length) {
-      app.replaceChildren(h('h1', {text: 'Kit'}),
+      app.replaceChildren(h('h1', {text: 'Kit'}), kitBar(),
         h('p', {class: 'sub', text: 'Reúne varios efectos para usarlos en una misma pieza: ordénalos en la línea de tiempo, ajusta cada uno y copia el paquete (o pásale el enlace a Claude).'}),
-        h('div', {class: 'empty'}, 'Tu kit está vacío. Abre un efecto y pulsa «+ Añadir al kit».', h('div', {style: 'margin-top:14px'}, h('a', {href: '#/'}, h('button', {class: 'primary', text: 'Ver efectos'})))));
+        h('div', {class: 'empty'}, 'Este kit está vacío. Abre un efecto y pulsa «+ Añadir al kit».', h('div', {style: 'margin-top:14px'}, h('a', {href: '#/'}, h('button', {class: 'primary', text: 'Ver efectos'})))));
       return;
     }
 
@@ -206,7 +220,7 @@
     window.addEventListener('resize', onResize);
 
     app.replaceChildren(
-      h('h1', {text: 'Kit'}),
+      h('h1', {text: 'Kit'}), kitBar(),
       h('p', {class: 'sub'}, 'Arrastra los bloques para cambiar cuándo empieza cada efecto y estira el borde derecho para cambiar su duración. Todo se guarda en este navegador. Duración total: ', totalEl),
       h('div', {class: 'detail', style: 'grid-template-columns:340px 1fr'},
         h('div', {class: 'stagebox'}, frame,

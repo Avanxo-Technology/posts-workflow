@@ -160,14 +160,34 @@
     return {el: h('div', {class: 'ctl'}, h('label', {text: p.label || k}), body, reset), sync: sync};
   }
 
-  // ---- kit (carrito): se guarda en este navegador ----
-  var KIT_KEY = 'posts-kit-v1', kitListeners = [];
+  // ---- kits (carritos): varios, con nombre, guardados en este navegador. Uno está "activo": es el que recibe «Añadir al kit». ----
+  var KITS_KEY = 'posts-kits-v2', KIT_KEY_OLD = 'posts-kit-v1', KITS_MAX = 30, kitListeners = [];
+  var uid = function () { return 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); };
+  function loadKits() {
+    try { var s = JSON.parse(localStorage.getItem(KITS_KEY)); if (s && Array.isArray(s.kits) && s.kits.length) { if (!s.kits.some(function (k) { return k.id === s.active; })) s.active = s.kits[0].id; return s; } } catch (e) { /* ilegible: se parte de cero */ }
+    var first = {id: uid(), name: 'Mi kit', palette: '', items: []};
+    try { var old = JSON.parse(localStorage.getItem(KIT_KEY_OLD)); if (old && Array.isArray(old.items)) first = {id: first.id, name: old.name || 'Mi kit', palette: old.palette || '', items: old.items}; } catch (e) { /* sin kit anterior */ }   // migra el kit único de la versión anterior
+    return {active: first.id, kits: [first]};
+  }
   var kitStore = {
-    get: function () {
-      try { var k = JSON.parse(localStorage.getItem(KIT_KEY)); if (k && Array.isArray(k.items)) return k; } catch (e) { /* kit ilegible: se ignora */ }
-      return {name: 'Mi kit', palette: '', items: []};
+    write: function (s) { try { localStorage.setItem(KITS_KEY, JSON.stringify(s)); } catch (e) { /* sin almacenamiento */ } kitListeners.forEach(function (f) { f(kitStore.get()); }); },
+    get: function () { var s = loadKits(), k = s.kits.filter(function (x) { return x.id === s.active; })[0]; return {name: k.name, palette: k.palette, items: k.items}; },
+    set: function (k) { var s = loadKits(); s.kits.forEach(function (x) { if (x.id === s.active) { x.name = k.name; x.palette = k.palette; x.items = k.items; } }); kitStore.write(s); },
+    list: function () { var s = loadKits(); return {active: s.active, kits: s.kits.map(function (x) { return {id: x.id, name: x.name || 'Sin nombre', n: x.items.length}; })}; },
+    select: function (id) { var s = loadKits(); if (s.kits.some(function (k) { return k.id === id; })) { s.active = id; kitStore.write(s); } },
+    create: function (name, data) {
+      var s = loadKits();
+      if (s.kits.length >= KITS_MAX) { toast('Hasta ' + KITS_MAX + ' kits: elimina alguno antes'); return null; }
+      var k = {id: uid(), name: name || 'Kit nuevo', palette: (data && data.palette) || '', items: (data && data.items) || []};
+      s.kits.push(k); s.active = k.id; kitStore.write(s); return k.id;
     },
-    set: function (k) { try { localStorage.setItem(KIT_KEY, JSON.stringify(k)); } catch (e) { /* sin almacenamiento */ } kitListeners.forEach(function (f) { f(k); }); },
+    duplicate: function () { var c = kitStore.get(); return kitStore.create((c.name || 'Kit') + ' (copia)', JSON.parse(JSON.stringify(c))); },
+    remove: function (id) {
+      var s = loadKits(); s.kits = s.kits.filter(function (k) { return k.id !== id; });
+      if (!s.kits.length) s.kits.push({id: uid(), name: 'Mi kit', palette: '', items: []});
+      if (s.active === id || !s.kits.some(function (k) { return k.id === s.active; })) s.active = s.kits[0].id;
+      kitStore.write(s);
+    },
     add: function (item, palette) {
       var k = kitStore.get();
       if (k.items.length >= FX.KIT_MAX) { toast('El kit admite hasta ' + FX.KIT_MAX + ' elementos'); return k; }
@@ -294,7 +314,7 @@
           h('h1', {text: e.name}),
           h('div', {class: 'idline'}, h('code', {text: e.id}), h('span', {class: 'kind k-' + e.kind, text: KIND[e.kind] || e.kind}),
             h('button', {onclick: function () { copy(e.id, 'id copiado'); }, text: 'Copiar id'}),
-            h('button', {class: 'primary', text: '+ Añadir al kit', onclick: function () { var n = kitStore.add({effect: e.id, label: fx.label || '', params: Object.assign({}, vals)}, palId === 'custom' ? custom : palId).items.length; toast('Añadido al kit (' + n + ')'); }})),
+            h('button', {class: 'primary', text: '+ Añadir al kit', onclick: function () { var n = kitStore.add({effect: e.id, label: fx.label || '', params: Object.assign({}, vals)}, palId === 'custom' ? custom : palId).items.length; toast('Añadido a «' + kitStore.get().name + '» (' + n + ')'); }})),
           md(e.md),
           h('h2', {text: 'Controles'}),
           saveBox(e),

@@ -6,7 +6,7 @@
 - **Explora:** cada efecto tiene vista previa en vivo en formato vertical (1080x1920).
 - **Edita sin código:** ajusta duración, retraso, distancia y colores con controles visuales y elige una paleta o crea la tuya.
 - **Guarda:** tus configuraciones se guardan con nombre en tu navegador.
-- **Arma un kit:** añade varios efectos al carrito, ordénalos en una línea de tiempo y copia el enlace del kit.
+- **Arma kits:** añade varios efectos a un carrito, ordénalos en una línea de tiempo y copia el enlace del kit. Puedes tener varios kits con nombre (crear, duplicar, cambiar, eliminar); al abrir el enlace de otra persona se guarda como kit nuevo sin pisar los tuyos.
 - **Pásaselo a tu IA:** pega el enlace del kit (o la URL de un efecto) en tu chat con Claude. La API devuelve el CSS y el HTML ya ajustados, con los tiempos de cada efecto.
 
 Ejemplo de prompt: «Aplica este kit en mi video: `https://<tu-sitio>/api/v1/kit?k=…`».
