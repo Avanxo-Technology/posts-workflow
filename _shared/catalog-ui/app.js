@@ -255,7 +255,7 @@
         t.addEventListener('input', function () { setProp('text', t.value); });
         section.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Texto', t));
       }
-      if (el.kind !== 'media') {
+      if (el.kind === 'sample' || el.kind === 'scene') {
         [['color', 'Color del texto'], ['bg', 'Fondo']].forEach(function (cp) {
           var k = cp[0], inp = h('input', {type: 'color', value: cur()[k] || '#888888'}), tag = h('span', {class: 'val mono', text: cur()[k] || 'auto'});
           inp.addEventListener('input', function () { tag.textContent = inp.value; setProp(k, inp.value); });
@@ -269,6 +269,7 @@
             h('button', {class: 'mini', title: 'Tamaño del efecto', text: '↺', onclick: function () { out.textContent = 'auto'; setProp('size', ''); }})));
         }
       }
+      if (el.kind === 'label') { box.appendChild(section); return; }   // sin elemento de muestra que sustituir: solo texto
       var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: o.assets[id] ? 'imagen puesta' : 'sin imagen'});
       file.addEventListener('change', function () {
         var f = file.files && file.files[0]; if (!f) return;

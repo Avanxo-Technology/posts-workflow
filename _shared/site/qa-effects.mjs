@@ -1,6 +1,6 @@
 // Comprobación visual de los efectos: renderiza cada uno en Chrome, toma fotogramas en varios instantes y mide cuánto cambia la imagen.
 // Un efecto cuyo movimiento no se ve (p. ej. un degradado liso que se desplaza) sale como "SIN MOVIMIENTO VISIBLE".
-//   node _shared/site/qa-effects.mjs [id ...] [--out carpeta]     (--out guarda los fotogramas como PNG para revisarlos)
+//   node _shared/site/qa-effects.mjs [id ...] [--out carpeta] [--long]     (--out guarda los fotogramas como PNG; --long prueba un texto largo y mide que quede centrado y dentro de la pantalla)
 // Requiere Google Chrome (o CHROME=/ruta/al/binario) y Node 22+.
 import {spawn} from 'node:child_process';
 import {createRequire} from 'node:module';
@@ -18,7 +18,9 @@ const FX = createRequire(import.meta.url)('../catalog-ui/fx-core.js');
 const args = process.argv.slice(2);
 const oi = args.indexOf('--out'); const OUT = oi >= 0 ? resolve(args.splice(oi, 2)[1]) : null;
 if (OUT) mkdirSync(OUT, {recursive: true});
+const LONG = args.includes('--long'); if (LONG) args.splice(args.indexOf('--long'), 1);
 const only = new Set(args);
+const LONG_TEXT = 'Una oferta muy larga que ocupa varias lineas del video hoy';
 
 // ---- PNG -> RGBA (solo lo que devuelve Chrome: 8 bits, sin entrelazado) ----
 function decodePng(buf) {
@@ -79,8 +81,10 @@ const pal = Object.values(publicPalettes(TOOL))[0];
 const baseCss = previewBaseCss(readFileSync(join(TOOL, '_shared', 'catalog-ui', 'fx-preview.html'), 'utf8'));
 const results = [];
 for (const e of data.effects.filter(x => x.fx && !x.supersededBy && (!only.size || only.has(x.id)))) {
-  const r = FX.build(e, {}, pal), total = Math.max(r.total, 0.5);
-  let html = fxCardPage(FX, e, pal, baseCss);
+  if (LONG && !FX.elementsOf(e).some(x => x.kind === 'sample')) continue;   // solo los efectos con un elemento de texto de muestra
+  const eo = LONG ? {elements: {s: {text: LONG_TEXT}}} : {};
+  const r = FX.build(e, {}, pal, eo), total = Math.max(r.total, 0.5);
+  let html = fxCardPage(FX, e, pal, baseCss, eo);
   html = html.replace(/requestAnimationFrame\(tick\);\s*<\/script>/, 'window.setT=function(x){anims.forEach(function(a){a.currentTime=x*1000})};</script>');
   await cdp('Page.navigate', {url: 'data:text/html;base64,' + Buffer.from(html).toString('base64')});
   await sleep(350);
@@ -94,6 +98,17 @@ for (const e of data.effects.filter(x => x.fx && !x.supersededBy && (!only.size 
     if (OUT) writeFileSync(join(OUT, `${e.id}-${String(t).replace('.', '_')}.png`), buf);
     frames.push(decodePng(buf));
   }
+  if (LONG) {
+    await cdp('Runtime.evaluate', {expression: `setT(${total})`});
+    await sleep(80);
+    const m = await cdp('Runtime.evaluate', {returnByValue: true, expression: `(function(){var el=document.querySelector('[data-fx-sample]');if(!el)return null;var r=el.getBoundingClientRect(),w=document.documentElement.clientWidth,cs=getComputedStyle(el);return {l:r.left,r:r.right,w:w,align:cs.textAlign,lines:Math.round(r.height/parseFloat(cs.lineHeight||cs.fontSize))}})()`});
+    const v = m.result.value;
+    const off = v && Math.abs((v.l + v.r) / 2 - v.w / 2);
+    const flag = !v ? 'SIN ELEMENTO' : v.l < -1 || v.r > v.w + 1 ? 'EL TEXTO SE SALE' : !['center', 'start', '-webkit-center'].includes(v.align) || v.align !== 'center' ? 'TEXTO NO CENTRADO (' + v.align + ')' : off > 6 ? 'DESCENTRADO ' + off.toFixed(0) + 'px' : 'ok';
+    results.push({id: e.id, flag});
+    console.log(`${flag === 'ok' ? '✓' : '✗'} ${e.id.padEnd(16)} alineación ${v ? v.align : '?'}  izq ${v ? v.l.toFixed(0) : '?'} der ${v ? v.r.toFixed(0) : '?'} de ${v ? v.w : '?'}  ${flag === 'ok' ? '' : flag}`);
+    continue;
+  }
   const steps = frames.slice(1).map((f, i) => changed(frames[i], f)), big = changed(frames[0], frames[frames.length - 1]);
   const move = Math.max(...steps, big), inked = Math.max(...frames.map(ink));
   const flag = move < 0.001 ? 'SIN MOVIMIENTO VISIBLE' : inked < 0.005 ? 'NO SE VE NADA' : 'ok';
@@ -103,5 +118,5 @@ for (const e of data.effects.filter(x => x.fx && !x.supersededBy && (!only.size 
 ws.close(); chrome.kill(); await sleep(500);
 try { rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 200}); } catch { /* Chrome aún libera archivos: es una carpeta temporal */ }
 const bad = results.filter(r => r.flag !== 'ok');
-console.log(`\n${results.length - bad.length}/${results.length} efectos con movimiento visible` + (bad.length ? `; revisar: ${bad.map(b => b.id).join(', ')}` : ''));
+console.log(`\n${results.length - bad.length}/${results.length} efectos ${LONG ? 'con el texto largo bien centrado' : 'con movimiento visible'}` + (bad.length ? `; revisar: ${bad.map(b => b.id).join(', ')}` : ''));
 process.exit(bad.length ? 1 : 0);

@@ -104,6 +104,8 @@
       out.push({id: id, kind: kind, inCode: !inDemo, hasText: kind !== 'media',
         text: kind === 'sample' ? ((effect.fx && effect.fx.label) || '') : kind === 'scene' ? m[6].trim() : ''});
     }
+    // efectos con texto ({{label}}) pero sin elemento de muestra marcado (p. ej. el tercio inferior): solo se puede editar el texto
+    if (effect.fx && effect.fx.label && html.indexOf('{{label}}') >= 0 && !out.some(function (x) { return x.id === 's'; })) out.push({id: 's', kind: 'label', inCode: true, hasText: true, text: effect.fx.label});
     return out;
   }
   // Valida elementos que llegan de fuera (URL, API, kit). Devuelve {elements, errors}; lo no válido se rechaza.
@@ -222,7 +224,7 @@
   var KIT_MAX = 40, ELEMENT_KINDS = ['entrance', 'text', 'loop'];
   var KIT_CSS = '/* kit: posiciones de ejemplo de los elementos; sustitúyelas por tu diseño */\n' +
     '.kit-slot{position:absolute;left:0;right:0;display:flex;justify-content:center;transform:translateY(-50%)}\n' +
-    '.kit-slot>*{margin:0;padding:40px 90px;border-radius:40px;background:var(--kit-accent);color:var(--kit-on);font:900 110px/1 system-ui,sans-serif;letter-spacing:-.03em}\n';
+    '.kit-slot>*{margin:0;padding:40px 90px;border-radius:40px;text-align:center;max-width:calc(100% - 120px);box-sizing:border-box;overflow-wrap:anywhere;background:var(--kit-accent);color:var(--kit-on);font:900 110px/1 system-ui,sans-serif;letter-spacing:-.03em}\n';
   var lum = function (h) { var c = [1, 3, 5].map(function (i) { var v = parseInt(h.slice(i, i + 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
 
   function paletteOfKit(kit, brands) {
