@@ -54,7 +54,7 @@ test('api: fuentes de los elementos y lista de fuentes (marcas y generales)', as
   assert.ok(d.code.html.includes("font-family:'Oswald',sans-serif") && d.code.css.startsWith('@import url('));
   assert.equal((await get('/api/v1/effects/slam?el_font=' + encodeURIComponent("a');}"))).r.status, 400);
   const f = (await get('/api/v1/fonts')).j;
-  assert.ok(f.general.google.includes('Poppins') && f.general.system.includes('Georgia') && Array.isArray(f.brands));
+  assert.ok(f.general.google.includes('Poppins') && f.general.system.includes('Georgia') && Array.isArray(f.brands));   // el catálogo local (con marcas) devuelve `brands`
   assert.ok(f.brands.every(b => b.heading || b.body));
 });
 
@@ -107,14 +107,32 @@ test('build público: sin marcas, rutas, posts ni efectos no autocontenidos', as
     const rx = new RegExp((PRIV.length ? `\\b(${PRIV.join('|')})\\b|` : '') + 'brands/|engine\\.js|postVideo|video-template|catalog/posts|/home/', 'i');
     for (const f of walk(dist)) { const m = rx.exec(readFileSync(f, 'utf8')); assert.ok(!m, `rastro interno «${m && m[0]}» en ${f}`); }
     const cat = JSON.parse(readFileSync(join(dist, 'public/data/catalog.json'), 'utf8'));
-    assert.deepEqual(cat.posts, []); assert.ok(cat.effects.every(e => e.fx && !e.uses.length && !e.brands.length && !e.source));
-    assert.ok(Object.keys(cat.brands).includes('oceano') && !Object.keys(cat.brands).some(b => PRIV.includes(b)));
+    assert.deepEqual(cat.posts, []); assert.ok(cat.effects.every(e => e.fx && !e.uses.length && !e.brands && !e.source));
+    assert.ok(Object.keys(cat.palettes).includes('oceano') && !Object.keys(cat.palettes).some(b => PRIV.includes(b)) && !('brands' in cat), 'lo público habla de paletas, no de marcas');
     const d = JSON.parse(readFileSync(join(dist, 'public/api/v1/effects/slam.json'), 'utf8'));
     assert.ok(!('usedIn' in d) && !('brands' in d));
     const index = readFileSync(join(dist, 'public/index.html'), 'utf8');
     assert.ok(!index.includes('#/posts') && index.includes('#/guardadas') && index.includes('#/kit'));
     const llms = readFileSync(join(dist, 'public/llms.txt'), 'utf8');
     assert.ok(llms.includes('palette=oceano') && !llms.includes('brand='));
+  } finally { rmSync(out, {recursive: true, force: true}); }
+});
+
+test('build público: la API y los datos hablan de paletas y fuentes sugeridas, no de marcas', async () => {
+  const out = mkdtempSync(join(tmpdir(), 'posts-site-'));
+  try {
+    const dist = join(out, 'dist'); await buildSite({TOOL, out: dist});
+    const imp = f => import(pathToFileURL(join(dist, f)).href);
+    const cf = await imp('functions/api/v1/[[path]].js');
+    const f = await (await cf.onRequest({request: new Request('https://x.test/api/v1/fonts')})).json();
+    assert.ok(Array.isArray(f.suggested) && f.suggested.length >= 8 && !('brands' in f));
+    assert.ok(f.suggested.every(p => p.palette && (p.heading || p.body)));
+    const data = (await imp('lib/data.mjs')).default;
+    assert.ok(data.palettes && !('brands' in data));
+    const llms = readFileSync(join(dist, 'public/llms.txt'), 'utf8');
+    assert.ok(!/\bmarcas?\b|\bbrands?\b/i.test(llms), 'llms.txt público sin marcas');
+    const app = readFileSync(join(dist, 'public/data/catalog.json'), 'utf8');
+    assert.ok(!/"brands"/.test(app));
   } finally { rmSync(out, {recursive: true, force: true}); }
 });
 

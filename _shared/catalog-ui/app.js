@@ -256,15 +256,15 @@
         section.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Texto', t));
       }
       if (el.kind === 'sample' || el.kind === 'scene') {
-        // fuente: la del efecto, las de las marcas disponibles, Google Fonts y del sistema
+        // fuente: la del efecto, las sugeridas con cada paleta (o las de las marcas en el catálogo local), Google Fonts y del sistema
         var brands = (PW.data().brands || {}), seenB = {}, bopts = [];
         Object.keys(brands).sort().forEach(function (bid) {
           [brands[bid].headFont, brands[bid].bodyFont].forEach(function (f) {
-            if (f && !seenB[bid + '|' + f]) { seenB[bid + '|' + f] = 1; bopts.push(h('option', {value: f, text: f + ' · ' + (brands[bid].name || bid)})); }
+            if (f && !seenB[bid + '|' + f]) { seenB[bid + '|' + f] = 1; bopts.push(h('option', {value: f, text: f + ' · ' + (STATIC ? 'paleta ' : '') + (brands[bid].name || bid)})); }
           });
         });
         var fontSel = h('select', {class: 'in'}, h('option', {value: '', text: 'La del efecto'}),
-          bopts.length ? h('optgroup', {label: 'Fuentes de las marcas'}, bopts) : null,
+          bopts.length ? h('optgroup', {label: STATIC ? 'Sugeridas con cada paleta' : 'Fuentes de las marcas'}, bopts) : null,
           h('optgroup', {label: 'Google Fonts'}, FX.FONTS.google.map(function (f) { return h('option', {value: f, text: f}); })),
           h('optgroup', {label: 'Del sistema'}, FX.FONTS.system.map(function (f) { return h('option', {value: f, text: f}); })));
         fontSel.value = cur().font || '';
@@ -412,7 +412,7 @@
       h('div', {class: 'detail'},
         h('div', {class: 'stagebox'}, frame,
           h('div', {class: 'bar', style: 'margin-top:10px'}, 'Paleta', palSel), customBox,
-          h('p', {style: 'color:var(--mut);font-size:12px;margin:10px 0 0', text: 'La barra inferior de la vista previa permite pausar y mover el instante. Las marcas amarillas indican momentos clave.'})),
+          h('p', {style: 'color:var(--mut);font-size:12px;margin:10px 0 0', text: 'La barra inferior de la vista previa permite pausar y mover el instante. Los puntos amarillos indican momentos clave.'})),
         h('div', null,
           h('h1', {text: e.name}),
           h('div', {class: 'idline'}, h('code', {text: e.id}), h('span', {class: 'kind k-' + e.kind, text: KIND[e.kind] || e.kind}),
@@ -580,6 +580,7 @@
   }
   function load(keepScroll) {
     return fetch(STATIC ? '/data/catalog.json' : '/api/catalog').then(function (r) { return r.json(); }).then(function (d) {
+      if (d.palettes && !d.brands) d.brands = d.palettes;   // el sitio público trae paletas; la UI las trata igual que las marcas del catálogo local
       data = d; var y = window.scrollY; render(); if (keepScroll) window.scrollTo(0, y);
     }).catch(function (err) { app.replaceChildren(h('div', {class: 'empty', text: 'No se pudo leer el catálogo: ' + err.message})); });
   }

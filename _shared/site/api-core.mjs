@@ -6,11 +6,15 @@
 const RESERVED = new Set(['palette', 'dark', 'light', 'accent']);
 const MAX_K = 8000;   // tope del parámetro k (kit codificado): evita peticiones desproporcionadas
 
+// El catálogo público trae `palettes`; el local (con marcas) trae `brands`. Para la API son lo mismo: colores y fuentes con nombre.
+const palettesOf = bundle => bundle.palettes || bundle.brands || {};
+
 function paletteFrom(q, bundle, effect) {
-  const b = bundle.brands[q.get('palette')] || bundle.brands[effect.brands?.[0]] || Object.values(bundle.brands)[0] || {};
+  const P = palettesOf(bundle);
+  const b = P[q.get('palette')] || P[effect.brands?.[0]] || Object.values(P)[0] || {};
   const pick = (k, d) => (/^#[0-9a-fA-F]{6}$/.test(q.get(k) || '') ? q.get(k) : b[k] || d);
   return {dark: pick('dark', '#14181c'), light: pick('light', '#f4f1ea'), accent: pick('accent', '#c46a2b'),
-    from: /^#/.test(q.get('palette') || '') ? 'custom' : (bundle.brands[q.get('palette')] ? q.get('palette') : b.id || 'default')};
+    from: /^#/.test(q.get('palette') || '') ? 'custom' : (P[q.get('palette')] ? q.get('palette') : b.id || 'default')};
 }
 
 // Elementos de muestra editables por la URL: el_text, el_color, el_bg, el_size (texto de muestra) y el_a_* / el_b_* (escenas A y B).
@@ -55,7 +59,7 @@ function kitResponse(FX, k, format, bundle, base) {
   if (!kit) return {status: 400, type: 'json', body: {error: 'Parámetro k no válido (el kit va codificado en la URL de la UI)'}};
   const effects = {};
   for (const e of bundle.effects) if (e.fx) effects[e.id] = e;
-  const b = FX.buildKit(effects, kit, bundle.brands);
+  const b = FX.buildKit(effects, kit, palettesOf(bundle));
   if (b.errors.length) return {status: 400, type: 'json', body: {error: 'Kit no válido', details: b.errors}};
   if (format === 'html') return {status: 200, type: 'html', body: FX.pageHtml(b)};
   return {status: 200, type: 'json', body: {
@@ -117,8 +121,8 @@ export function createApi({getBundle, FX, cache = 'public, max-age=300'}) {
 
     const bundle = await getBundle();
     if (path === '/api/v1/fonts') {
-      const brandFonts = Object.values(bundle.brands).filter(b => b.headFont || b.bodyFont).map(b => ({palette: b.id, name: b.name, heading: b.headFont || null, body: b.bodyFont || null}));
-      return json(200, {howTo: 'Usa el nombre en el_font (o el_a_font / el_b_font). Las fuentes de Google Fonts añaden un @import al principio de code.css; las del sistema no.', brands: brandFonts, general: {google: FX.FONTS.google, system: FX.FONTS.system}});
+      const suggested = Object.values(palettesOf(bundle)).filter(b => b.headFont || b.bodyFont).map(b => ({palette: b.id, name: b.name, heading: b.headFont || null, body: b.bodyFont || null}));
+      return json(200, {howTo: 'Usa el nombre en el_font (o el_a_font / el_b_font). Las fuentes de Google Fonts añaden un @import al principio de code.css; las del sistema no.', [bundle.public ? 'suggested' : 'brands']: suggested, general: {google: FX.FONTS.google, system: FX.FONTS.system}});
     }
     if (path === '/api/v1/effects') {
       const term = (q.get('q') || '').toLowerCase();

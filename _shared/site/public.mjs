@@ -32,7 +32,7 @@ export function scrubMd(md) {
 }
 
 export function publicEffect(e) {
-  return {id: e.id, name: e.name, kind: e.kind, medium: e.medium, tags: e.tags || [], brands: [], uses: [], spec: 1,
+  return {id: e.id, name: e.name, kind: e.kind, medium: e.medium, tags: e.tags || [], uses: [], spec: 1,
     audio: e.audio?.sync ? {sync: e.audio.sync} : null, md: scrubMd(e.md || ''), fx: e.fx, snippet: null, snippetName: null, demo: {type: 'fx', variants: []}};
 }
 
@@ -48,5 +48,5 @@ export function publicBundle(TOOL, data) {
     if (m) leaks.push(`${e.id}: «${m[0]}»`);
   }
   if (leaks.length) throw new Error('El catálogo público contiene referencias internas (marcas, rutas o posts). Límpialas en effect.md / effect.json:\n  ' + leaks.join('\n  '));
-  return {effects, palettes, brands: palettes};
+  return {effects, palettes};
 }
