@@ -10,7 +10,14 @@ html,body{margin:0;height:100%;background:#0b0d10;overflow:hidden;font-family:sy
 [data-fx-scene]{display:grid;place-items:center;font:900 150px/1 system-ui,sans-serif;letter-spacing:-.04em;text-align:center}
 [data-fx-scene=a]{background:var(--p-dark);color:var(--p-light)}
 [data-fx-scene=b]{background:var(--p-light);color:var(--p-dark)}
-[data-fx-scene]{position:absolute;inset:0}
+[data-fx-scene]{position:absolute;inset:0;overflow:hidden;isolation:isolate;font-size:190px}
+/* escenas de muestra muy distintas entre sí (formas y letra gigante) para que se note la transición; van detrás del texto y no dependen del fondo que ponga cada efecto */
+[data-fx-scene]::before,[data-fx-scene]::after{content:'';position:absolute;z-index:-1;pointer-events:none}
+[data-fx-scene]::before{content:attr(data-fx-scene);text-transform:uppercase;font:900 1100px/1 system-ui,sans-serif;letter-spacing:0;opacity:.1}
+[data-fx-scene=a]::before{left:-60px;bottom:-190px}
+[data-fx-scene=b]::before{right:-40px;top:-160px}
+[data-fx-scene=a]::after{inset:0;background:radial-gradient(circle at 24% 26%,var(--p-accent) 0 17%,transparent 17.4%),radial-gradient(circle at 80% 78%,color-mix(in srgb,var(--p-accent) 35%,transparent) 0 24%,transparent 24.4%)}
+[data-fx-scene=b]::after{inset:0;background:repeating-linear-gradient(135deg,transparent 0 70px,color-mix(in srgb,var(--p-accent) 30%,transparent) 70px 140px)}
 #bar{position:absolute;left:0;right:0;bottom:0;height:44px;display:flex;align-items:center;gap:10px;padding:0 10px;background:#12161b;border-top:1px solid #262c34;font-size:12px}
 #bar button{background:#222831;color:#e7eaee;border:1px solid #2f3742;border-radius:6px;width:30px;height:26px;cursor:pointer}
 #seekwrap{position:relative;flex:1;height:26px;display:flex;align-items:center}
