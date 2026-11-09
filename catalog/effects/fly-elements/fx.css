@@ -1,0 +1,6 @@
+/* fly-elements — escena con elementos propios: cada uno termina en una posición (left/top en %), sale de un lado (--dx/--dy) y entra con su retraso. Parámetros: --fx-duration, --fx-delay, --fx-gap, --fx-ease */
+.fx-fly{position:absolute;inset:0;overflow:hidden}
+.fx-fly-pos{position:absolute;transform:translate(-50%,-50%);display:grid;place-items:center;width:max-content;max-width:92%}
+.fx-fly-item{font:900 90px/1.05 system-ui,sans-serif;text-align:center;border-radius:36px;padding:24px 48px;box-sizing:border-box;overflow-wrap:anywhere;
+  animation:fx-fly var(--du,var(--fx-duration,.7s)) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) calc(var(--fx-delay,0s) + var(--d,calc(var(--i,0) * var(--fx-gap,.2s)))) both}
+@keyframes fx-fly{from{opacity:0;transform:translate(var(--dx,0),var(--dy,0)) scale(var(--s0,1))}to{opacity:1;transform:none}}

@@ -1,0 +1,7 @@
+/* split-cards — dos tarjetas entran desde lados opuestos y se encuentran. Parámetros: --fx-duration, --fx-delay, --fx-gap, --fx-distance, --fx-ease */
+.fx-split{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:44px}
+.fx-split-a,.fx-split-b{font-size:96px;animation-duration:var(--fx-duration,.6s);animation-timing-function:var(--fx-ease,cubic-bezier(.2,.8,.2,1));animation-fill-mode:both}
+.fx-split-a{animation-name:fx-split-a;animation-delay:var(--fx-delay,0s)}
+.fx-split-b{animation-name:fx-split-b;animation-delay:calc(var(--fx-delay,0s) + var(--fx-gap,.12s))}
+@keyframes fx-split-a{from{opacity:0;transform:translateX(calc(var(--fx-distance,900px) * -1)) rotate(-4deg)}to{opacity:1;transform:none}}
+@keyframes fx-split-b{from{opacity:0;transform:translateX(var(--fx-distance,900px)) rotate(4deg)}to{opacity:1;transform:none}}

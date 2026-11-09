@@ -1,0 +1,7 @@
+/* badge-burst — un título central con dos insignias que aparecen alrededor con rebote. Parámetros: --fx-duration, --fx-delay, --fx-gap, --fx-overshoot, --fx-ease */
+.fx-bb{position:absolute;inset:0}
+.fx-bb>*{position:absolute;animation:fx-bb var(--fx-duration,.5s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) both}
+.fx-bb-main{inset:0;margin:auto;width:fit-content;height:fit-content;font-size:120px;--r:0deg;animation-delay:var(--fx-delay,0s)}
+.fx-bb-a{left:6%;top:28%;font-size:52px;--r:-8deg;animation-delay:calc(var(--fx-delay,0s) + var(--fx-gap,.2s))}
+.fx-bb-b{right:6%;bottom:28%;font-size:52px;--r:7deg;animation-delay:calc(var(--fx-delay,0s) + var(--fx-gap,.2s) * 2)}
+@keyframes fx-bb{0%{opacity:0;transform:scale(.2) rotate(var(--r,0deg))}60%{opacity:1;transform:scale(var(--fx-overshoot,1.15)) rotate(var(--r,0deg))}100%{opacity:1;transform:scale(1) rotate(var(--r,0deg))}}

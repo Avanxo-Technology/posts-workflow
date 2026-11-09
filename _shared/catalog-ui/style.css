@@ -142,3 +142,11 @@ pre{max-width:100%}
 .saved{display:flex;flex-direction:column;gap:6px;margin-top:10px}
 .srow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 8px;border:1px solid var(--line);border-radius:10px}
 .srow b{flex:1;min-width:120px}
+
+.pad2d{position:relative;width:84px;aspect-ratio:9/16;border:1px solid var(--line);border-radius:8px;background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/100% 25%,linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/25% 100%;cursor:crosshair;touch-action:none;flex:none}
+.pad2d i{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--acc);border:2px solid #fff;transform:translate(-50%,-50%);pointer-events:none}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin:0 0 10px}
+.item header{display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.item header b{flex:1}
+.pads{display:flex;gap:16px;flex-wrap:wrap;margin:6px 0 8px}
+.pads>div{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut)}

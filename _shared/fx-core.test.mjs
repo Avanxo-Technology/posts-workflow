@@ -64,7 +64,7 @@ test('todos los efectos spec 1 del catálogo cumplen el contrato', () => {
   assert.ok(n >= 5);
 });
 
-const effects = () => Object.fromEntries(['slam', 'pop', 'sweep-panel', 'scene-push', 'camera-pan', 'shutter-bars'].map(id => [id, load(id)]));
+const effects = () => Object.fromEntries(['slam', 'pop', 'sweep-panel', 'scene-push', 'camera-pan', 'shutter-bars', 'fly-elements', 'title-stack'].map(id => [id, load(id)]));
 
 test('kit: composición, orden, tiempos y marcadores absolutos', () => {
   const kit = {name: 'K', palette: pal, items: [{effect: 'slam', label: 'Hola', params: {delay: 0.3, duration: 0.8}}, {effect: 'pop', params: {delay: 1.2}}, {effect: 'sweep-panel', params: {delay: 3}}]};
@@ -224,4 +224,48 @@ test('fuentes: font-family en el código y @import al principio del CSS (solo Go
   const kit = FX.buildKit(effects(), {palette: pal, items: [{effect: 'slam', elements: {s: {font: 'Oswald'}}}, {effect: 'pop', elements: {s: {font: 'Oswald'}}}, {effect: 'scene-push', elements: {a: {font: 'Lora'}}}]}, {});
   assert.equal((kit.css.match(/@import/g) || []).length, 2, 'cada fuente se importa una sola vez y al principio');
   assert.ok(kit.css.startsWith('@import') && kit.html.includes("font-family:'Lora',serif"));
+});
+
+test('elementos añadidos (fly-elements): posición final, origen y tiempos van al código', () => {
+  const e = effects()['fly-elements'];
+  const d = FX.build(e, {}, pal);
+  assert.deepEqual(d.errors, []);
+  assert.equal((d.html.match(/class="fx-fly-pos"/g) || []).length, 3, 'sin elementos propios se usan los 3 de muestra');
+  assert.equal(d.total, 1.1);                                         // 0.4 s de retraso del último + 0.7 s de duración
+  const r = FX.build(e, {}, pal, {elements: {e1: {text: 'Hola <b>', x: 20, y: 70, from: 'left', delay: 1, duration: 0.4}, e2: {text: 'Dos', x: 70, y: 30, from: 'custom', fx: 95, fy: 5}}});
+  assert.deepEqual(r.errors, []);
+  assert.equal((r.html.match(/class="fx-fly-pos"/g) || []).length, 2, 'los elementos propios sustituyen a los de muestra');
+  assert.ok(r.html.includes('left:20%;top:70%') && r.html.includes('Hola &lt;b&gt;') && r.html.includes('--d:1s;--du:0.4s'));
+  assert.ok(/--dx:-916px;--dy:0px/.test(r.html), 'de la izquierda: sale fuera de la pantalla');
+  assert.ok(r.html.includes('--dx:270px;--dy:-480px'), 'origen personalizado en % de la pantalla');
+  assert.equal(r.total, 1.4);
+  assert.ok(!/<h[1-6]|<section|data-fx/.test(r.html));
+});
+
+test('elementos añadidos: validación estricta (ids, rangos, origen y propiedades solo de e1…e8)', () => {
+  const e = effects()['fly-elements'], bad = els => FX.build(e, {}, pal, {elements: els}).errors.length;
+  assert.equal(bad({e9: {text: 'x'}}), 1);
+  assert.equal(bad({e1: {x: 101}}), 1); assert.equal(bad({e1: {y: -1}}), 1);
+  assert.equal(bad({e1: {from: 'diagonal'}}), 1); assert.equal(bad({e1: {ease: 'raro'}}), 1);
+  assert.equal(bad({e1: {delay: 31}}), 1); assert.equal(bad({e1: {duration: 0}}), 1);
+  assert.equal(bad({s: {x: 10}}), 1, 'x solo existe en los elementos añadidos');
+  assert.equal(bad({e1: {font: "x');}"}}), 1);
+  assert.equal(FX.itemsConfig(e).max, 8);
+  assert.equal(FX.itemsConfig(effects().slam), null);
+});
+
+test('elementos añadidos: la imagen es solo de la vista previa', () => {
+  const png = 'data:image/png;base64,iVBORw0KGgo=', e = effects()['fly-elements'];
+  const r = FX.build(e, {}, pal, {elements: {e1: {text: '', x: 50, y: 50}}, assets: {e1: png}});
+  assert.ok(r.previewHtml.includes(png) && !r.html.includes('data:image'));
+});
+
+test('varias plantillas con varios textos: cada elemento se edita por separado', () => {
+  const e = effects()['title-stack'];
+  assert.deepEqual(FX.elementsOf(e).map(x => x.id + ':' + x.name).sort(), ['s2:Subtítulo', 's3:Etiqueta', 's:Título']);
+  const r = FX.build(e, {}, pal, {elements: {s: {text: 'Gran título'}, s2: {text: 'Segunda línea', color: '#ff0000', font: 'Oswald'}, s3: {bg: '#00ff00'}}});
+  assert.deepEqual(r.errors, []);
+  assert.ok(r.html.includes('>Gran título</div>') && r.html.includes('>Segunda línea</div>') && r.html.includes('color:#ff0000;font-family:\'Oswald\''));
+  assert.ok(r.html.includes('background:#00ff00') && !/<h[1-6]|<section|data-fx/.test(r.html));
+  assert.ok(r.css.startsWith('@import'), 'la fuente de un elemento se importa en el CSS');
 });

@@ -210,8 +210,8 @@
   function elsFromQuery(p) {
     var els = {};
     p.forEach(function (v, k) {
-      var m = /^el_(?:([sab])_)?(text|color|bg|font|size|w|pad)$/.exec(k);
-      if (m) { var id = m[1] || 's'; (els[id] = els[id] || {})[m[2]] = /^(size|w|pad)$/.test(m[2]) ? parseFloat(v) : v; }
+      var m = /^el_(?:(s[1-9]?|a|b|e[1-8])_)?(text|color|bg|font|size|w|pad|x|y|fx|fy|from|delay|duration|ease)$/.exec(k);
+      if (m) { var id = m[1] || 's'; (els[id] = els[id] || {})[m[2]] = /^(size|w|pad|x|y|fx|fy|delay|duration)$/.test(m[2]) ? parseFloat(v) : v; }
     });
     return els;
   }
@@ -233,11 +233,125 @@
     img.onerror = function () { URL.revokeObjectURL(url); toast('No se pudo leer la imagen'); };
     img.src = url;
   }
+
+  // ---- controles reutilizables ----
+  function fontSelect(value, onChange) {
+    var brands = (PW.data().brands || {}), seenB = {}, bopts = [];
+    Object.keys(brands).sort().forEach(function (bid) {
+      [brands[bid].headFont, brands[bid].bodyFont].forEach(function (f) {
+        if (f && !seenB[bid + '|' + f]) { seenB[bid + '|' + f] = 1; bopts.push(h('option', {value: f, text: f + ' · ' + (STATIC ? 'paleta ' : '') + (brands[bid].name || bid)})); }
+      });
+    });
+    var sel = h('select', {class: 'in'}, h('option', {value: '', text: 'La del efecto'}),
+      bopts.length ? h('optgroup', {label: STATIC ? 'Sugeridas con cada paleta' : 'Fuentes de las marcas'}, bopts) : null,
+      h('optgroup', {label: 'Google Fonts'}, FX.FONTS.google.map(function (f) { return h('option', {value: f, text: f}); })),
+      h('optgroup', {label: 'Del sistema'}, FX.FONTS.system.map(function (f) { return h('option', {value: f, text: f}); })));
+    sel.value = value || '';
+    sel.addEventListener('change', function () { onChange(sel.value); });
+    return sel;
+  }
+  function colorRow(label, value, onSet) {
+    var inp = h('input', {type: 'color', value: /^#[0-9a-f]{6}$/i.test(value || '') ? value : '#888888'}), tag = h('span', {class: 'val mono', text: value || 'auto'});
+    inp.addEventListener('input', function () { tag.textContent = inp.value; onSet(inp.value); });
+    return h('div', {class: 'ctl'}, h('label', {text: label}), h('div', {class: 'rg'}, inp, tag),
+      h('button', {class: 'mini', title: 'Volver al valor del efecto', text: '↺', onclick: function () { tag.textContent = 'auto'; inp.value = '#888888'; onSet(''); }}));
+  }
+  function sliderRow(label, value, min, max, step, unit, shown, onSet) {
+    var rng = h('input', {type: 'range', min: min, max: max, step: step, value: value != null ? value : shown}), out = h('span', {class: 'val mono', text: value != null ? value + unit : 'auto'});
+    rng.addEventListener('input', function () { out.textContent = rng.value + unit; onSet(parseFloat(rng.value)); });
+    return h('div', {class: 'ctl'}, h('label', {text: label}), h('div', {class: 'rg'}, rng, out),
+      h('button', {class: 'mini', title: 'Volver al valor del efecto', text: '↺', onclick: function () { out.textContent = 'auto'; onSet(''); }}));
+  }
+  // Cuadro 9:16 en miniatura: se hace clic o se arrastra para elegir una posición (X, Y en % de la pantalla)
+  function pad2d(x, y, onChange) {
+    var pad = h('div', {class: 'pad2d'}), dot = h('i'), read = h('span', {class: 'mono'});
+    pad.appendChild(dot);
+    var place = function (px, py) { dot.style.left = px + '%'; dot.style.top = py + '%'; read.textContent = px + '%, ' + py + '%'; };
+    place(x, y);
+    function at(ev) { var r = pad.getBoundingClientRect(), px = Math.round(Math.max(0, Math.min(100, (ev.clientX - r.left) / r.width * 100))), py = Math.round(Math.max(0, Math.min(100, (ev.clientY - r.top) / r.height * 100))); place(px, py); onChange(px, py); }
+    pad.addEventListener('pointerdown', function (ev) { pad.setPointerCapture(ev.pointerId); at(ev); pad.onpointermove = at; });
+    pad.addEventListener('pointerup', function () { pad.onpointermove = null; });
+    return {pad: pad, read: read};
+  }
+  // Fondo de la vista previa: imagen o color. Solo se ve en la vista previa; nunca va al código, a la URL ni a la API.
+  function bgControl(assets, onChange) {
+    var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: assets.bg ? 'imagen puesta' : assets.bgColor ? assets.bgColor : 'el de la paleta'});
+    file.addEventListener('change', function () { var f = file.files && file.files[0]; if (!f) return; readImage(f, function (d) { assets.bg = d; state.textContent = 'imagen puesta'; onChange(); }); file.value = ''; });
+    var col = h('input', {type: 'color', value: assets.bgColor || '#202830'});
+    col.addEventListener('input', function () { assets.bgColor = col.value; if (!assets.bg) state.textContent = col.value; onChange(); });
+    return h('div', {class: 'panel', style: 'margin-top:10px'}, h('div', {class: 'ctl'}, h('label', {text: 'Fondo (solo vista previa)'}),
+      h('div', {class: 'rg'}, h('button', {text: 'Imagen…', onclick: function () { file.click(); }}), col, state, file),
+      h('button', {class: 'mini', title: 'Quitar el fondo', text: '✕', onclick: function () { delete assets.bg; delete assets.bgColor; state.textContent = 'el de la paleta'; onChange(); }})));
+  }
+  var FROM_LABEL = {bottom: 'Abajo', top: 'Arriba', left: 'La izquierda', right: 'La derecha', center: 'El centro (crece)', fade: 'Solo aparece (fundido)', custom: 'Un punto de la pantalla…'};
+  var EASE_LABEL = {suave: 'Rebote suave', lineal: 'Lineal', 'in-out': 'Entrada y salida', brusco: 'Brusco'};
+  // Efectos con elementos añadidos por el usuario ({{items}}): para cada uno se elige dónde termina, de dónde sale y cuándo entra.
+  function itemsPanel(e, o, cfg) {
+    var box = h('div', {class: 'panel'}), list = h('div'), isE = function (id) { return /^e[1-8]$/.test(id); };
+    box.appendChild(h('p', {class: 'hint', style: 'color:var(--mut);margin:0 0 10px;font-size:12px', text: 'Añade los elementos que quieras. Para cada uno elige dónde termina, de dónde sale y cuándo entra: todo va al código. La imagen es solo para la vista previa.'}));
+    var clone = function (x) { return JSON.parse(JSON.stringify(x)); };
+    function materialize() { var all = o.get(); if (!Object.keys(all).some(isE)) Object.keys(cfg.defaults).forEach(function (id) { all[id] = clone(cfg.defaults[id]); }); return all; }
+    function current() { var all = o.get(), ids = Object.keys(all).filter(isE).sort(); return ids.length ? ids.map(function (id) { return [id, all[id]]; }) : Object.keys(cfg.defaults).sort().map(function (id) { return [id, cfg.defaults[id]]; }); }
+    function setItem(id, k, v) { var all = materialize(), c = Object.assign({x: 50, y: 50, from: 'bottom', size: 90}, all[id]); if (v === '' || v == null || (typeof v === 'number' && !isFinite(v))) delete c[k]; else c[k] = v; all[id] = c; o.set(all); }
+    function draw() {
+      list.replaceChildren();
+      var rows = current();
+      rows.forEach(function (row, n) {
+        var id = row[0], it = Object.assign({x: 50, y: 50, from: 'bottom'}, row[1]), item = h('div', {class: 'item'});
+        item.appendChild(h('header', null, h('b', {text: 'Elemento ' + (n + 1)}),
+          h('button', {class: 'mini', title: 'Quitar este elemento', text: '✕', disabled: rows.length < 2, onclick: function () { var all = materialize(); delete all[id]; o.set(all); draw(); }})));
+        var t = h('input', {type: 'text', maxlength: 80, value: it.text || '', placeholder: 'Texto'});
+        t.addEventListener('input', function () { setItem(id, 'text', t.value); });
+        item.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Texto', t));
+        item.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Fuente', fontSelect(it.font, function (v) { setItem(id, 'font', v); })));
+        item.appendChild(colorRow('Color del texto', it.color && !/^palette\./.test(it.color) ? it.color : '', function (v) { setItem(id, 'color', v); }));
+        item.appendChild(colorRow('Fondo', it.bg && !/^palette\./.test(it.bg) ? it.bg : '', function (v) { setItem(id, 'bg', v); }));
+        item.appendChild(sliderRow('Tamaño del texto', it.size, 20, 400, 5, 'px', 90, function (v) { setItem(id, 'size', v); }));
+        var endPad = pad2d(it.x, it.y, function (px, py) { all2(id, {x: px, y: py}); });
+        var pads = h('div', {class: 'pads'}, h('div', null, h('span', {text: 'Termina en (centro)'}), endPad.pad, endPad.read));
+        var fromSel = h('select', {class: 'in'}, cfg && ['bottom', 'top', 'left', 'right', 'center', 'fade', 'custom'].map(function (k) { return h('option', {value: k, text: FROM_LABEL[k]}); }));
+        fromSel.value = it.from || 'bottom';
+        fromSel.addEventListener('change', function () { setItem(id, 'from', fromSel.value); draw(); });
+        if ((it.from || 'bottom') === 'custom') {
+          var sp = pad2d(it.fx != null ? it.fx : it.x, it.fy != null ? it.fy : it.y, function (px, py) { all2(id, {fx: px, fy: py}); });
+          pads.appendChild(h('div', null, h('span', {text: 'Sale desde (centro)'}), sp.pad, sp.read));
+        }
+        item.appendChild(pads);
+        item.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Sale desde', fromSel));
+        item.appendChild(sliderRow('Entra en el segundo', it.delay, 0, 10, 0.05, 's', 0, function (v) { setItem(id, 'delay', v); }));
+        item.appendChild(sliderRow('Duración', it.duration, 0.1, 3, 0.05, 's', 0.7, function (v) { setItem(id, 'duration', v); }));
+        var easeSel = h('select', {class: 'in'}, h('option', {value: '', text: 'La del efecto'}), Object.keys(EASE_LABEL).map(function (k) { return h('option', {value: k, text: EASE_LABEL[k]}); }));
+        easeSel.value = it.ease || '';
+        easeSel.addEventListener('change', function () { setItem(id, 'ease', easeSel.value); });
+        item.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Curva', easeSel));
+        var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: o.assets[id] ? 'imagen puesta' : 'sin imagen'});
+        file.addEventListener('change', function () { var f = file.files && file.files[0]; if (!f) return; readImage(f, function (d) { o.assets[id] = d; state.textContent = 'imagen puesta'; o.onAsset(); }); file.value = ''; });
+        item.appendChild(h('div', {class: 'ctl'}, h('label', {text: 'Imagen (solo vista previa)'}), h('div', {class: 'rg'}, h('button', {text: 'Elegir imagen…', onclick: function () { file.click(); }}), state, file),
+          h('button', {class: 'mini', title: 'Quitar la imagen', text: '✕', onclick: function () { delete o.assets[id]; state.textContent = 'sin imagen'; o.onAsset(); }})));
+        list.appendChild(item);
+      });
+    }
+    function all2(id, props) { var all = materialize(), c = Object.assign({x: 50, y: 50, from: 'bottom', size: 90}, all[id], props); all[id] = c; o.set(all); }
+    box.appendChild(list);
+    box.appendChild(h('div', {class: 'actions'}, h('button', {class: 'primary', text: '+ Agregar elemento', onclick: function () {
+      var all = materialize(), ids = Object.keys(all).filter(isE).sort();
+      if (ids.length >= cfg.max) { toast('Hasta ' + cfg.max + ' elementos'); return; }
+      var n = 1; while (all['e' + n]) n++;
+      all['e' + n] = {text: 'Nuevo elemento', x: 50, y: Math.min(90, 18 + ids.length * 14), from: 'bottom', size: 70, color: 'palette.light'};
+      o.set(all); draw();
+    }})));
+    draw();
+    return box;
+  }
+
   // o: {get() -> els, set(els), assets: {id: dataURL}, onAsset(), kit: bool}. En el kit el texto del elemento de texto se edita en su propio campo «Texto».
   function elementsPanel(e, o) {
+    var cfg = FX.itemsConfig(e);
+    if (cfg) return itemsPanel(e, o, cfg);
     var seen = {}, rows = FX.elementsOf(e).filter(function (el) { if (seen[el.id]) return false; seen[el.id] = 1; return true; });
     if (!rows.length) return null;
     var NAME = {s: 'Elemento de texto', a: 'Escena A', b: 'Escena B', m: 'Foto o video de muestra'};
+    var nameOf = function (el) { return el.name || NAME[el.id] || ('Elemento de texto ' + el.id.slice(1)); };
     var box = h('div', {class: 'panel'});
     box.appendChild(h('p', {class: 'hint', style: 'color:var(--mut);margin:0 0 10px;font-size:12px', text: 'El texto, los colores y el tamaño se incluyen en el código. La imagen es solo para la vista previa: no va en el código ni en la API.'}));
     rows.forEach(function (el) {
@@ -249,27 +363,14 @@
         o.set(all);
       };
       var cur = function () { return o.get()[id] || {}; };
-      var section = h('div', {class: 'elrow'}, h('h3', {text: NAME[id] || id}, ' ', h('small', {text: el.kind === 'media' ? '(el marcador va en el código; la imagen, no)' : el.inCode ? '(va en el código)' : '(solo vista previa)'})));
+      var section = h('div', {class: 'elrow'}, h('h3', {text: nameOf(el)}, ' ', h('small', {text: el.kind === 'media' ? '(el marcador va en el código; la imagen, no)' : el.inCode ? '(va en el código)' : '(solo vista previa)'})));
       if (el.hasText && !(o.kit && id === 's')) {
         var t = h('input', {type: 'text', maxlength: 80, value: cur().text || '', placeholder: el.text || 'Texto'});
         t.addEventListener('input', function () { setProp('text', t.value); });
         section.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Texto', t));
       }
       if (el.kind === 'sample' || el.kind === 'scene') {
-        // fuente: la del efecto, las sugeridas con cada paleta (o las de las marcas en el catálogo local), Google Fonts y del sistema
-        var brands = (PW.data().brands || {}), seenB = {}, bopts = [];
-        Object.keys(brands).sort().forEach(function (bid) {
-          [brands[bid].headFont, brands[bid].bodyFont].forEach(function (f) {
-            if (f && !seenB[bid + '|' + f]) { seenB[bid + '|' + f] = 1; bopts.push(h('option', {value: f, text: f + ' · ' + (STATIC ? 'paleta ' : '') + (brands[bid].name || bid)})); }
-          });
-        });
-        var fontSel = h('select', {class: 'in'}, h('option', {value: '', text: 'La del efecto'}),
-          bopts.length ? h('optgroup', {label: STATIC ? 'Sugeridas con cada paleta' : 'Fuentes de las marcas'}, bopts) : null,
-          h('optgroup', {label: 'Google Fonts'}, FX.FONTS.google.map(function (f) { return h('option', {value: f, text: f}); })),
-          h('optgroup', {label: 'Del sistema'}, FX.FONTS.system.map(function (f) { return h('option', {value: f, text: f}); })));
-        fontSel.value = cur().font || '';
-        fontSel.addEventListener('change', function () { setProp('font', fontSel.value); });
-        section.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Fuente', fontSel));
+        section.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Fuente', fontSelect(cur().font, function (v) { setProp('font', v); })));
         [['color', 'Color del texto'], ['bg', 'Fondo']].forEach(function (cp) {
           var k = cp[0], inp = h('input', {type: 'color', value: cur()[k] || '#888888'}), tag = h('span', {class: 'val mono', text: cur()[k] || 'auto'});
           inp.addEventListener('input', function () { tag.textContent = inp.value; setProp(k, inp.value); });
@@ -370,7 +471,7 @@
     function update() {
       var p = palette(), r = FX.build(e, vals, p, {elements: els, assets: assets});
       current = r;
-      if (ready) frame.contentWindow.postMessage({type: 'fx', css: r.css, html: r.previewHtml, total: r.total, markers: r.markers, palette: p}, '*');
+      if (ready) frame.contentWindow.postMessage({type: 'fx', css: r.css, html: r.previewHtml, total: r.total, markers: r.markers, palette: p, bgImage: assets.bg || null, bgColor: assets.bgColor || null}, '*');
       htmlPre.textContent = r.html; cssPre.textContent = r.css;
       var qs = query(), local = new URLSearchParams(qs.toString());
       if (palId !== 'custom') local.set('palette', palId); else ['dark', 'light', 'accent'].forEach(function (k) { local.set(k, custom[k]); });
@@ -411,7 +512,7 @@
       h('a', {class: 'back', href: '#/', text: '← Todos los efectos'}),
       h('div', {class: 'detail'},
         h('div', {class: 'stagebox'}, frame,
-          h('div', {class: 'bar', style: 'margin-top:10px'}, 'Paleta', palSel), customBox,
+          h('div', {class: 'bar', style: 'margin-top:10px'}, 'Paleta', palSel), customBox, bgControl(assets, function () { update(); }),
           h('p', {style: 'color:var(--mut);font-size:12px;margin:10px 0 0', text: 'La barra inferior de la vista previa permite pausar y mover el instante. Los puntos amarillos indican momentos clave.'})),
         h('div', null,
           h('h1', {text: e.name}),
@@ -555,7 +656,7 @@
     app.replaceChildren(h('a', {class: 'back', href: '#/', text: '← Volver'}), h('div', {class: 'empty', text: 'No existe ' + what + ' "' + id + '" en el catálogo.'}));
   }
 
-  window.PW = {h: h, toast: toast, copy: copy, app: app, search: q, reload: function () { return load(true); }, data: function () { return data; }, makeControl: makeControl, elementsPanel: elementsPanel, elsFromQuery: elsFromQuery, elsToQuery: elsToQuery, kit: kitStore, KIND: KIND, routeQuery: function () { return routeQuery; }};
+  window.PW = {h: h, toast: toast, copy: copy, app: app, search: q, reload: function () { return load(true); }, data: function () { return data; }, makeControl: makeControl, bgControl: bgControl, elementsPanel: elementsPanel, elsFromQuery: elsFromQuery, elsToQuery: elsToQuery, kit: kitStore, KIND: KIND, routeQuery: function () { return routeQuery; }};
 
   // ---- router ----
   function render() {

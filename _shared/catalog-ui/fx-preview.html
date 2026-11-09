@@ -69,6 +69,8 @@ addEventListener('message', function (e) {
   rs.setProperty('--p-on', /^#[0-9a-f]{6}$/i.test(p.accent || '') && lum(p.accent) > .4 ? '#111111' : '#ffffff');
   rs.setProperty('--kit-dark', p.dark || '#14181c'); rs.setProperty('--kit-light', p.light || '#f4f1ea'); rs.setProperty('--kit-accent', p.accent || '#c46a2b'); rs.setProperty('--kit-on', getComputedStyle(document.documentElement).getPropertyValue('--p-on'));
   rs.setProperty('--fx-bg-a', p.dark || '#14181c'); rs.setProperty('--fx-bg-b', p.light || '#f4f1ea');
+  var stg = document.getElementById('stage');   // fondo de la vista previa (imagen o color); nunca forma parte del código
+  stg.style.background = /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(m.bgImage || '') ? "url('" + m.bgImage + "') center/cover no-repeat" : /^#[0-9a-f]{6}$/i.test(m.bgColor || '') ? m.bgColor : '';
   style.textContent = m.css || ''; root.innerHTML = m.html || '';
   total = m.total || 1; end = total + HOLD;
   wrap.querySelectorAll('.mk').forEach(function (n) { n.remove(); });

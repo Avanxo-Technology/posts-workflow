@@ -49,6 +49,18 @@ test('api: textos y colores de los elementos de muestra, con etiqueta genérica 
   }
 });
 
+test('api: elementos que añade el usuario (posición, origen y tiempos) y varios textos', async () => {
+  const q = '/api/v1/effects/fly-elements?el_e1_text=Hola&el_e1_x=20&el_e1_y=70&el_e1_from=left&el_e1_delay=1&el_e2_text=Dos&el_e2_x=70&el_e2_y=30&el_e2_from=custom&el_e2_fx=95&el_e2_fy=5';
+  const d = (await get(q)).j;
+  assert.ok(d.code.html.includes('left:20%;top:70%') && d.code.html.includes('--dx:-916px') && d.code.html.includes('--dx:270px;--dy:-480px'));
+  assert.equal((d.code.html.match(/fx-fly-pos/g) || []).length, 2);
+  assert.equal(d.elements.items.max, 8); assert.ok(d.elements.items.samples.e1 && d.elements.items.howTo.includes('el_e1_x'));
+  for (const bad of ['el_e1_x=500', 'el_e9_text=a', 'el_e1_from=zzz', 'el_x=5']) assert.equal((await get('/api/v1/effects/fly-elements?' + bad)).r.status, 400, bad);
+  const t = (await get('/api/v1/effects/title-stack?el_s2_text=Linea%202&el_s3_bg=%2300ff00')).j;
+  assert.ok(t.code.html.includes('>Linea 2</div>') && t.code.html.includes('background:#00ff00'));
+  assert.deepEqual(t.elements.editable.map(x => x.id).sort(), ['s', 's2', 's3']);
+});
+
 test('api: fuentes de los elementos y lista de fuentes (marcas y generales)', async () => {
   const d = (await get('/api/v1/effects/slam?el_font=Oswald')).j;
   assert.ok(d.code.html.includes("font-family:'Oswald',sans-serif") && d.code.css.startsWith('@import url('));

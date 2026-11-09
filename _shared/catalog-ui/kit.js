@@ -56,11 +56,12 @@
     var ctlBox = h('div'), tlBox = h('div'), sumBox = h('div'), errBox = h('div'), linkBox = h('div', {class: 'cmd'}), totalEl = h('span', {class: 'mono'});
 
     function save() { store.set(kit); }
+    var kitBg = {};   // fondo de la vista previa del kit (imagen o color): solo en memoria
     var assets = new Map();   // imágenes de la vista previa por elemento del kit: solo en memoria, nunca van al código, al enlace ni al navegador
     function rebuild() { built = FX.buildKit(effects, {name: kit.name, palette: kit.palette, items: kit.items.map(function (it) { var c = Object.assign({}, it); c.assets = assets.get(it) || null; return c; })}, brands); return built; }
     function push(keepTime) {
       if (!ready || !built) return;
-      frame.contentWindow.postMessage({type: 'fx', css: built.css, html: built.previewHtml || built.html, total: Math.max(built.total, 0.1), markers: built.markers, palette: built.palette, keepTime: !!keepTime}, '*');
+      frame.contentWindow.postMessage({type: 'fx', css: built.css, html: built.previewHtml || built.html, total: Math.max(built.total, 0.1), markers: built.markers, palette: built.palette, bgImage: kitBg.bg || null, bgColor: kitBg.bgColor || null, keepTime: !!keepTime}, '*');
     }
     function changed(keepTime, skipTimeline) {
       rebuild(); save(); schedulePush(keepTime);
@@ -230,7 +231,7 @@
       h('div', {class: 'detail', style: 'grid-template-columns:340px 1fr'},
         h('div', {class: 'stagebox'}, frame,
           h('label', {class: 'f', style: 'margin-top:10px'}, 'Nombre del kit', nameIn),
-          h('div', {class: 'bar', style: 'margin-top:10px'}, 'Paleta', palSel), customBox),
+          h('div', {class: 'bar', style: 'margin-top:10px'}, 'Paleta', palSel), customBox, PW.bgControl(kitBg, function () { schedulePush(true); })),
         h('div', null,
           errBox,
           h('div', {class: 'panel', style: 'padding:12px 12px 14px'}, h('h2', {text: 'Línea de tiempo'}), tlBox),

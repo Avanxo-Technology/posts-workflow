@@ -1,0 +1,10 @@
+/* title-stack — etiqueta, título y subtítulo entran uno tras otro desde distintos lados. Parámetros: --fx-duration, --fx-delay, --fx-gap, --fx-distance, --fx-ease */
+.fx-tstack{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px}
+.fx-ts-tag{font-size:46px}.fx-ts-sub{font-size:54px}
+.fx-ts-tag,.fx-ts-title,.fx-ts-sub{animation-duration:var(--fx-duration,.6s);animation-timing-function:var(--fx-ease,cubic-bezier(.2,.8,.2,1));animation-fill-mode:both}
+.fx-ts-tag{animation-name:fx-ts-tag;animation-delay:var(--fx-delay,0s)}
+.fx-ts-title{animation-name:fx-ts-title;animation-delay:calc(var(--fx-delay,0s) + var(--fx-gap,.18s))}
+.fx-ts-sub{animation-name:fx-ts-sub;animation-delay:calc(var(--fx-delay,0s) + var(--fx-gap,.18s) * 2)}
+@keyframes fx-ts-tag{from{opacity:0;transform:translateY(calc(var(--fx-distance,140px) * -1))}to{opacity:1;transform:none}}
+@keyframes fx-ts-title{from{opacity:0;transform:translateY(var(--fx-distance,140px)) scale(1.2)}to{opacity:1;transform:none}}
+@keyframes fx-ts-sub{from{opacity:0;transform:translateX(var(--fx-distance,140px))}to{opacity:1;transform:none}}

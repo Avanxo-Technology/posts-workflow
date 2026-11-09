@@ -109,7 +109,7 @@ En la pestaña **Kit** de `posts catalog` se reúnen varios efectos spec 1 para 
 **API del kit** (para agentes), con `k` = el valor del enlace del kit:
 - `GET /api/v1/kit?k=<kit>`: JSON con `items[]` (inicio, duración, marcadores y HTML de cada uno), `code.css`, `code.html`, `markers` y `howTo`. Un kit no válido devuelve 400 con el detalle.
 - `GET /api/v1/kit?k=<kit>&format=html`: la página autónoma (con política de seguridad restrictiva).
-Solo admiten efectos spec 1 (parametrizados) y hasta 40 elementos. Las etiquetas se escapan siempre.
+Solo admiten efectos spec 1 (parametrizados) y hasta 60 elementos. Las etiquetas se escapan siempre.
 
 ## Elementos de muestra editables
 Un efecto puede marcar sus elementos de muestra en `fx.html`: `data-fx-sample` (texto de muestra, con `{{label}}`), `data-fx-scene="a|b"` (escenas) y `data-fx-media` (foto o video). Las escenas dentro de `<!--fx-demo-->…<!--/fx-demo-->` solo existen en la vista previa.
@@ -118,6 +118,11 @@ Un efecto puede marcar sus elementos de muestra en `fx.html`: `data-fx-sample` (
 - **La imagen** que el visitante pone en un elemento es **solo para la vista previa**: vive en memoria, no se guarda ni viaja en enlaces, kit, API ni código.
 - **El código no se ata a una etiqueta**: el elemento de muestra sale como `<div>` con un comentario («aplica esta clase y el style a TU elemento»); `h1`, `h2`, `section`… del fx.html solo se usan en la vista previa. Las escenas del código salen como `<div>` con `<!-- tu escena A -->`.
 - `FX.elementsOf(efecto)` lista los elementos editables y `FX.cleanElements` valida lo que llega de fuera (hex o `palette.*`, texto de hasta 80 caracteres, tamaño del texto de 10 a 600, ancho de 10 a 100, relleno de 0 a 300).
+
+## Efectos con varios elementos
+- **Plantillas con varios textos** (`title-stack`, `split-cards`, `list-stagger`, `badge-burst`, `curtain-title`): cada texto de muestra se marca con `data-fx-sample="2"`, `"3"`… (el primero sin número) y, si quieres, `data-fx-name="Subtítulo"` para su nombre en el panel. En la API se editan con `el_s2_text`, `el_s3_bg`…
+- **Escena con tus elementos** (`fly-elements`): el efecto declara `fx.items` (`max` y `defaults`) y su `fx.html` lleva `{{items}}`. El usuario añade hasta 8 elementos (`e1`…`e8`) y para cada uno elige **dónde termina** (`x`, `y` en % de la pantalla, el punto es el centro del elemento), **de dónde sale** (`from`: `bottom`, `top`, `left`, `right`, `center`, `fade` o `custom` con `fx`, `fy`) y **cuándo entra** (`delay`, `duration`, `ease`), además de texto, fuente, colores y tamaños. Si se envía algún `e*`, sustituyen a los de muestra. Por la API: `el_e1_text`, `el_e1_x`, `el_e1_from`…
+- **Fondo de la vista previa**: imagen o color solo para ver el efecto sobre algo distinto de la paleta; nunca va al código, la URL ni la API.
 
 ## Comprobar que los efectos se ven y se mueven
 `node _shared/site/qa-effects.mjs [id …] [--out carpeta]` renderiza cada efecto en Chrome, toma fotogramas en varios instantes y mide cuánto cambia la imagen. Marca como **SIN MOVIMIENTO VISIBLE** los que no cambian de forma perceptible (p. ej. un degradado liso que se desplaza) y como **NO SE VE NADA** los que no dibujan contenido. Con `--out` guarda los fotogramas como PNG para revisarlos. Requiere Chrome. Córrelo tras crear o cambiar un efecto.
