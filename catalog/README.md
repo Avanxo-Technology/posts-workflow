@@ -111,6 +111,13 @@ En la pestaña **Kit** de `posts catalog` se reúnen varios efectos spec 1 para 
 - `GET /api/v1/kit?k=<kit>&format=html`: la página autónoma (con política de seguridad restrictiva).
 Solo admiten efectos spec 1 (parametrizados) y hasta 40 elementos. Las etiquetas se escapan siempre.
 
+## Elementos de muestra editables
+Un efecto puede marcar sus elementos de muestra en `fx.html`: `data-fx-sample` (texto de muestra, con `{{label}}`), `data-fx-scene="a|b"` (escenas) y `data-fx-media` (foto o video). Las escenas dentro de `<!--fx-demo-->…<!--/fx-demo-->` solo existen en la vista previa.
+- **Texto, color del texto, fondo y tamaño** (`el_text`, `el_color`, `el_bg`, `el_size`; `el_a_*` / `el_b_*` para las escenas) **sí cambian el código**: se aplican como `style` inline del elemento. Valen en la URL de la UI, en la API (`/api/v1/effects/<id>?el_text=Hola&el_bg=%23112233`) y en el kit.
+- **La imagen** que el visitante pone en un elemento es **solo para la vista previa**: vive en memoria, no se guarda ni viaja en enlaces, kit, API ni código.
+- **El código no se ata a una etiqueta**: el elemento de muestra sale como `<div>` con un comentario («aplica esta clase y el style a TU elemento»); `h1`, `h2`, `section`… del fx.html solo se usan en la vista previa. Las escenas del código salen como `<div>` con `<!-- tu escena A -->`.
+- `FX.elementsOf(efecto)` lista los elementos editables y `FX.cleanElements` valida lo que llega de fuera (hex o `palette.*`, texto de hasta 80 caracteres, tamaño de 10 a 600).
+
 ## Comprobar que los efectos se ven y se mueven
 `node _shared/site/qa-effects.mjs [id …] [--out carpeta]` renderiza cada efecto en Chrome, toma fotogramas en varios instantes y mide cuánto cambia la imagen. Marca como **SIN MOVIMIENTO VISIBLE** los que no cambian de forma perceptible (p. ej. un degradado liso que se desplaza) y como **NO SE VE NADA** los que no dibujan contenido. Con `--out` guarda los fotogramas como PNG para revisarlos. Requiere Chrome. Córrelo tras crear o cambiar un efecto.
 

@@ -82,6 +82,84 @@
   }
   var inline = function (v) { return Object.keys(v).map(function (k) { return k + ':' + v[k]; }).join(';'); };
 
+  // ---- Elementos de ejemplo editables ----
+  // El marcado de un efecto puede traer elementos de muestra marcados con data-fx-sample (texto), data-fx-scene="a|b" (escenas) y data-fx-media (foto o video).
+  // El usuario puede cambiarles texto, colores y tamaño (eso SÍ llega al código exportado) y, solo en la vista previa, sustituirlos por una imagen (nunca va al código).
+  // elements = {s: {text, color, bg, size}, a: {...}, b: {...}}   (s = elemento de texto de muestra; a/b = escenas)
+  var ELEM_RE = /<(\w+)([^>]*?)\sdata-fx-(sample|scene|media)(?:="([^"]*)")?([^>]*)>([^<]*)<\/\1>/g;
+  var IMG_RE = /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/=]+$/;
+  var ELEM_IDS = ['s', 'a', 'b'];
+  function demoRanges(html) {
+    var out = [], re = /<!--fx-demo-->[\s\S]*?<!--\/fx-demo-->/g, m;
+    while ((m = re.exec(html))) out.push([m.index, m.index + m[0].length]);
+    return out;
+  }
+  // Lista los elementos editables de un efecto: [{id, kind, inCode, hasText, text}]. inCode=false: escena de muestra que solo existe en la vista previa.
+  function elementsOf(effect) {
+    var html = (effect.fx && effect.fx.htmlText) || '', ranges = demoRanges(html), out = [], m;
+    ELEM_RE.lastIndex = 0;
+    while ((m = ELEM_RE.exec(html))) {
+      var kind = m[3], id = kind === 'sample' ? 's' : kind === 'media' ? 'm' : m[4];
+      var inDemo = ranges.some(function (r) { return m.index >= r[0] && m.index < r[1]; });
+      out.push({id: id, kind: kind, inCode: !inDemo, hasText: kind !== 'media',
+        text: kind === 'sample' ? ((effect.fx && effect.fx.label) || '') : kind === 'scene' ? m[6].trim() : ''});
+    }
+    return out;
+  }
+  // Valida elementos que llegan de fuera (URL, API, kit). Devuelve {elements, errors}; lo no válido se rechaza.
+  function cleanElements(input, palette) {
+    var out = {}, errors = [];
+    Object.keys(input || {}).forEach(function (id) {
+      if (ELEM_IDS.indexOf(id) < 0) { errors.push('Elemento desconocido: ' + id); return; }
+      var o = input[id] || {}, c = {};
+      Object.keys(o).forEach(function (k) {
+        var v = o[k];
+        if (v === '' || v == null) return;
+        if (k === 'text') { if (typeof v === 'string' && v.length <= 80) c.text = v; else errors.push(id + '.text: texto de hasta 80 caracteres'); }
+        else if (k === 'color' || k === 'bg') { if (HEX.test(v) || TOKEN.test(v)) c[k] = v; else errors.push(id + '.' + k + ' debe ser #RRGGBB o palette.dark|light|accent'); }
+        else if (k === 'size') { var n = parseFloat(v); if (isFinite(n) && n >= 10 && n <= 600) c.size = n; else errors.push(id + '.size debe estar entre 10 y 600'); }
+        else errors.push(id + ': propiedad desconocida ' + k);
+      });
+      if (Object.keys(c).length) out[id] = c;
+    });
+    return {elements: out, errors: errors};
+  }
+  var GENERIC_TAG = /^(h[1-6]|section|article|p|header|footer|main|aside|figure)$/i;
+  // Aplica los cambios a los elementos de muestra. mode 'export': código para el usuario (etiqueta genérica, sin imágenes). 'preview': vista previa del efecto (con imágenes y escenas de muestra).
+  // 'kit': igual que el código exportado pero con imágenes, para la vista previa del kit.
+  function applyElements(html, els, assets, mode, palette) {
+    els = els || {}; assets = assets || {};
+    var ranges = demoRanges(html), commented = false;
+    return html.replace(ELEM_RE, function (whole, tag, pre, kind, val, post, inner, off) {
+      var id = kind === 'sample' ? 's' : kind === 'media' ? 'm' : val;
+      var inDemo = ranges.some(function (r) { return off >= r[0] && off < r[1]; });
+      if (mode !== 'preview' && inDemo) return whole;   // la escena de muestra se quita del código (y de la vista previa del kit)
+      var o = els[id] || {}, css = [], img = mode !== 'export' && IMG_RE.test(assets[id] || '') ? assets[id] : '';
+      var col = function (v) { return colorOf(v, palette); };
+      if (o.bg) css.push('background:' + col(o.bg));
+      if (o.color) css.push('color:' + col(o.color));
+      if (o.size && kind === 'sample') css.push('font-size:' + o.size + 'px');
+      if (img) { css.push("background:url('" + img + "') center/cover no-repeat"); css.push('color:transparent'); post += ' data-fx-img'; }
+      if (kind === 'scene') {
+        if (o.text) inner = escapeHtml(o.text);
+        else if (mode !== 'preview') inner = '<!-- tu escena ' + String(id).toUpperCase() + ' -->';
+      }
+      if (css.length) {
+        var attr = /(\sstyle=")([^"]*)"/;
+        if (attr.test(post)) post = post.replace(attr, function (mm, a, s) { return a + s + ';' + css.join(';') + '"'; });
+        else if (attr.test(pre)) pre = pre.replace(attr, function (mm, a, s) { return a + s + ';' + css.join(';') + '"'; });
+        else post += ' style="' + css.join(';') + '"';
+      }
+      var t = tag, lead = '';
+      if (mode !== 'preview') {
+        if (mode === 'export' && kind === 'media' && !commented) { commented = true; lead = '<!-- Pon aquí tu <img> o <video> con esta misma clase (este div es solo un marcador) -->\n'; }
+        if (kind !== 'media' && GENERIC_TAG.test(tag)) t = 'div';   // el código no se ata a un h1/h2/section concretos
+        if (mode === 'export' && kind === 'sample' && !commented) { commented = true; lead = '<!-- Aplica esta clase y el style a TU elemento (h1, h2, p, img, div…): el efecto no depende de la etiqueta -->\n'; }
+      }
+      return lead + '<' + t + pre + ' data-fx-' + kind + (val != null ? '="' + val + '"' : '') + post + '>' + inner + '</' + t + '>';
+    });
+  }
+
   // Quita lo que solo sirve para la vista previa (contenido de ejemplo y marcas data-fx-*).
   var escapeHtml = function (t) { return String(t).replace(/[&<>"']/g, function (c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]; }); };
   function exportHtml(html, style, label, keepContent) {
@@ -93,13 +171,14 @@
   // Todo lo necesario para usar o previsualizar un efecto con unos valores y una paleta.
   function build(effect, input, palette, opts) {
     var fx = effect.fx, r = resolve(fx, input), v = vars(fx, r.values, palette), style = inline(v);
-    var label = ((opts && opts.label) || fx.label || '').slice(0, 80);
+    var ce = cleanElements(opts && opts.elements, palette), els = ce.elements, assets = opts && opts.assets;
+    var label = ((els.s && els.s.text) || (opts && opts.label) || fx.label || '').slice(0, 80);
     var delay = r.values.delay || 0, dur = r.values.duration || 0;
     var totalV = fx.total ? evalExpr(fx.total, r.values) : delay + dur;
     if (!isFinite(totalV)) totalV = delay + dur;
     return {
-      values: r.values, errors: r.errors, vars: v, style: style,
-      css: fx.cssText, html: exportHtml(fx.htmlText, style, label, opts && opts.keepContent), previewHtml: previewHtml(fx.htmlText, style, label),
+      values: r.values, errors: r.errors.concat(ce.errors), vars: v, style: style, elements: els,
+      css: fx.cssText, html: exportHtml(applyElements(fx.htmlText, els, null, 'export', palette), style, label, opts && opts.keepContent), kitPreviewHtml: exportHtml(applyElements(fx.htmlText, els, assets, 'kit', palette), style, label, opts && opts.keepContent), previewHtml: previewHtml(applyElements(fx.htmlText, els, assets, 'preview', palette), style, label),
       total: r3(totalV),
       markers: (fx.markers || []).map(function (m) { var at = m.expr ? evalExpr(m.expr, r.values) : delay + m.at * dur; return {label: m.label, at: r3(isFinite(at) ? at : delay)}; }),
     };
@@ -163,25 +242,29 @@
       var e = effects[it.effect];
       if (!e || !e.fx) { errors.push('Elemento ' + (i + 1) + ': el efecto "' + it.effect + '" no existe o no es parametrizable'); return; }
       var wrapper = e.fx.htmlText.indexOf('{{content}}') >= 0;
-      var r = build(e, it.params || {}, palette, {label: it.label, keepContent: wrapper});
+      var r = build(e, it.params || {}, palette, {label: it.label, keepContent: wrapper, elements: it.elements, assets: it.assets});
       r.errors.forEach(function (m) { errors.push('Elemento ' + (i + 1) + ' (' + it.effect + '): ' + m); });
       if (!seen[it.effect]) { seen[it.effect] = 1; cssParts.push(e.fx.cssText.trim()); }
       var isElem = ELEMENT_KINDS.indexOf(e.kind) >= 0;
-      items.push({n: i + 1, effect: it.effect, name: e.name, kind: e.kind, label: (it.label || e.fx.label || ''), start: r.values.delay || 0, duration: r.values.duration || 0,
-        end: r.total, values: r.values, vars: r.vars, markers: r.markers, html: r.html, element: isElem && !wrapper, wrap: wrapper});
+      items.push({n: i + 1, effect: it.effect, name: e.name, kind: e.kind, label: (it.label || e.fx.label || ''), elements: r.elements, start: r.values.delay || 0, duration: r.values.duration || 0,
+        end: r.total, values: r.values, vars: r.vars, markers: r.markers, html: r.html, pv: r.kitPreviewHtml, element: isElem && !wrapper, wrap: wrapper});
       if (isElem && !wrapper) elems.push(items.length - 1);
     });
-    var html = items.filter(function (it) { return !it.wrap; }).map(function (it) {
-      if (!it.element) return it.html;
-      var k = elems.indexOf(items.indexOf(it)), y = Math.round((15 + (k + 0.5) / elems.length * 70) * 10) / 10;
-      return '<div class="kit-slot" style="top:' + y + '%">' + it.html + '</div>';
-    }).join('\n');
-    items.filter(function (it) { return it.wrap; }).forEach(function (w) { var inner = html; html = w.html.replace(/\{\{content\}\}/g, function () { return inner; }); });   // los envoltorios (p. ej. la sacudida) rodean al resto
+    function compose(key) {
+      var out = items.filter(function (it) { return !it.wrap; }).map(function (it) {
+        if (!it.element) return it[key];
+        var k = elems.indexOf(items.indexOf(it)), y = Math.round((15 + (k + 0.5) / elems.length * 70) * 10) / 10;
+        return '<div class="kit-slot" style="top:' + y + '%">' + it[key] + '</div>';
+      }).join('\n');
+      items.filter(function (it) { return it.wrap; }).forEach(function (w) { var inner = out; out = w[key].replace(/\{\{content\}\}/g, function () { return inner; }); });   // los envoltorios (p. ej. la sacudida) rodean al resto
+      return out;
+    }
+    var html = compose('html'), previewHtml = compose('pv');
     var total = items.reduce(function (m, it) { return Math.max(m, it.end); }, 0);
     var markers = [];
     items.forEach(function (it) { it.markers.forEach(function (m) { markers.push({at: m.at, label: m.label, item: it.n, effect: it.effect}); }); });
     markers.sort(function (a, b) { return a.at - b.at; });
-    return {name: kit.name || 'Kit', palette: palette, items: items, css: (cssParts.join('\n\n') + '\n\n' + KIT_CSS).trim() + '\n', html: html, total: Math.round(total * 1000) / 1000, markers: markers, errors: errors, stageVars: kitVars(palette)};
+    return {name: kit.name || 'Kit', palette: palette, items: items, css: (cssParts.join('\n\n') + '\n\n' + KIT_CSS).trim() + '\n', html: html, previewHtml: previewHtml, total: Math.round(total * 1000) / 1000, markers: markers, errors: errors, stageVars: kitVars(palette)};
   }
 
   // Codificación compacta para la URL (base64url de un JSON). Con effects se omiten los valores que son los de por defecto.
@@ -191,7 +274,9 @@
     var o = {v: 1, n: kit.name || '', p: kit.palette, i: (kit.items || []).map(function (it) {
       var params = {}, e = effects && effects[it.effect], d = e && e.fx ? defaults(e.fx) : {};
       Object.keys(it.params || {}).forEach(function (k) { if (!e || it.params[k] !== d[k]) params[k] = it.params[k]; });
-      return {e: it.effect, l: it.label || '', p: params};
+      var row = {e: it.effect, l: it.label || '', p: params};
+      if (it.elements && Object.keys(it.elements).length) row.x = it.elements;
+      return row;
     })};
     return b64e(JSON.stringify(o));
   }
@@ -199,7 +284,7 @@
     try {
       var o = JSON.parse(b64d(s));
       if (!o || o.v !== 1 || !Array.isArray(o.i)) return null;
-      return {name: String(o.n || '').slice(0, 80), palette: (o.p && typeof o.p === 'object') ? o.p : String(o.p || ''), items: o.i.slice(0, KIT_MAX).map(function (x) { return {effect: String(x.e || ''), label: String(x.l || '').slice(0, 80), params: (x.p && typeof x.p === 'object') ? x.p : {}}; })};
+      return {name: String(o.n || '').slice(0, 80), palette: (o.p && typeof o.p === 'object') ? o.p : String(o.p || ''), items: o.i.slice(0, KIT_MAX).map(function (x) { return {effect: String(x.e || ''), label: String(x.l || '').slice(0, 80), params: (x.p && typeof x.p === 'object') ? x.p : {}, elements: (x.x && typeof x.x === 'object') ? x.x : {}}; })};
     } catch (e) { return null; }
   }
 
@@ -225,5 +310,5 @@
       'anims=document.getAnimations();anims.forEach(function(a){a.pause()});var qt=q.get("t");if(qt!==null)t=parseFloat(qt)||0;pp.textContent=playing?"❚❚":"▶";apply();requestAnimationFrame(tick);\n})();\n</script>\n</body></html>\n';
   }
 
-  return {KIT_MAX: KIT_MAX, buildKit: buildKit, encodeKit: encodeKit, decodeKit: decodeKit, pageHtml: pageHtml, paletteOfKit: paletteOfKit, escapeHtml: escapeHtml, HOLD: HOLD, defaults: defaults, resolve: resolve, vars: vars, inline: inline, build: build, lint: lint, kebab: kebab};
+  return {KIT_MAX: KIT_MAX, buildKit: buildKit, encodeKit: encodeKit, decodeKit: decodeKit, pageHtml: pageHtml, paletteOfKit: paletteOfKit, escapeHtml: escapeHtml, HOLD: HOLD, defaults: defaults, resolve: resolve, vars: vars, inline: inline, build: build, lint: lint, kebab: kebab, elementsOf: elementsOf, cleanElements: cleanElements};
 });

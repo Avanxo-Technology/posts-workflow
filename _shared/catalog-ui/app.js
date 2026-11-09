@@ -196,8 +196,92 @@
     },
     onChange: function (f) { kitListeners.push(f); },
   };
+  // Elemento del kit a partir de un efecto: el texto del elemento de texto pasa a ser su «label»; el resto de cambios van en elements.
+  function kitItem(e, vals, els) {
+    var x = JSON.parse(JSON.stringify(els || {})), label = (x.s && x.s.text) || e.fx.label || '';
+    if (x.s) { delete x.s.text; if (!Object.keys(x.s).length) delete x.s; }
+    return {effect: e.id, label: label, params: Object.assign({}, vals), elements: x};
+  }
   function kitBadge() { var n = kitStore.get().items.length, b = document.getElementById('kitbadge'); if (b) { b.textContent = n ? String(n) : ''; b.style.display = n ? '' : 'none'; } }
   kitStore.onChange(kitBadge);
+
+
+  // ---- elementos de muestra: texto, colores y tamaño (SÍ van al código) e imagen (solo vista previa, nunca va al código) ----
+  function elsFromQuery(p) {
+    var els = {};
+    p.forEach(function (v, k) {
+      var m = /^el_(?:([sab])_)?(text|color|bg|size)$/.exec(k);
+      if (m) { var id = m[1] || 's'; (els[id] = els[id] || {})[m[2]] = m[2] === 'size' ? parseFloat(v) : v; }
+    });
+    return els;
+  }
+  function elsToQuery(els, qs) {
+    Object.keys(els).forEach(function (id) { Object.keys(els[id]).forEach(function (k) { qs.set('el_' + (id === 's' ? '' : id + '_') + k, els[id][k]); }); });
+    return qs;
+  }
+  function readImage(file, done) {
+    if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) { toast('Usa una imagen PNG, JPG, WebP o GIF'); return; }
+    if (file.size > 8 * 1024 * 1024) { toast('La imagen pesa más de 8 MB'); return; }
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function () {
+      var k = Math.min(1, 1080 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      done(c.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.85));
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); toast('No se pudo leer la imagen'); };
+    img.src = url;
+  }
+  // o: {get() -> els, set(els), assets: {id: dataURL}, onAsset(), kit: bool}. En el kit el texto del elemento de texto se edita en su propio campo «Texto».
+  function elementsPanel(e, o) {
+    var seen = {}, rows = FX.elementsOf(e).filter(function (el) { if (seen[el.id]) return false; seen[el.id] = 1; return true; });
+    if (!rows.length) return null;
+    var NAME = {s: 'Elemento de texto', a: 'Escena A', b: 'Escena B', m: 'Foto o video de muestra'};
+    var box = h('div', {class: 'panel'});
+    box.appendChild(h('p', {class: 'hint', style: 'color:var(--mut);margin:0 0 10px;font-size:12px', text: 'El texto, los colores y el tamaño se incluyen en el código. La imagen es solo para la vista previa: no va en el código ni en la API.'}));
+    rows.forEach(function (el) {
+      var id = el.id;
+      var setProp = function (k, v) {
+        var all = o.get(), c = Object.assign({}, all[id] || {});
+        if (v === '' || v == null || (typeof v === 'number' && !isFinite(v))) delete c[k]; else c[k] = v;
+        if (Object.keys(c).length) all[id] = c; else delete all[id];
+        o.set(all);
+      };
+      var cur = function () { return o.get()[id] || {}; };
+      var section = h('div', {class: 'elrow'}, h('h3', {text: NAME[id] || id}, ' ', h('small', {text: el.kind === 'media' ? '(el marcador va en el código; la imagen, no)' : el.inCode ? '(va en el código)' : '(solo vista previa)'})));
+      if (el.hasText && !(o.kit && id === 's')) {
+        var t = h('input', {type: 'text', maxlength: 80, value: cur().text || '', placeholder: el.text || 'Texto'});
+        t.addEventListener('input', function () { setProp('text', t.value); });
+        section.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Texto', t));
+      }
+      if (el.kind !== 'media') {
+        [['color', 'Color del texto'], ['bg', 'Fondo']].forEach(function (cp) {
+          var k = cp[0], inp = h('input', {type: 'color', value: cur()[k] || '#888888'}), tag = h('span', {class: 'val mono', text: cur()[k] || 'auto'});
+          inp.addEventListener('input', function () { tag.textContent = inp.value; setProp(k, inp.value); });
+          var auto = h('button', {class: 'mini', title: 'Volver al color del efecto', text: '↺', onclick: function () { tag.textContent = 'auto'; inp.value = '#888888'; setProp(k, ''); }});
+          section.appendChild(h('div', {class: 'ctl'}, h('label', {text: cp[1]}), h('div', {class: 'rg'}, inp, tag), auto));
+        });
+        if (el.kind === 'sample') {
+          var rng = h('input', {type: 'range', min: 20, max: 400, step: 5, value: cur().size || 130}), out = h('span', {class: 'val mono', text: cur().size ? cur().size + 'px' : 'auto'});
+          rng.addEventListener('input', function () { out.textContent = rng.value + 'px'; setProp('size', parseFloat(rng.value)); });
+          section.appendChild(h('div', {class: 'ctl'}, h('label', {text: 'Tamaño del texto'}), h('div', {class: 'rg'}, rng, out),
+            h('button', {class: 'mini', title: 'Tamaño del efecto', text: '↺', onclick: function () { out.textContent = 'auto'; setProp('size', ''); }})));
+        }
+      }
+      var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: o.assets[id] ? 'imagen puesta' : 'sin imagen'});
+      file.addEventListener('change', function () {
+        var f = file.files && file.files[0]; if (!f) return;
+        readImage(f, function (data) { o.assets[id] = data; state.textContent = 'imagen puesta'; o.onAsset(); });
+        file.value = '';
+      });
+      section.appendChild(h('div', {class: 'ctl'}, h('label', {text: 'Imagen (solo vista previa)'}),
+        h('div', {class: 'rg'}, h('button', {text: 'Elegir imagen…', onclick: function () { file.click(); }}), state, file),
+        h('button', {class: 'mini', title: 'Quitar la imagen', text: '✕', onclick: function () { delete o.assets[id]; state.textContent = 'sin imagen'; o.onAsset(); }})));
+      box.appendChild(section);
+    });
+    return box;
+  }
 
   // ---- configuraciones guardadas (en este navegador): efecto + valores + paleta, como un enlace de la propia página ----
   var SAVE_KEY = 'posts-saved-v1';
@@ -213,9 +297,9 @@
       saved.all().filter(function (s) { return s.effect === e.id; }).forEach(function (s) {
         list.appendChild(h('div', {class: 'srow'}, h('b', {text: s.name}),
           h('button', {text: 'Aplicar', onclick: function () { routeQuery = new URLSearchParams(s.qs); location.hash = '#/efecto/' + e.id + (s.qs ? '?' + s.qs : ''); render(); }}),
-          h('button', {text: 'Al kit', onclick: function () { var p = new URLSearchParams(s.qs), r = FX.resolve(e.fx, Object.fromEntries(Array.from(p).filter(function (kv) { return e.fx.params[kv[0]]; })));
+          h('button', {text: 'Al kit', onclick: function () { var p = new URLSearchParams(s.qs), r = FX.resolve(e.fx, Object.fromEntries(Array.from(p).filter(function (kv) { return e.fx.params[kv[0]]; }))), sel = elsFromQuery(p);
             var pal = p.get('palette') === 'custom' ? {dark: p.get('c_dark'), light: p.get('c_light'), accent: p.get('c_accent')} : (p.get('palette') || '');
-            toast('Añadido al kit (' + kitStore.add({effect: e.id, label: e.fx.label || '', params: Object.assign(FX.defaults(e.fx), r.errors.length ? {} : r.values)}, pal).items.length + ')'); }}),
+            toast('Añadido al kit (' + kitStore.add(kitItem(e, Object.assign(FX.defaults(e.fx), r.errors.length ? {} : r.values), sel), pal).items.length + ')'); }}),
           h('button', {class: 'mini', title: 'Borrar', text: '✕', onclick: function () { saved.put(saved.all().filter(function (x) { return x !== undefined && !(x.effect === s.effect && x.name === s.name && x.at === s.at); })); draw(); }})));
       });
       list.style.display = list.children.length ? '' : 'none';
@@ -245,7 +329,7 @@
   // ---- vista: efecto con contrato spec 1 (controles + vista previa + código listo) ----
   function viewEffectFx(e) {
     if (cleanup) { cleanup(); cleanup = null; }
-    var fx = e.fx, pr = routeQuery, vals = FX.defaults(fx);
+    var fx = e.fx, pr = routeQuery, vals = FX.defaults(fx), els = elsFromQuery(pr), assets = {};   // els: texto/colores/tamaño (van al código); assets: imágenes solo de la vista previa
     var brandIds = Object.keys(data.brands).sort(), custom = {dark: '#14181c', light: '#f4f1ea', accent: '#c46a2b'};
     var palId = pr.get('palette') && (data.brands[pr.get('palette')] || pr.get('palette') === 'custom') ? pr.get('palette') : ((e.brands || []).filter(function (b) { return data.brands[b]; })[0] || brandIds[0] || 'custom');
     ['dark', 'light', 'accent'].forEach(function (k) { if (/^#[0-9a-fA-F]{6}$/.test(pr.get('c_' + k) || '')) custom[k] = pr.get('c_' + k); });
@@ -262,10 +346,11 @@
     function query() {
       var d = FX.defaults(fx), qs = new URLSearchParams();
       Object.keys(fx.params).forEach(function (k) { if (vals[k] !== d[k]) qs.set(k, vals[k]); });
+      elsToQuery(els, qs);
       return qs;
     }
     function update() {
-      var p = palette(), r = FX.build(e, vals, p);
+      var p = palette(), r = FX.build(e, vals, p, {elements: els, assets: assets});
       current = r;
       if (ready) frame.contentWindow.postMessage({type: 'fx', css: r.css, html: r.previewHtml, total: r.total, markers: r.markers, palette: p}, '*');
       htmlPre.textContent = r.html; cssPre.textContent = r.css;
@@ -314,8 +399,10 @@
           h('h1', {text: e.name}),
           h('div', {class: 'idline'}, h('code', {text: e.id}), h('span', {class: 'kind k-' + e.kind, text: KIND[e.kind] || e.kind}),
             h('button', {onclick: function () { copy(e.id, 'id copiado'); }, text: 'Copiar id'}),
-            h('button', {class: 'primary', text: '+ Añadir al kit', onclick: function () { var n = kitStore.add({effect: e.id, label: fx.label || '', params: Object.assign({}, vals)}, palId === 'custom' ? custom : palId).items.length; toast('Añadido a «' + kitStore.get().name + '» (' + n + ')'); }})),
+            h('button', {class: 'primary', text: '+ Añadir al kit', onclick: function () { var n = kitStore.add(kitItem(e, vals, els), palId === 'custom' ? custom : palId).items.length; toast('Añadido a «' + kitStore.get().name + '» (' + n + ')'); }})),
           md(e.md),
+          FX.elementsOf(e).length ? h('h2', {text: 'Elementos de la vista previa'}) : null,
+          elementsPanel(e, {get: function () { return els; }, set: function (a) { els = a; update(); }, assets: assets, onAsset: function () { update(); }}),
           h('h2', {text: 'Controles'}),
           saveBox(e),
           h('div', {class: 'panel'}, Object.keys(fx.params).map(function (k) { return control(k, fx.params[k]); }),
@@ -450,7 +537,7 @@
     app.replaceChildren(h('a', {class: 'back', href: '#/', text: '← Volver'}), h('div', {class: 'empty', text: 'No existe ' + what + ' "' + id + '" en el catálogo.'}));
   }
 
-  window.PW = {h: h, toast: toast, copy: copy, app: app, search: q, reload: function () { return load(true); }, data: function () { return data; }, makeControl: makeControl, kit: kitStore, KIND: KIND, routeQuery: function () { return routeQuery; }};
+  window.PW = {h: h, toast: toast, copy: copy, app: app, search: q, reload: function () { return load(true); }, data: function () { return data; }, makeControl: makeControl, elementsPanel: elementsPanel, elsFromQuery: elsFromQuery, elsToQuery: elsToQuery, kit: kitStore, KIND: KIND, routeQuery: function () { return routeQuery; }};
 
   // ---- router ----
   function render() {

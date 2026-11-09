@@ -64,7 +64,7 @@ test('todos los efectos spec 1 del catálogo cumplen el contrato', () => {
   assert.ok(n >= 5);
 });
 
-const effects = () => Object.fromEntries(['slam', 'pop', 'sweep-panel', 'scene-push'].map(id => [id, load(id)]));
+const effects = () => Object.fromEntries(['slam', 'pop', 'sweep-panel', 'scene-push', 'camera-pan', 'shutter-bars'].map(id => [id, load(id)]));
 
 test('kit: composición, orden, tiempos y marcadores absolutos', () => {
   const kit = {name: 'K', palette: pal, items: [{effect: 'slam', label: 'Hola', params: {delay: 0.3, duration: 0.8}}, {effect: 'pop', params: {delay: 1.2}}, {effect: 'sweep-panel', params: {delay: 3}}]};
@@ -81,7 +81,7 @@ test('kit: etiquetas escapadas y sin inyección por $& / $\'', () => {
   const b = FX.buildKit(effects(), kit, {});
   assert.ok(!b.html.includes('<img'));
   assert.ok(b.html.includes('&lt;img src=x onerror=alert(1)&gt; $&amp; $&#39; $`'));
-  assert.equal((b.html.match(/<h1/g) || []).length, 1);        // un solo elemento: $& no duplicó el HTML
+  assert.equal((b.html.match(/class="fx-slam"/g) || []).length, 1);   // un solo elemento: $& no duplicó el HTML
   assert.ok(!FX.pageHtml(b).includes('<img'));
 });
 
@@ -151,4 +151,57 @@ test('evalExpr no ejecuta código: solo aritmética con parámetros', () => {
   assert.ok(Number.isFinite(FX.build(e, {}, pal).total));      // expresión inválida: vuelve a delay + duration
   e.fx.total = '(delay + 2) * duration - 1';
   assert.equal(FX.build(e, {delay: 1, duration: 0.5}, pal).total, 0.5);
+});
+
+test('elementos: texto, colores y tamaño llegan al código con etiqueta genérica', () => {
+  const e = effects().slam;
+  const r = FX.build(e, {}, pal, {elements: {s: {text: 'HOLA <b>', color: '#00ff00', bg: '#0000ff', size: 200}}});
+  assert.deepEqual(r.errors, []);
+  assert.ok(!/<h[1-6]|<section/i.test(r.html), 'el código no se ata a h1/h2/section');
+  assert.ok(r.html.includes('<div class="fx-slam"') && r.html.includes('HOLA &lt;b&gt;'));
+  assert.ok(r.html.includes('background:#0000ff') && r.html.includes('color:#00ff00') && r.html.includes('font-size:200px'));
+  assert.ok(r.html.includes('TU elemento') && !r.html.includes('data-fx'));
+  assert.ok(r.previewHtml.includes('<h1 class="fx-slam"'), 'la vista previa conserva su elemento de muestra');
+});
+
+test('elementos: las imágenes son solo de vista previa y nunca llegan al código', () => {
+  const png = 'data:image/png;base64,iVBORw0KGgo=';
+  for (const id of ['slam', 'scene-push', 'camera-pan', 'shutter-bars']) {
+    const e = effects()[id], els = FX.elementsOf(e).map(x => x.id);
+    const assets = Object.fromEntries(els.map(k => [k, png]));
+    const r = FX.build(e, {}, pal, {assets});
+    assert.ok(!r.html.includes('data:image'), id + ': la imagen no debe ir en el código');
+    assert.ok(r.previewHtml.includes(png), id + ': la imagen sí va en la vista previa');
+  }
+  const bad = FX.build(effects().slam, {}, pal, {assets: {s: 'javascript:alert(1)'}});
+  assert.ok(!bad.previewHtml.includes('javascript'));          // solo data:image/(png|jpeg|webp|gif);base64
+});
+
+test('elementos: las escenas de código usan marcadores y las de muestra no salen del código', () => {
+  const push = FX.build(effects()['scene-push'], {}, pal, {elements: {a: {text: 'Inicio', bg: '#222222'}}});
+  assert.ok(push.html.includes('<div class="fx-push-out" style="background:#222222">Inicio</div>') && push.html.includes('<!-- tu escena B -->'));
+  const bars = FX.build(effects()['shutter-bars'], {}, pal, {elements: {a: {text: 'X'}}});
+  assert.ok(!bars.html.includes('<section') && !bars.html.includes('X'), 'la escena de muestra solo existe en la vista previa');
+  assert.ok(bars.previewHtml.includes('>X<'));
+  assert.ok(FX.build(effects()['camera-pan'], {}, pal).html.includes('<img> o <video>'));
+});
+
+test('elementos: validación y viaje por el enlace del kit', () => {
+  const bad = FX.build(effects().slam, {}, pal, {elements: {s: {color: 'rojo', size: 9999, text: 'x'.repeat(81)}, z: {text: 'a'}, a: {zzz: '1'}}});
+  assert.equal(bad.errors.length, 5);
+  const kit = {name: 'K', palette: pal, items: [{effect: 'slam', label: 'Hola', params: {}, elements: {s: {bg: '#112233'}}}]};
+  const back = FX.decodeKit(FX.encodeKit(kit, effects()));
+  assert.deepEqual(back.items[0].elements, {s: {bg: '#112233'}});
+  assert.ok(FX.buildKit(effects(), back, {}).html.includes('background:#112233'));
+});
+
+test('elementos en el kit: la imagen está en la vista previa del kit y no en el código ni en el enlace', () => {
+  const png = 'data:image/png;base64,iVBORw0KGgo=';
+  const items = [{effect: 'slam', label: 'Hola', params: {}, elements: {s: {bg: '#112233'}}, assets: {s: png}}, {effect: 'scene-push', params: {}, elements: {a: {text: 'Antes'}}, assets: {a: png}}];
+  const b = FX.buildKit(effects(), {palette: pal, items}, {});
+  assert.deepEqual(b.errors, []);
+  assert.ok(b.previewHtml.includes(png) && !b.html.includes('data:image'));
+  assert.ok(!/<h[1-6]|<section/i.test(b.html) && b.html.includes('>Antes<'));
+  assert.ok(!FX.encodeKit({palette: pal, items}, effects()).includes('data'), 'las imágenes no viajan en el enlace');
+  assert.ok(!FX.pageHtml(b).includes('data:image'));
 });

@@ -56,10 +56,11 @@
     var ctlBox = h('div'), tlBox = h('div'), sumBox = h('div'), errBox = h('div'), linkBox = h('div', {class: 'cmd'}), totalEl = h('span', {class: 'mono'});
 
     function save() { store.set(kit); }
-    function rebuild() { built = FX.buildKit(effects, kit, brands); return built; }
+    var assets = new Map();   // imágenes de la vista previa por elemento del kit: solo en memoria, nunca van al código, al enlace ni al navegador
+    function rebuild() { built = FX.buildKit(effects, {name: kit.name, palette: kit.palette, items: kit.items.map(function (it) { var c = Object.assign({}, it); c.assets = assets.get(it) || null; return c; })}, brands); return built; }
     function push(keepTime) {
       if (!ready || !built) return;
-      frame.contentWindow.postMessage({type: 'fx', css: built.css, html: built.html, total: Math.max(built.total, 0.1), markers: built.markers, palette: built.palette, keepTime: !!keepTime}, '*');
+      frame.contentWindow.postMessage({type: 'fx', css: built.css, html: built.previewHtml || built.html, total: Math.max(built.total, 0.1), markers: built.markers, palette: built.palette, keepTime: !!keepTime}, '*');
     }
     function changed(keepTime, skipTimeline) {
       rebuild(); save(); schedulePush(keepTime);
@@ -159,6 +160,7 @@
       Array.prototype.forEach.call(tlBox.querySelectorAll('.kt-row'), function (b, k) { b.classList.toggle('on', k === i); });
       drawControls();
     }
+    function assetsOf(it) { var a = assets.get(it); if (!a) { a = {}; assets.set(it, a); } return a; }
     function drawControls() {
       syncs = [];
       var it = kit.items[sel], e = it && effects[it.effect];
@@ -176,7 +178,10 @@
             h('button', {text: '↑ Subir', title: 'Se apila antes (queda debajo)', disabled: sel === 0, onclick: function () { move(-1); }}),
             h('button', {text: '↓ Bajar', title: 'Se apila después (queda encima)', disabled: sel === kit.items.length - 1, onclick: function () { move(1); }}),
             h('button', {text: 'Duplicar', onclick: function () { kit.items.splice(sel + 1, 0, JSON.parse(JSON.stringify(it))); sel++; full(); }}),
-            h('button', {class: 'danger', text: 'Quitar', onclick: function () { removeAt(sel); }}))));
+            h('button', {class: 'danger', text: 'Quitar', onclick: function () { removeAt(sel); }}))),
+        h('h2', {text: 'Elementos de la vista previa'}),
+        PW.elementsPanel(e, {kit: true, get: function () { return it.elements || (it.elements = {}); }, set: function (all) { it.elements = all; changed(true, true); },
+          assets: assetsOf(it), onAsset: function () { changed(true, true); }}) || null);
       void palette;
     }
     function move(d) { var j = sel + d; if (j < 0 || j >= kit.items.length) return; var t = kit.items[sel]; kit.items[sel] = kit.items[j]; kit.items[j] = t; sel = j; full(); }
@@ -235,7 +240,7 @@
           h('div', {class: 'actions', style: 'margin:0 0 8px'},
             h('button', {class: 'primary', text: 'Copiar código (CSS + HTML)', onclick: function () { copy(allCode(), 'Código copiado'); }}),
             h('button', {text: 'Descargar kit.html', onclick: download}),
-            h('button', {text: 'Copiar JSON', onclick: function () { copy(JSON.stringify({name: built.name, palette: built.palette, totalSeconds: built.total, items: built.items.map(function (i) { return {effect: i.effect, label: i.label, start: i.start, duration: i.duration, values: i.values}; })}, null, 2), 'JSON copiado'); }})),
+            h('button', {text: 'Copiar JSON', onclick: function () { copy(JSON.stringify({name: built.name, palette: built.palette, totalSeconds: built.total, items: built.items.map(function (i) { return {effect: i.effect, label: i.label, elements: i.elements, start: i.start, duration: i.duration, values: i.values}; })}, null, 2), 'JSON copiado'); }})),
           h('h2', {text: 'Para tu agente'}),
           h('p', {style: 'color:var(--mut);margin:0 0 8px;font-size:13px', text: 'Esta URL devuelve el kit compuesto en JSON (código listo, tiempos y marcadores). Pégala en el prompt de Claude.'}), linkBox,
           h('div', {class: 'actions'},

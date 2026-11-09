@@ -4,7 +4,7 @@ Sus variantes laterales están en `slam-sides`.
 
 ## Cómo aplicarlo
 1. Copia `fx.css` en el CSS de la pieza (una sola vez).
-2. Añade la clase al elemento y fija los parámetros como variables en su `style`: `<h1 class="fx-slam" style="--fx-delay:.3s;--fx-duration:.8s">`.
+2. Añade la clase al elemento y fija los parámetros como variables en su `style`: `<div class="fx-slam" style="--fx-delay:.3s;--fx-duration:.8s">` (puede ser tu propio h1, h2, p, img…: el efecto no depende de la etiqueta).
 3. `--fx-delay` es el segundo del video en que entra el elemento. Sincroniza el sonido en ese mismo segundo (un golpe fuerte si debe sacudir la pantalla).
 
 ## Notas
