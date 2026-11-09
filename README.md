@@ -12,13 +12,13 @@
 Ejemplo de prompt: «Aplica este kit en mi video: `https://<tu-sitio>/api/v1/kit?k=…`».
 Los agentes pueden empezar por `/llms.txt`, que explica la API (`/api/v1/effects`, `/api/v1/effects/<id>?duration=0.6&palette=oceano`, `/api/v1/kit?k=…`).
 
-**Probarlo en local** (solo Node 22+, sin dependencias):
+**No necesitas clonar este repositorio ni instalar nada.** La fuente es el sitio: entras, eliges y ajustas los efectos, y tu IA los lee por la API. Todo lo que explica un efecto (descripción, parámetros, código listo) está en su ficha y en `/api/v1/effects/<id>`.
+
+**Quien mantiene el sitio** (no el visitante) lo genera y lo sirve con el CLI, solo con Node 22+:
 ```
-git clone <este-repo> && cd posts-workflow
-./posts site build && ./posts site serve      # abre http://127.0.0.1:4748/
-./posts site serve --lan                       # además lo sirve en tu red local (solo lectura) y muestra la URL
+./posts site build && ./posts site serve --lan      # http://127.0.0.1:4748/ y la URL de tu red local
 ```
-Más abajo está el flujo de producción de piezas del equipo (carruseles y reels con el CLI `posts`), que es opcional para quien solo quiere los efectos.
+Lo que sigue en este README es para ese equipo: el flujo de producción de piezas con el CLI `posts` es opcional y ajeno al sitio.
 
 ---
 

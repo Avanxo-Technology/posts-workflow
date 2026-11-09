@@ -11,7 +11,7 @@
   "snippet": "fx.css",
   "audio": {
     "sfx": "whoosh de transición",
-    "sync": "en el mismo `--s` en gen_audio.py"
+    "sync": "sincroniza el sonido con el inicio del barrido (`--fx-delay`)"
   },
   "spec": 1,
   "fx": {

@@ -15,7 +15,7 @@
   ],
   "audio": {
     "sfx": "sugerido: golpe/whoosh en --s",
-    "sync": "mismo instante en gen_audio.py; usar hit=True si debe sacudir pantalla"
+    "sync": "sincroniza el sonido en ese mismo instante (golpe fuerte si debe sacudir la pantalla)"
   },
   "related": [
     "slam-sides"
