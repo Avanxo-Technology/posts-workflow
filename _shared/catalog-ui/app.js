@@ -210,7 +210,7 @@
   function elsFromQuery(p) {
     var els = {};
     p.forEach(function (v, k) {
-      var m = /^el_(?:([sab])_)?(text|color|bg|size|w|pad)$/.exec(k);
+      var m = /^el_(?:([sab])_)?(text|color|bg|font|size|w|pad)$/.exec(k);
       if (m) { var id = m[1] || 's'; (els[id] = els[id] || {})[m[2]] = /^(size|w|pad)$/.test(m[2]) ? parseFloat(v) : v; }
     });
     return els;
@@ -256,6 +256,20 @@
         section.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Texto', t));
       }
       if (el.kind === 'sample' || el.kind === 'scene') {
+        // fuente: la del efecto, las de las marcas disponibles, Google Fonts y del sistema
+        var brands = (PW.data().brands || {}), seenB = {}, bopts = [];
+        Object.keys(brands).sort().forEach(function (bid) {
+          [brands[bid].headFont, brands[bid].bodyFont].forEach(function (f) {
+            if (f && !seenB[bid + '|' + f]) { seenB[bid + '|' + f] = 1; bopts.push(h('option', {value: f, text: f + ' · ' + (brands[bid].name || bid)})); }
+          });
+        });
+        var fontSel = h('select', {class: 'in'}, h('option', {value: '', text: 'La del efecto'}),
+          bopts.length ? h('optgroup', {label: 'Fuentes de las marcas'}, bopts) : null,
+          h('optgroup', {label: 'Google Fonts'}, FX.FONTS.google.map(function (f) { return h('option', {value: f, text: f}); })),
+          h('optgroup', {label: 'Del sistema'}, FX.FONTS.system.map(function (f) { return h('option', {value: f, text: f}); })));
+        fontSel.value = cur().font || '';
+        fontSel.addEventListener('change', function () { setProp('font', fontSel.value); });
+        section.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Fuente', fontSel));
         [['color', 'Color del texto'], ['bg', 'Fondo']].forEach(function (cp) {
           var k = cp[0], inp = h('input', {type: 'color', value: cur()[k] || '#888888'}), tag = h('span', {class: 'val mono', text: cur()[k] || 'auto'});
           inp.addEventListener('input', function () { tag.textContent = inp.value; setProp(k, inp.value); });

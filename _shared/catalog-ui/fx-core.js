@@ -85,7 +85,7 @@
   // ---- Elementos de ejemplo editables ----
   // El marcado de un efecto puede traer elementos de muestra marcados con data-fx-sample (texto), data-fx-scene="a|b" (escenas) y data-fx-media (foto o video).
   // El usuario puede cambiarles texto, colores y tamaño (eso SÍ llega al código exportado) y, solo en la vista previa, sustituirlos por una imagen (nunca va al código).
-  // elements = {s: {text, color, bg, size, w, pad}, a: {...}, b: {...}}   (size = tamaño del texto en px; w = ancho del elemento en %; pad = relleno en px)   (s = elemento de texto de muestra; a/b = escenas)
+  // elements = {s: {text, color, bg, font, size, w, pad}, a: {...}, b: {...}}   (size = tamaño del texto en px; w = ancho del elemento en %; pad = relleno en px)   (s = elemento de texto de muestra; a/b = escenas)
   var ELEM_RE = /<(\w+)([^>]*?)\sdata-fx-(sample|scene|media)(?:="([^"]*)")?([^>]*)>([^<]*)<\/\1>/g;
   var IMG_RE = /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/=]+$/;
   var ELEM_IDS = ['s', 'a', 'b'];
@@ -119,6 +119,7 @@
         if (v === '' || v == null) return;
         if (k === 'text') { if (typeof v === 'string' && v.length <= 80) c.text = v; else errors.push(id + '.text: texto de hasta 80 caracteres'); }
         else if (k === 'color' || k === 'bg') { if (HEX.test(v) || TOKEN.test(v)) c[k] = v; else errors.push(id + '.' + k + ' debe ser #RRGGBB o palette.dark|light|accent'); }
+        else if (k === 'font') { if (typeof v === 'string' && FONT_RE.test(v)) c.font = v; else errors.push(id + '.font debe ser el nombre de una fuente (letras, números y espacios)'); }
         else if (k === 'size' || k === 'w' || k === 'pad') {
           var R = {size: [10, 600], w: [10, 100], pad: [0, 300]}[k], n = parseFloat(v);
           if (isFinite(n) && n >= R[0] && n <= R[1]) c[k] = n; else errors.push(id + '.' + k + ' debe estar entre ' + R[0] + ' y ' + R[1]);
@@ -128,6 +129,22 @@
       if (Object.keys(c).length) out[id] = c;
     });
     return {elements: out, errors: errors};
+  }
+  // ---- Fuentes: el código lleva font-family y, si es una fuente de Google Fonts, el CSS trae su @import ----
+  var SYSTEM_FONTS = {'system-ui': 1, 'Arial': 1, 'Arial Black': 1, 'Georgia': 1, 'Impact': 1, 'Courier New': 1, 'Trebuchet MS': 1, 'Verdana': 1, 'Times New Roman': 1, 'Tahoma': 1};
+  var FONT_WEIGHTS = {'Inter': '400;700;900', 'Poppins': '400;700;900', 'Montserrat': '400;700;900', 'Oswald': '400;700', 'Lora': '400;700', 'Playfair Display': '400;700;900', 'Space Grotesk': '400;700', 'DM Sans': '400;700;900',
+    'Roboto': '400;700;900', 'Roboto Condensed': '400;700', 'Merriweather': '400;700;900', 'Nunito': '400;700;900', 'Raleway': '400;700;900', 'Barlow Condensed': '400;700;900', 'Bebas Neue': '', 'Anton': '', 'Archivo Black': '', 'Pacifico': '', 'Lobster': '', 'Space Mono': '400;700'};
+  var SERIF_FONTS = {'Georgia': 1, 'Times New Roman': 1, 'Lora': 1, 'Playfair Display': 1, 'Merriweather': 1}, MONO_FONTS = {'Courier New': 1, 'Space Mono': 1};
+  var FONT_RE = /^[A-Za-z0-9][A-Za-z0-9 \-]{1,38}$/;
+  var FONTS = {
+    system: ['system-ui', 'Arial', 'Arial Black', 'Georgia', 'Impact', 'Courier New', 'Trebuchet MS', 'Verdana', 'Times New Roman', 'Tahoma'],
+    google: ['Inter', 'Poppins', 'Montserrat', 'Oswald', 'Lora', 'Playfair Display', 'Space Grotesk', 'DM Sans', 'Roboto', 'Roboto Condensed', 'Merriweather', 'Nunito', 'Raleway', 'Barlow Condensed', 'Bebas Neue', 'Anton', 'Archivo Black', 'Pacifico', 'Lobster', 'Space Mono']
+  };
+  function fontStack(name) { return name === 'system-ui' ? 'system-ui,sans-serif' : "'" + name + "'," + (SERIF_FONTS[name] ? 'serif' : MONO_FONTS[name] ? 'monospace' : 'sans-serif'); }
+  function fontImport(name) {
+    if (SYSTEM_FONTS[name]) return '';
+    var w = FONT_WEIGHTS[name];
+    return "@import url('https://fonts.googleapis.com/css2?family=" + name.replace(/ /g, '+') + (w ? ':wght@' + w : '') + "&display=swap');";
   }
   var GENERIC_TAG = /^(h[1-6]|section|article|p|header|footer|main|aside|figure)$/i;
   // Aplica los cambios a los elementos de muestra. mode 'export': código para el usuario (etiqueta genérica, sin imágenes). 'preview': vista previa del efecto (con imágenes y escenas de muestra).
@@ -143,6 +160,7 @@
       var col = function (v) { return colorOf(v, palette); };
       if (o.bg) css.push('background:' + col(o.bg));
       if (o.color) css.push('color:' + col(o.color));
+      if (o.font && kind !== 'media') css.push('font-family:' + fontStack(o.font));
       if (o.size && kind !== 'media') css.push('font-size:' + o.size + 'px');
       if (o.w && kind === 'sample') css.push('width:' + o.w + '%');
       if (o.pad != null && kind === 'sample') css.push('padding:' + o.pad + 'px');
@@ -179,13 +197,15 @@
   function build(effect, input, palette, opts) {
     var fx = effect.fx, r = resolve(fx, input), v = vars(fx, r.values, palette), style = inline(v);
     var ce = cleanElements(opts && opts.elements, palette), els = ce.elements, assets = opts && opts.assets;
+    var imports = [];
+    Object.keys(els).forEach(function (id) { var im = els[id].font && fontImport(els[id].font); if (im && imports.indexOf(im) < 0) imports.push(im); });
     var label = ((els.s && els.s.text) || (opts && opts.label) || fx.label || '').slice(0, 80);
     var delay = r.values.delay || 0, dur = r.values.duration || 0;
     var totalV = fx.total ? evalExpr(fx.total, r.values) : delay + dur;
     if (!isFinite(totalV)) totalV = delay + dur;
     return {
       values: r.values, errors: r.errors.concat(ce.errors), vars: v, style: style, elements: els,
-      css: fx.cssText, html: exportHtml(applyElements(fx.htmlText, els, null, 'export', palette), style, label, opts && opts.keepContent), kitPreviewHtml: exportHtml(applyElements(fx.htmlText, els, assets, 'kit', palette), style, label, opts && opts.keepContent), previewHtml: previewHtml(applyElements(fx.htmlText, els, assets, 'preview', palette), style, label),
+      css: (imports.length ? imports.join('\n') + '\n' : '') + fx.cssText, fontImports: imports, html: exportHtml(applyElements(fx.htmlText, els, null, 'export', palette), style, label, opts && opts.keepContent), kitPreviewHtml: exportHtml(applyElements(fx.htmlText, els, assets, 'kit', palette), style, label, opts && opts.keepContent), previewHtml: previewHtml(applyElements(fx.htmlText, els, assets, 'preview', palette), style, label),
       total: r3(totalV),
       markers: (fx.markers || []).map(function (m) { var at = m.expr ? evalExpr(m.expr, r.values) : delay + m.at * dur; return {label: m.label, at: r3(isFinite(at) ? at : delay)}; }),
     };
@@ -242,7 +262,7 @@
 
   // Compone el kit. effects: {id: efecto con fx.cssText/htmlText}. Devuelve también los errores por elemento.
   function buildKit(effects, kit, brands) {
-    var errors = [], palette = paletteOfKit(kit, brands), items = [], cssParts = [], seen = {}, elems = [];
+    var errors = [], palette = paletteOfKit(kit, brands), items = [], cssParts = [], seen = {}, elems = [], kitImports = [];
     var list = (kit.items || []).slice(0, KIT_MAX);
     if ((kit.items || []).length > KIT_MAX) errors.push('El kit admite hasta ' + KIT_MAX + ' elementos');
     list.forEach(function (it, i) {
@@ -252,6 +272,7 @@
       var r = build(e, it.params || {}, palette, {label: it.label, keepContent: wrapper, elements: it.elements, assets: it.assets});
       r.errors.forEach(function (m) { errors.push('Elemento ' + (i + 1) + ' (' + it.effect + '): ' + m); });
       if (!seen[it.effect]) { seen[it.effect] = 1; cssParts.push(e.fx.cssText.trim()); }
+      r.fontImports.forEach(function (im) { if (kitImports.indexOf(im) < 0) kitImports.push(im); });
       var isElem = ELEMENT_KINDS.indexOf(e.kind) >= 0;
       items.push({n: i + 1, effect: it.effect, name: e.name, kind: e.kind, label: (it.label || e.fx.label || ''), elements: r.elements, start: r.values.delay || 0, duration: r.values.duration || 0,
         end: r.total, values: r.values, vars: r.vars, markers: r.markers, html: r.html, pv: r.kitPreviewHtml, element: isElem && !wrapper, wrap: wrapper});
@@ -271,7 +292,7 @@
     var markers = [];
     items.forEach(function (it) { it.markers.forEach(function (m) { markers.push({at: m.at, label: m.label, item: it.n, effect: it.effect}); }); });
     markers.sort(function (a, b) { return a.at - b.at; });
-    return {name: kit.name || 'Kit', palette: palette, items: items, css: (cssParts.join('\n\n') + '\n\n' + KIT_CSS).trim() + '\n', html: html, previewHtml: previewHtml, total: Math.round(total * 1000) / 1000, markers: markers, errors: errors, stageVars: kitVars(palette)};
+    return {name: kit.name || 'Kit', palette: palette, items: items, css: ((kitImports.length ? kitImports.join('\n') + '\n\n' : '') + cssParts.join('\n\n') + '\n\n' + KIT_CSS).trim() + '\n', html: html, previewHtml: previewHtml, total: Math.round(total * 1000) / 1000, markers: markers, errors: errors, stageVars: kitVars(palette)};
   }
 
   // Codificación compacta para la URL (base64url de un JSON). Con effects se omiten los valores que son los de por defecto.
@@ -317,5 +338,5 @@
       'anims=document.getAnimations();anims.forEach(function(a){a.pause()});var qt=q.get("t");if(qt!==null)t=parseFloat(qt)||0;pp.textContent=playing?"❚❚":"▶";apply();requestAnimationFrame(tick);\n})();\n</script>\n</body></html>\n';
   }
 
-  return {KIT_MAX: KIT_MAX, buildKit: buildKit, encodeKit: encodeKit, decodeKit: decodeKit, pageHtml: pageHtml, paletteOfKit: paletteOfKit, escapeHtml: escapeHtml, HOLD: HOLD, defaults: defaults, resolve: resolve, vars: vars, inline: inline, build: build, lint: lint, kebab: kebab, elementsOf: elementsOf, cleanElements: cleanElements};
+  return {KIT_MAX: KIT_MAX, buildKit: buildKit, encodeKit: encodeKit, decodeKit: decodeKit, pageHtml: pageHtml, paletteOfKit: paletteOfKit, escapeHtml: escapeHtml, HOLD: HOLD, defaults: defaults, resolve: resolve, vars: vars, inline: inline, build: build, lint: lint, kebab: kebab, elementsOf: elementsOf, cleanElements: cleanElements, FONTS: FONTS, fontStack: fontStack, fontImport: fontImport};
 });

@@ -210,3 +210,18 @@ test('elementos en el kit: la imagen está en la vista previa del kit y no en el
   assert.ok(!FX.encodeKit({palette: pal, items}, effects()).includes('data'), 'las imágenes no viajan en el enlace');
   assert.ok(!FX.pageHtml(b).includes('data:image'));
 });
+
+test('fuentes: font-family en el código y @import al principio del CSS (solo Google Fonts)', () => {
+  const e = effects().slam;
+  const g = FX.build(e, {}, pal, {elements: {s: {font: 'Space Grotesk'}}});
+  assert.deepEqual(g.errors, []);
+  assert.ok(g.html.includes("font-family:'Space Grotesk',sans-serif"));
+  assert.ok(g.css.startsWith("@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap');\n"));
+  const sys = FX.build(e, {}, pal, {elements: {s: {font: 'Georgia'}}});
+  assert.ok(sys.html.includes("font-family:'Georgia',serif") && !sys.css.includes('@import'));   // las del sistema no cargan nada
+  assert.ok(FX.build(e, {}, pal, {elements: {s: {font: 'Bebas Neue'}}}).css.includes('family=Bebas+Neue&display=swap'));   // fuentes de un solo peso, sin eje wght
+  assert.equal(FX.build(e, {}, pal, {elements: {s: {font: "x');}body{background:red"}}}).errors.length, 1);   // nada de inyección
+  const kit = FX.buildKit(effects(), {palette: pal, items: [{effect: 'slam', elements: {s: {font: 'Oswald'}}}, {effect: 'pop', elements: {s: {font: 'Oswald'}}}, {effect: 'scene-push', elements: {a: {font: 'Lora'}}}]}, {});
+  assert.equal((kit.css.match(/@import/g) || []).length, 2, 'cada fuente se importa una sola vez y al principio');
+  assert.ok(kit.css.startsWith('@import') && kit.html.includes("font-family:'Lora',serif"));
+});

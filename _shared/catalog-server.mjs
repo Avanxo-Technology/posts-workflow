@@ -21,7 +21,7 @@ const readIf = p => (existsSync(p) ? readFileSync(p, 'utf8') : null);
 function brandsOf(TOOL) {
   const out = {};
   for (const id of brandIds(TOOL)) {
-    try { const b = JSON.parse(readFileSync(join(brandRoot(TOOL, id), id + '.json'), 'utf8')); out[id] = {id, name: b.name || id, dark: b.dark, light: b.light, accent: b.accent}; } catch { /* marca ilegible: se omite */ }
+    try { const b = JSON.parse(readFileSync(join(brandRoot(TOOL, id), id + '.json'), 'utf8')); out[id] = {id, name: b.name || id, dark: b.dark, light: b.light, accent: b.accent, headFont: b.headFont, bodyFont: b.bodyFont}; } catch { /* marca ilegible: se omite */ }
   }
   return out;
 }

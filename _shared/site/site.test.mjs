@@ -49,6 +49,15 @@ test('api: textos y colores de los elementos de muestra, con etiqueta genérica 
   }
 });
 
+test('api: fuentes de los elementos y lista de fuentes (marcas y generales)', async () => {
+  const d = (await get('/api/v1/effects/slam?el_font=Oswald')).j;
+  assert.ok(d.code.html.includes("font-family:'Oswald',sans-serif") && d.code.css.startsWith('@import url('));
+  assert.equal((await get('/api/v1/effects/slam?el_font=' + encodeURIComponent("a');}"))).r.status, 400);
+  const f = (await get('/api/v1/fonts')).j;
+  assert.ok(f.general.google.includes('Poppins') && f.general.system.includes('Georgia') && Array.isArray(f.brands));
+  assert.ok(f.brands.every(b => b.heading || b.body));
+});
+
 test('api: kits (JSON y página HTML con CSP), límites y métodos', async () => {
   const E = {}; for (const e of data.effects) if (e.fx) E[e.id] = e;
   const k = FX.encodeKit({name: 'K', palette: 'oceano', items: [{effect: 'slam', label: 'Hola', params: {delay: 0.3}}, {effect: 'screen-shake', params: {delay: 1}}]}, E);

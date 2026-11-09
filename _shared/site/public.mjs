@@ -12,7 +12,7 @@ export function publicPalettes(TOOL) {
   for (const f of existsSync(dir) ? readdirSync(dir).sort() : []) {
     if (!f.endsWith('.json')) continue;
     const id = f.slice(0, -5), p = JSON.parse(readFileSync(join(dir, f), 'utf8'));
-    out[id] = {id, name: p.name || id, dark: p.dark, light: p.light, accent: p.accent};
+    out[id] = {id, name: p.name || id, dark: p.dark, light: p.light, accent: p.accent, headFont: p.headFont, bodyFont: p.bodyFont};
   }
   return out;
 }
