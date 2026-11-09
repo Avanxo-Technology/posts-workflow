@@ -111,6 +111,9 @@ En la pestaña **Kit** de `posts catalog` se reúnen varios efectos spec 1 para 
 - `GET /api/v1/kit?k=<kit>&format=html`: la página autónoma (con política de seguridad restrictiva).
 Solo admiten efectos spec 1 (parametrizados) y hasta 40 elementos. Las etiquetas se escapan siempre.
 
+## Comprobar que los efectos se ven y se mueven
+`node _shared/site/qa-effects.mjs [id …] [--out carpeta]` renderiza cada efecto en Chrome, toma fotogramas en varios instantes y mide cuánto cambia la imagen. Marca como **SIN MOVIMIENTO VISIBLE** los que no cambian de forma perceptible (p. ej. un degradado liso que se desplaza) y como **NO SE VE NADA** los que no dibujan contenido. Con `--out` guarda los fotogramas como PNG para revisarlos. Requiere Chrome. Córrelo tras crear o cambiar un efecto.
+
 ## Sitio público (`posts site build`)
 El sitio es lo que usa el visitante; GitHub guarda la fuente y publica. `posts site build [--out dist] [--base https://mi-sitio.com]` genera una carpeta lista para publicar (se ignora en git):
 - `public/`: la UI (sin el editor de marcas), los datos del catálogo, las miniaturas, `llms.txt` y la API con **valores por defecto** como archivos (`api/v1/effects.json`, `api/v1/effects/<id>.json`).
