@@ -8,6 +8,7 @@ html,body{margin:0;height:100%;background:#0b0d10;overflow:hidden;font-family:sy
 #root{position:absolute;inset:0;display:grid;place-items:center}
 [data-fx-sample]{margin:0 auto;padding:50px 100px;border-radius:44px;text-align:center;max-width:calc(100% - 120px);box-sizing:border-box;overflow-wrap:anywhere;background:var(--p-accent);color:var(--p-on);font:900 130px/1 system-ui,sans-serif;letter-spacing:-.03em;box-shadow:0 50px 80px rgba(0,0,0,.45)}
 [data-fx-scene]{display:grid;place-items:center;font:900 150px/1 system-ui,sans-serif;letter-spacing:-.04em;text-align:center}
+[data-fx-sample][style*="width:"]{max-width:100%}   /* si el usuario fija un ancho, manda su valor */
 [data-fx-scene=a]{background:var(--p-dark);color:var(--p-light)}
 [data-fx-scene=b]{background:var(--p-light);color:var(--p-dark)}
 [data-fx-scene]{position:absolute;inset:0;overflow:hidden;isolation:isolate;font-size:190px}

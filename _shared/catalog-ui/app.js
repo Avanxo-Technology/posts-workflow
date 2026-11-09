@@ -210,8 +210,8 @@
   function elsFromQuery(p) {
     var els = {};
     p.forEach(function (v, k) {
-      var m = /^el_(?:([sab])_)?(text|color|bg|size)$/.exec(k);
-      if (m) { var id = m[1] || 's'; (els[id] = els[id] || {})[m[2]] = m[2] === 'size' ? parseFloat(v) : v; }
+      var m = /^el_(?:([sab])_)?(text|color|bg|size|w|pad)$/.exec(k);
+      if (m) { var id = m[1] || 's'; (els[id] = els[id] || {})[m[2]] = /^(size|w|pad)$/.test(m[2]) ? parseFloat(v) : v; }
     });
     return els;
   }
@@ -262,12 +262,15 @@
           var auto = h('button', {class: 'mini', title: 'Volver al color del efecto', text: '↺', onclick: function () { tag.textContent = 'auto'; inp.value = '#888888'; setProp(k, ''); }});
           section.appendChild(h('div', {class: 'ctl'}, h('label', {text: cp[1]}), h('div', {class: 'rg'}, inp, tag), auto));
         });
-        if (el.kind === 'sample') {
-          var rng = h('input', {type: 'range', min: 20, max: 400, step: 5, value: cur().size || 130}), out = h('span', {class: 'val mono', text: cur().size ? cur().size + 'px' : 'auto'});
-          rng.addEventListener('input', function () { out.textContent = rng.value + 'px'; setProp('size', parseFloat(rng.value)); });
-          section.appendChild(h('div', {class: 'ctl'}, h('label', {text: 'Tamaño del texto'}), h('div', {class: 'rg'}, rng, out),
-            h('button', {class: 'mini', title: 'Tamaño del efecto', text: '↺', onclick: function () { out.textContent = 'auto'; setProp('size', ''); }})));
-        }
+        // tamaños: texto (todos), ancho y relleno del elemento (solo el elemento de texto de muestra)
+        var sliders = [['size', 'Tamaño del texto', 20, 400, 5, 'px', el.kind === 'sample' ? 130 : 190]];
+        if (el.kind === 'sample') sliders.push(['w', 'Ancho del elemento', 10, 100, 1, '%', 80], ['pad', 'Relleno interior', 0, 300, 5, 'px', 50]);
+        sliders.forEach(function (sd) {
+          var k = sd[0], rng = h('input', {type: 'range', min: sd[2], max: sd[3], step: sd[4], value: cur()[k] != null ? cur()[k] : sd[6]}), out = h('span', {class: 'val mono', text: cur()[k] != null ? cur()[k] + sd[5] : 'auto'});
+          rng.addEventListener('input', function () { out.textContent = rng.value + sd[5]; setProp(k, parseFloat(rng.value)); });
+          section.appendChild(h('div', {class: 'ctl'}, h('label', {text: sd[1]}), h('div', {class: 'rg'}, rng, out),
+            h('button', {class: 'mini', title: 'Volver al tamaño del efecto', text: '↺', onclick: function () { out.textContent = 'auto'; setProp(k, ''); }})));
+        });
       }
       if (el.kind === 'label') { box.appendChild(section); return; }   // sin elemento de muestra que sustituir: solo texto
       var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: o.assets[id] ? 'imagen puesta' : 'sin imagen'});

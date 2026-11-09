@@ -85,7 +85,7 @@
   // ---- Elementos de ejemplo editables ----
   // El marcado de un efecto puede traer elementos de muestra marcados con data-fx-sample (texto), data-fx-scene="a|b" (escenas) y data-fx-media (foto o video).
   // El usuario puede cambiarles texto, colores y tamaño (eso SÍ llega al código exportado) y, solo en la vista previa, sustituirlos por una imagen (nunca va al código).
-  // elements = {s: {text, color, bg, size}, a: {...}, b: {...}}   (s = elemento de texto de muestra; a/b = escenas)
+  // elements = {s: {text, color, bg, size, w, pad}, a: {...}, b: {...}}   (size = tamaño del texto en px; w = ancho del elemento en %; pad = relleno en px)   (s = elemento de texto de muestra; a/b = escenas)
   var ELEM_RE = /<(\w+)([^>]*?)\sdata-fx-(sample|scene|media)(?:="([^"]*)")?([^>]*)>([^<]*)<\/\1>/g;
   var IMG_RE = /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/=]+$/;
   var ELEM_IDS = ['s', 'a', 'b'];
@@ -119,7 +119,10 @@
         if (v === '' || v == null) return;
         if (k === 'text') { if (typeof v === 'string' && v.length <= 80) c.text = v; else errors.push(id + '.text: texto de hasta 80 caracteres'); }
         else if (k === 'color' || k === 'bg') { if (HEX.test(v) || TOKEN.test(v)) c[k] = v; else errors.push(id + '.' + k + ' debe ser #RRGGBB o palette.dark|light|accent'); }
-        else if (k === 'size') { var n = parseFloat(v); if (isFinite(n) && n >= 10 && n <= 600) c.size = n; else errors.push(id + '.size debe estar entre 10 y 600'); }
+        else if (k === 'size' || k === 'w' || k === 'pad') {
+          var R = {size: [10, 600], w: [10, 100], pad: [0, 300]}[k], n = parseFloat(v);
+          if (isFinite(n) && n >= R[0] && n <= R[1]) c[k] = n; else errors.push(id + '.' + k + ' debe estar entre ' + R[0] + ' y ' + R[1]);
+        }
         else errors.push(id + ': propiedad desconocida ' + k);
       });
       if (Object.keys(c).length) out[id] = c;
@@ -140,7 +143,9 @@
       var col = function (v) { return colorOf(v, palette); };
       if (o.bg) css.push('background:' + col(o.bg));
       if (o.color) css.push('color:' + col(o.color));
-      if (o.size && kind === 'sample') css.push('font-size:' + o.size + 'px');
+      if (o.size && kind !== 'media') css.push('font-size:' + o.size + 'px');
+      if (o.w && kind === 'sample') css.push('width:' + o.w + '%');
+      if (o.pad != null && kind === 'sample') css.push('padding:' + o.pad + 'px');
       if (img) { css.push("background:url('" + img + "') center/cover no-repeat"); css.push('color:transparent'); post += ' data-fx-img'; }
       if (kind === 'scene') {
         if (o.text) inner = escapeHtml(o.text);

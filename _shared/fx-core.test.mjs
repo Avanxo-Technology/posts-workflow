@@ -162,6 +162,11 @@ test('elementos: texto, colores y tamaño llegan al código con etiqueta genéri
   assert.ok(r.html.includes('background:#0000ff') && r.html.includes('color:#00ff00') && r.html.includes('font-size:200px'));
   assert.ok(r.html.includes('TU elemento') && !r.html.includes('data-fx'));
   assert.ok(r.previewHtml.includes('<h1 class="fx-slam"'), 'la vista previa conserva su elemento de muestra');
+  const sz = FX.build(e, {}, pal, {elements: {s: {w: 60, pad: 0}}});
+  assert.deepEqual(sz.errors, []);
+  assert.ok(sz.html.includes('width:60%;padding:0px'), 'ancho y relleno del elemento llegan al código');
+  assert.equal(FX.build(effects()['scene-push'], {}, pal, {elements: {a: {size: 90}}}).html.includes('font-size:90px'), true);   // el tamaño del texto también en las escenas
+  assert.equal(FX.build(e, {}, pal, {elements: {s: {w: 5, pad: 999}}}).errors.length, 2);
 });
 
 test('elementos: las imágenes son solo de vista previa y nunca llegan al código', () => {

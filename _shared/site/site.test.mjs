@@ -39,10 +39,11 @@ test('api: textos y colores de los elementos de muestra, con etiqueta genérica 
   const d = (await get('/api/v1/effects/slam?el_text=Hola&el_color=%23ffffff&el_bg=%23112233&el_size=120')).j;
   assert.ok(d.code.html.includes('<div class="fx-slam"') && !/<h[1-6]/.test(d.code.html) && d.code.html.includes('>Hola</div>'));
   assert.ok(d.code.html.includes('background:#112233;color:#ffffff;font-size:120px'));
+  assert.ok((await get('/api/v1/effects/slam?el_w=70&el_pad=40')).j.code.html.includes('width:70%;padding:40px'));
   assert.deepEqual(d.elements.editable, [{id: 's', kind: 'sample', text: 'Título'}]);
   const sc = (await get('/api/v1/effects/scene-push?el_a_text=Inicio&el_b_bg=%23ff0000')).j;
   assert.ok(sc.code.html.includes('>Inicio</div>') && sc.code.html.includes('background:#ff0000'));
-  for (const bad of ['el_color=rojo', 'el_size=9999', 'el_zzz=1', 'el_x_text=a', 'el_text=' + 'x'.repeat(81)]) {
+  for (const bad of ['el_color=rojo', 'el_size=9999', 'el_w=500', 'el_pad=-1', 'el_zzz=1', 'el_x_text=a', 'el_text=' + 'x'.repeat(81)]) {
     const r = await get('/api/v1/effects/slam?' + bad);
     assert.equal(r.r.status, 400, bad); assert.equal(r.r.headers.get('cache-control'), 'no-store');   // los errores no se cachean
   }
