@@ -109,6 +109,8 @@ En la pestaña **Kit** de `posts catalog` se reúnen varios efectos spec 1 para 
 **API del kit** (para agentes), con `k` = el valor del enlace del kit:
 - `GET /api/v1/kit?k=<kit>`: JSON con `items[]` (inicio, duración, marcadores y HTML de cada uno), `code.css`, `code.html`, `markers` y `howTo`. Un kit no válido devuelve 400 con el detalle.
 - `GET /api/v1/kit?k=<kit>&format=html`: la página autónoma (con política de seguridad restrictiva).
+- **Crear un kit sin la UI** (para que la IA decida sola): `POST /api/v1/kit` con cuerpo JSON, o `GET /api/v1/kit?kit=<JSON urlencoded>` si solo puede leer URLs (hasta ~16000 caracteres). Forma: `{"name","palette","items":[{"effect","label","params":{…},"elements":{"el_text":…}}]}` (hasta 60 ítems; `elements` admite las claves `el_*` de la API). No guarda nada: compone y devuelve lo mismo que `?k=` más `k`, `kitUrl` (abre el kit en la web para retocarlo) y `page`. Errores: 400 con `details` por elemento; 413 si el cuerpo pasa de 64 KB. Es el único POST de la API.
+- `llms.txt` incluye la **receta de pieza**: elegir efectos, componer el kit, comprobar y aplicar en la pieza del usuario.
 Solo admiten efectos spec 1 (parametrizados) y hasta 60 elementos. Las etiquetas se escapan siempre.
 
 ## Elementos de muestra editables

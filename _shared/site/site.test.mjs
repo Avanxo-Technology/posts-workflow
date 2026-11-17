@@ -79,6 +79,24 @@ test('api: fuentes de los elementos y lista de fuentes (marcas y generales)', as
   assert.ok(f.brands.every(b => b.heading || b.body));
 });
 
+test('api: crear kit por POST y por GET ?kit= (JSON legible), con errores claros', async () => {
+  const kit = {name: 'Mi reel', palette: 'oceano', items: [{effect: 'slam', label: 'Hola', params: {delay: 0.3}, elements: {el_text: 'Nuevo'}}, {effect: 'screen-shake', params: {delay: 1}}]};
+  const post = await get('/api/v1/kit', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(kit)});
+  assert.equal(post.r.status, 200); assert.equal(post.j.totalSeconds, 1.5);
+  assert.ok(post.j.code.html.includes('>Nuevo</div>') && post.j.kitUrl.startsWith('https://site.test/#/kit?k='));
+  const viaGet = (await get('/api/v1/kit?kit=' + encodeURIComponent(JSON.stringify(kit)))).j;
+  assert.equal(viaGet.code.html, post.j.code.html);
+  const viaK = (await get('/api/v1/kit?k=' + post.j.k)).j;                           // el k devuelto reabre el mismo kit
+  assert.equal(viaK.code.html, post.j.code.html);
+  const bad = await get('/api/v1/kit', {method: 'POST', body: JSON.stringify({items: [{effect: 'nope'}, {effect: 'slam', elements: {el_zzz: 'x'}}]})});
+  assert.equal(bad.r.status, 400); assert.ok(bad.j.details.length >= 2);
+  assert.equal((await get('/api/v1/kit', {method: 'POST', body: 'no es json'})).r.status, 400);
+  assert.equal((await get('/api/v1/kit', {method: 'POST', body: JSON.stringify({items: 'x'})})).r.status, 400);
+  assert.equal((await get('/api/v1/kit', {method: 'POST', body: 'x'.repeat(70000)})).r.status, 413);
+  assert.equal((await get('/api/v1/kit?kit=' + 'a'.repeat(17000))).r.status, 400);
+  assert.equal((await get('/api/v1/effects', {method: 'POST', body: '{}'})).r.status, 405);   // el único POST es el del kit
+});
+
 test('api: kits (JSON y página HTML con CSP), límites y métodos', async () => {
   const E = {}; for (const e of data.effects) if (e.fx) E[e.id] = e;
   const k = FX.encodeKit({name: 'K', palette: 'oceano', items: [{effect: 'slam', label: 'Hola', params: {delay: 0.3}}, {effect: 'screen-shake', params: {delay: 1}}]}, E);

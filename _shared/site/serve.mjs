@@ -8,6 +8,13 @@ import {networkInterfaces} from 'node:os';
 
 const TYPES = {'.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.txt': 'text/plain', '.svg': 'image/svg+xml', '.png': 'image/png'};
 
+const readBody = (req, max = 70000) => new Promise((ok, fail) => {   // cuerpo de POST (la API aplica su propio tope; aquí se corta antes de acumular de más)
+  const chunks = []; let n = 0;
+  req.on('data', c => { n += c.length; if (n <= max) chunks.push(c); });
+  req.on('end', () => ok(Buffer.concat(chunks)));
+  req.on('error', fail);
+});
+
 export function lanAddresses() {
   return Object.values(networkInterfaces()).flat().filter(i => i && i.family === 'IPv4' && !i.internal).map(i => i.address);
 }
@@ -31,7 +38,8 @@ export async function serveSite({dir, port = 4748, host = '127.0.0.1'}) {
         res.writeHead(200, {'content-type': (TYPES[extname(file)] || 'application/octet-stream') + '; charset=utf-8', 'x-content-type-options': 'nosniff'});
         return res.end(readFileSync(file));
       }
-      const r = await api(new Request(url.href, {method: req.method}));
+      const hasBody = req.method === 'POST';
+      const r = await api(new Request(url.href, {method: req.method, headers: hasBody ? {'content-type': req.headers['content-type'] || 'application/json'} : undefined, body: hasBody ? await readBody(req) : undefined}));
       if (r) { const h = {}; r.headers.forEach((v, k) => { h[k] = v; }); res.writeHead(r.status, h); return res.end(Buffer.from(await r.arrayBuffer())); }
       res.writeHead(404, {'content-type': 'text/plain; charset=utf-8'}); res.end('No encontrado');
     } catch (e) { res.writeHead(500, {'content-type': 'text/plain; charset=utf-8'}); res.end('Error: ' + e.message); }

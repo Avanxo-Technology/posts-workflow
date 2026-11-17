@@ -5,6 +5,8 @@
 
 const RESERVED = new Set(['palette', 'dark', 'light', 'accent']);
 const MAX_K = 8000;   // tope del parámetro k (kit codificado): evita peticiones desproporcionadas
+const MAX_KIT_JSON = 16000;   // tope del kit en JSON dentro de la URL (?kit=)
+const MAX_BODY = 65536;       // tope del cuerpo de POST /api/v1/kit
 
 // El catálogo público trae `palettes`; el local (con marcas) trae `brands`. Para la API son lo mismo: colores y fuentes con nombre.
 const palettesOf = bundle => bundle.palettes || bundle.brands || {};
@@ -53,23 +55,61 @@ function effectDetail(FX, e, q, bundle, base) {
     howTo: 'Copia code.css una vez en el CSS de la pieza y code.html en su sitio. Los tiempos van en las variables --fx-* del style; --fx-delay es el segundo del video en que empieza el efecto. La etiqueta del elemento es genérica: aplica la clase y el style a tu propio elemento (h1, h2, p, img, div…).'}};
 }
 
-function kitResponse(FX, k, format, bundle, base) {
-  if (!k || k.length > MAX_K) return {status: 400, type: 'json', body: {error: 'Parámetro k ausente o demasiado largo (el kit va codificado en la URL de la UI)'}};
-  const kit = FX.decodeKit(k);
-  if (!kit) return {status: 400, type: 'json', body: {error: 'Parámetro k no válido (el kit va codificado en la URL de la UI)'}};
+// Kit legible (JSON) -> kit interno. Los elementos admiten la forma plana de la API (el_text, el_s2_bg, el_e1_x…) o la agrupada de la UI ({s:{text}, a:{bg}}).
+function normalizeKit(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw) || !Array.isArray(raw.items)) return {error: 'El kit debe ser un objeto con "items" (lista de {effect, label?, params?, elements?})'};
+  const str = (v, n) => String(v ?? '').slice(0, n), obj = v => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
+  const errors = [];
+  const items = raw.items.slice(0, 60).map((x, i) => {
+    x = obj(x);
+    const el = obj(x.elements), flat = Object.keys(el).some(k => k.startsWith('el_'));
+    let elements = el;
+    if (flat) {
+      const r = elementsFrom(new URLSearchParams(Object.entries(el).map(([k, v]) => [k, String(v)])));
+      r.errors.forEach(m => errors.push(`Elemento ${i + 1}: ${m}`));
+      elements = r.els;
+    }
+    return {effect: str(x.effect, 80), label: str(x.label, 80), params: obj(x.params), elements};
+  });
+  const palette = raw.palette && typeof raw.palette === 'object' ? raw.palette : str(raw.palette, 80);
+  return {kit: {name: str(raw.name, 80), palette, items}, errors};
+}
+
+function kitResponse(FX, kit, preErrors, format, bundle, base) {
   const effects = {};
   for (const e of bundle.effects) if (e.fx) effects[e.id] = e;
   const b = FX.buildKit(effects, kit, palettesOf(bundle));
-  if (b.errors.length) return {status: 400, type: 'json', body: {error: 'Kit no válido', details: b.errors}};
+  const errors = [...preErrors, ...b.errors];
+  if (errors.length) return {status: 400, type: 'json', body: {error: 'Kit no válido', details: errors, tip: `Lista los efectos en ${base}/api/v1/effects y pide la ficha de cada uno para ver sus params`}};
   if (format === 'html') return {status: 200, type: 'html', body: FX.pageHtml(b)};
+  const k = FX.encodeKit(kit, effects);
   return {status: 200, type: 'json', body: {
     name: b.name, stage: {width: 1080, height: 1920}, palette: b.palette, totalSeconds: b.total,
     items: b.items.map(it => ({n: it.n, effect: it.effect, name: it.name, label: it.label, elements: it.elements, start: it.start, duration: it.duration, end: it.end, values: it.values, markers: it.markers,
       code: {html: it.html}, effectUrl: `${base}/api/v1/effects/${it.effect}`})),
     markers: b.markers, code: {css: b.css, html: b.html},
-    page: `${base}/api/v1/kit?k=${encodeURIComponent(k)}&format=html`,
-    howTo: 'code.css se copia una vez en el CSS de la pieza y code.html contiene los elementos en orden de apilado (el último queda encima; un efecto envoltorio como screen-shake rodea al resto). Los elementos tipo texto van en contenedores .kit-slot de ejemplo: sustitúyelos por tu diseño; las etiquetas son genéricas, así que aplica cada clase y style a tu propio elemento. El inicio de cada efecto es items[].start (segundos del video). "page" abre una página autónoma con todo el kit y un reproductor.',
+    k, kitUrl: `${base}/#/kit?k=${k}`,
+    page: k.length <= MAX_K ? `${base}/api/v1/kit?k=${k}&format=html` : null,
+    howTo: 'code.css se copia una vez en el CSS de la pieza y code.html contiene los elementos en orden de apilado (el último queda encima; un efecto envoltorio como screen-shake rodea al resto). Los elementos tipo texto van en contenedores .kit-slot de ejemplo: sustitúyelos por tu diseño; las etiquetas son genéricas, así que aplica cada clase y style a tu propio elemento. El inicio de cada efecto es items[].start (segundos del video). "page" abre una página autónoma con todo el kit y un reproductor; "kitUrl" lo abre en la web para que la persona lo retoque.',
   }};
+}
+
+// Kit desde la petición: ?k= (codificado por la UI), ?kit= (JSON legible) o cuerpo JSON (POST).
+function kitFromRequest(FX, q, bodyText) {
+  const bad = error => ({error});
+  if (bodyText != null) {
+    let raw; try { raw = JSON.parse(bodyText); } catch { return bad('El cuerpo no es JSON válido'); }
+    const n = normalizeKit(raw); return n.error ? bad(n.error) : n;
+  }
+  if (q.get('kit')) {
+    if (q.get('kit').length > MAX_KIT_JSON) return bad('Parámetro kit demasiado largo: usa POST /api/v1/kit con el JSON en el cuerpo');
+    let raw; try { raw = JSON.parse(q.get('kit')); } catch { return bad('Parámetro kit: no es JSON válido'); }
+    const n = normalizeKit(raw); return n.error ? bad(n.error) : n;
+  }
+  const k = q.get('k');
+  if (!k || k.length > MAX_K) return bad('Falta el kit: usa ?kit=<JSON>, ?k=<kit de la UI> o POST /api/v1/kit con JSON (k demasiado largo o ausente)');
+  const kit = FX.decodeKit(k);
+  return kit ? {kit, errors: []} : bad('Parámetro k no válido (el kit va codificado en la URL de la UI)');
 }
 
 export function llmsTxt(base, pub = false, siteName = '') {
@@ -100,12 +140,34 @@ Un kit es una lista de efectos con su etiqueta y sus parámetros, guardada en la
 - GET ${base}/api/v1/kit?k=<kit>&format=html   página HTML autónoma con reproductor, para ver el resultado
 Aplica el kit en la pieza del usuario conservando los tiempos de items[].start.
 
+## Crear un kit tú mismo (sin la interfaz)
+Describe los efectos en JSON y el sitio los compone (código unido, tiempos, marcadores). Nada se guarda: solo calcula y devuelve.
+- POST ${base}/api/v1/kit     cuerpo JSON (kits grandes; requiere poder hacer POST)
+- GET  ${base}/api/v1/kit?kit=<JSON urlencoded>     lo mismo si solo puedes leer URLs (hasta ~16000 caracteres)
+  {"name":"Mi reel","palette":"${pal}","items":[
+    {"effect":"title-stack","label":"Intro","params":{"delay":0.3,"duration":0.8},"elements":{"el_text":"Nuevo","el_s2_text":"Colección"}},
+    {"effect":"slam","params":{"delay":2}}]}
+  - items: lista ordenada (hasta 60). effect = id; params = los de la ficha del efecto (valores por defecto si se omiten); elements = los mismos el_* de arriba.
+  - palette: id de ${pub ? 'paleta' : 'marca'} o {"dark":"#112233","light":"#ffffff","accent":"#ff5500"}.
+  - Si algo no es válido responde 400 con "details" por elemento: corrige y repite.
+  - La respuesta es la del kit (items[].start, code.css, code.html, howTo) más "kitUrl" (ábrelo en la web para que la persona lo retoque) y "page" (reproductor).
+
+## Receta: armar una pieza a partir del prompt del usuario
+1. Lee el prompt y los recursos del usuario (textos, imágenes, ${pub ? "colores" : "marca"}). Decide formato y duración total.
+2. GET ${base}/api/v1/effects?kind=...&q=... para elegir; lee la ficha de 3 a 6 candidatos (description, params, markers). No elijas solo por el nombre.
+3. Orden típico: entrada (título) → desarrollo (elementos, tarjetas) → transición → cierre. Cada efecto empieza en su delay: encadena con items[].start/end. Un envoltorio como screen-shake rodea al resto.
+4. Crea el kit (POST o GET ?kit=). Corrige los errores y repite hasta que no haya.
+5. Comprueba tiempos y orden con "page" o pasa "kitUrl" al usuario.
+6. Integra code.css (una vez) y code.html en la pieza del usuario: sustituye los textos de muestra por los suyos, aplica clase y style a TU elemento (las etiquetas son genéricas) y enlaza tú sus imágenes (el sitio no las recibe ni las guarda).
+7. Para video, mueve el tiempo con seek y renderiza fotograma a fotograma.
+Usa solo textos y datos del usuario; no inventes cifras.
+
 Las animaciones son CSS puro que se pueden pausar y mover en el tiempo (seek), así que sirven para renderizar video fotograma a fotograma.
 `;
 }
 
 export function createApi({getBundle, FX, cache = 'public, max-age=300'}) {
-  const cors = {'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, HEAD, OPTIONS', 'x-content-type-options': 'nosniff', 'cache-control': cache};
+  const cors = {'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, HEAD, POST, OPTIONS', 'access-control-allow-headers': 'content-type', 'x-content-type-options': 'nosniff', 'cache-control': cache};
   const json = (status, obj) => new Response(JSON.stringify(obj), {status, headers: {...cors, ...(status >= 400 ? {'cache-control': 'no-store'} : {}), 'content-type': 'application/json; charset=utf-8'}});   // los errores no se cachean
 
   return async function handle(request) {
@@ -113,11 +175,12 @@ export function createApi({getBundle, FX, cache = 'public, max-age=300'}) {
     const isApi = path === '/llms.txt' || path === '/api/v1' || path.startsWith('/api/v1/');
     if (!isApi) return null;
     if (request.method === 'OPTIONS') return new Response(null, {status: 204, headers: cors});
-    if (request.method !== 'GET' && request.method !== 'HEAD') return json(405, {error: 'Solo lectura: usa GET'});
+    const isPost = request.method === 'POST' && path === '/api/v1/kit';
+    if (request.method !== 'GET' && request.method !== 'HEAD' && !isPost) return json(405, {error: 'Solo lectura: usa GET (el único POST es /api/v1/kit)'});
     const base = url.origin, q = url.searchParams;
 
     if (path === '/llms.txt') return new Response(llmsTxt(base, !!(await getBundle()).public), {status: 200, headers: {...cors, 'content-type': 'text/plain; charset=utf-8'}});
-    if (path === '/api/v1') return json(200, {name: 'Catálogo de efectos', version: 1, docs: `${base}/llms.txt`, endpoints: {effects: `${base}/api/v1/effects`, effect: `${base}/api/v1/effects/{id}?{param}={valor}&palette={marca}`, kit: `${base}/api/v1/kit?k={kit}`, fonts: `${base}/api/v1/fonts`}});
+    if (path === '/api/v1') return json(200, {name: 'Catálogo de efectos', version: 1, docs: `${base}/llms.txt`, endpoints: {effects: `${base}/api/v1/effects`, effect: `${base}/api/v1/effects/{id}?{param}={valor}&palette={marca}`, kit: `${base}/api/v1/kit?kit={json}  |  POST /api/v1/kit {json}  |  ?k={kit de la UI}`, fonts: `${base}/api/v1/fonts`}});
 
     const bundle = await getBundle();
     if (path === '/api/v1/fonts') {
@@ -138,7 +201,15 @@ export function createApi({getBundle, FX, cache = 'public, max-age=300'}) {
       return json(r.status, r.body);
     }
     if (path === '/api/v1/kit') {
-      const r = kitResponse(FX, q.get('k'), q.get('format'), bundle, base);
+      let bodyText = null;
+      if (isPost) {
+        if (Number(request.headers.get('content-length') || 0) > MAX_BODY) return json(413, {error: `Cuerpo demasiado grande (máximo ${MAX_BODY} bytes)`});
+        bodyText = await request.text();
+        if (bodyText.length > MAX_BODY) return json(413, {error: `Cuerpo demasiado grande (máximo ${MAX_BODY} bytes)`});
+      }
+      const input = kitFromRequest(FX, q, bodyText);
+      if (input.error) return json(400, {error: input.error});
+      const r = kitResponse(FX, input.kit, input.errors || [], q.get('format'), bundle, base);
       if (r.type === 'html') return new Response(r.body, {status: r.status, headers: {...cors, 'content-type': 'text/html; charset=utf-8', 'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'"}});
       return json(r.status, r.body);
     }

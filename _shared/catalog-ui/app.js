@@ -90,6 +90,19 @@
   }
 
   // ---- vista: galería de efectos ----
+  // Bloque «Cómo usarlo con tu IA» (sitio público): dos caminos, con un prompt listo para copiar.
+  function aiGuide() {
+    var origin = location.origin;
+    var freePrompt = 'Quiero hacer [describe tu pieza: formato, duración, mensaje]. Te paso mis textos e imágenes. Lee ' + origin + '/llms.txt, elige del catálogo los efectos que mejor encajen, créalos como kit con la API (POST ' + origin + '/api/v1/kit, o GET con ?kit= si no puedes hacer POST), corrige los errores que devuelva y aplícalo todo en mi pieza con mis textos. Usa solo mis datos, no inventes nada.';
+    return h('details', {class: 'note', style: 'margin:0 0 16px'},
+      h('summary', {style: 'cursor:pointer;font-weight:600', text: 'Cómo usarlo con tu IA'}),
+      h('p', {style: 'margin:10px 0 4px'}, h('b', {text: 'Tú eliges: '}), 'arma un kit en la pestaña Kit (efectos, colores, textos, tiempos), pulsa «Copiar prompt para Claude» y pégalo en tu IA junto con tus recursos.'),
+      h('p', {style: 'margin:4px 0'}, h('b', {text: 'Tu IA decide: '}), 'dale tu idea, tus textos e imágenes, y que ella explore el sitio, elija los efectos y los una. Copia este prompt y rellena lo que va entre corchetes:'),
+      h('pre', {class: 'mono', style: 'white-space:pre-wrap;margin:6px 0', text: freePrompt}),
+      h('div', {class: 'actions'}, h('button', {text: 'Copiar prompt', onclick: function () { copy(freePrompt, 'Prompt copiado'); }})),
+      h('p', {style: 'margin:8px 0 0;font-size:12px;color:var(--mut)', text: 'Tu IA necesita poder abrir enlaces. Si no puede, usa «Copiar código» en cada efecto o kit. Tus imágenes nunca se suben al sitio: tu IA las enlaza en tu proyecto.'}));
+  }
+
   function viewEffects() {
     var term = norm(q.value), brands = {}, kinds = {};
     data.effects.forEach(function (e) {
@@ -106,6 +119,7 @@
       h('h1', {text: 'Efectos'}),
       h('p', {class: 'sub', text: STATIC ? data.effects.length + ' transiciones y efectos para videos de redes. Elige uno, ajusta tiempos y colores sin escribir código, guarda tu configuración o añádelo al kit y pásale el enlace a Claude.'
         : data.effects.length + ' efectos · ' + data.posts.length + ' posts registrados. Haz clic en un efecto para ver cómo está hecho y dónde se usó.'}),
+      STATIC ? aiGuide() : null,
       h('div', {class: 'filters'},
         STATIC ? null : h('div', {class: 'grp'}, h('b', {text: 'Marca'}), Object.keys(brands).sort().map(function (b) { return chip((data.brands[b] || {}).name || b, filters.brand === b, set('brand', b), brandDot(b)); })),
         h('div', {class: 'grp'}, h('b', {text: 'Tipo'}), Object.keys(kinds).sort().map(function (k) { return chip(KIND[k] || k, filters.kind === k, set('kind', k)); }))),
