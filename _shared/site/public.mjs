@@ -6,12 +6,13 @@ import {privateBrandNames} from '../brands-dirs.mjs';
 
 const INTERNAL_LINE = /brands\/|engine\.js|postVideo|reel\d|video-template|_shared|plantilla|antiguo|originales?\b/i;
 
-// Las paletas públicas son las marcas GENÉRICAS del repo (brands/*.json). Las marcas reales del equipo viven fuera del repo y nunca llegan aquí.
+// Las paletas públicas son las marcas GENÉRICAS del repo (brands/*.json). Las marcas reales (con "private": true, o en la carpeta privada) nunca llegan aquí.
 export function publicPalettes(TOOL) {
   const dir = join(TOOL, 'brands'), out = {};
   for (const f of existsSync(dir) ? readdirSync(dir).sort() : []) {
     if (!f.endsWith('.json')) continue;
     const id = f.slice(0, -5), p = JSON.parse(readFileSync(join(dir, f), 'utf8'));
+    if (p.private) continue;
     out[id] = {id, name: p.name || id, dark: p.dark, light: p.light, accent: p.accent, headFont: p.headFont, bodyFont: p.bodyFont};
   }
   return out;
