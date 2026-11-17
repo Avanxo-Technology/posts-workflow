@@ -194,3 +194,12 @@ test('build: los adaptadores generados (Cloudflare y Netlify) funcionan tal cual
     assert.deepEqual(Object.keys(FX2).sort(), Object.keys(FX).sort());
   } finally { rmSync(out, {recursive: true, force: true}); }
 });
+
+test('marcas reales del repo (private:true): fuera de las paletas públicas, dentro de la lista de nombres a vigilar', async () => {
+  const {publicPalettes} = await import('./public.mjs');
+  const real = readdirSync(join(TOOL, 'brands')).filter(f => f.endsWith('.json')).map(f => f.slice(0, -5)).filter(id => JSON.parse(readFileSync(join(TOOL, 'brands', id + '.json'), 'utf8')).private);
+  assert.ok(real.length > 0, 'hay marcas reales en brands/');
+  const pal = publicPalettes(TOOL);
+  for (const id of real) { assert.ok(!(id in pal), id + ' no debe ser paleta pública'); assert.ok(privateBrandNames(TOOL).includes(id), id + ' debe vigilarse en lo público'); }
+  for (const id of real) assert.ok(!/\+?57 ?3\d\d|\d{3} ?\d{3} ?\d{4}|@[\w-]+\.\w/.test(readFileSync(join(TOOL, 'brands', id + '.json'), 'utf8') + readFileSync(join(TOOL, 'brands', id + '.md'), 'utf8')), id + ' sin contacto en el repo');
+});

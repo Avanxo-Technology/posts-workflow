@@ -60,7 +60,7 @@ ln -s ~/tools/posts-workflow/posts ~/.local/bin/posts   # opcional: usar `posts`
 Sonido: las marcas genéricas y cualquier marca nueva usan sonido sintetizado (sin descargas). Una marca puede traer sus propios efectos o música en su `_shared/`; la música es siempre OPCIONAL.
 
 ## Marcas privadas
-El repo trae 8 marcas **genéricas** (`brands/`: carbon, oceano, bosque, fuego, uva, lima, rosa, claro), que también son las paletas del sitio público. Las marcas reales de un equipo (colores, logos, motores, sonidos, registros de posts) no se suben aquí: van en una carpeta privada.
+El repo trae 8 marcas **genéricas** (`brands/`: carbon, oceano, bosque, fuego, uva, lima, rosa, claro), que también son las paletas del sitio público. Las marcas reales de un equipo (logos, motores, sonidos, registros de posts, datos de contacto) van en una carpeta privada. En `brands/` también hay fichas de marcas reales (`aga`, `gmaq`, `gremco`, `pirotecnia`, marcadas con `"private": true`): solo colores, fuentes, plantillas y notas, **sin contacto**, y nunca llegan a las paletas ni al sitio público. Los efectos de sonido y la música no se versionan (`fetch_sfx.py` los descarga).
 ```
 echo /ruta/privada/marcas > .posts-brands      # o POSTS_BRANDS_DIR=/ruta/privada/marcas
 ```

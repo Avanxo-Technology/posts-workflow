@@ -18,14 +18,17 @@ export function brandIds(TOOL) {
   for (const d of brandRoots(TOOL)) if (existsSync(d)) for (const f of readdirSync(d)) if (f.endsWith('.json')) ids.add(f.slice(0, -5));
   return [...ids].sort();
 }
-// Ids y nombres de las marcas que NO son del repo (para comprobar que no se filtran a lo público)
+// Ids y nombres de las marcas que NO son públicas: las de la carpeta privada y las del repo marcadas con "private": true (marcas reales).
+// Sirve para comprobar que no se filtran a lo público.
 export function privateBrandNames(TOOL) {
-  const d = privateBrandsDir(TOOL), out = [];
-  if (!d) return out;
+  const out = [];
   for (const id of brandIds(TOOL)) {
-    if (existsSync(join(TOOL, 'brands', id + '.json'))) continue;
+    const inRepo = existsSync(join(TOOL, 'brands', id + '.json'));
+    let j = {};
+    try { j = JSON.parse(readFileSync(join(brandRoot(TOOL, id), id + '.json'), 'utf8')); } catch { /* ilegible */ }
+    if (inRepo && !j.private) continue;   // genérica del repo
     out.push(id);
-    try { const j = JSON.parse(readFileSync(join(d, id + '.json'), 'utf8')); for (const k of [j.name, j.short]) if (k) out.push(k); } catch { /* ilegible */ }
+    for (const k of [j.name, j.short]) if (k) out.push(k);
   }
   return out.filter(s => s.length > 1);
 }
