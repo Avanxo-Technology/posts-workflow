@@ -4,9 +4,9 @@ export function previewBaseCss(previewHtml) {
   return (previewHtml.match(/<style>([\s\S]*?)<\/style>/) || ['', ''])[1];
 }
 
-export function fxCardPage(FX, e, brand, baseCss) {
+export function fxCardPage(FX, e, brand, baseCss, buildOpts) {
   const pal = {dark: brand?.dark || '#14181c', light: brand?.light || '#f4f1ea', accent: brand?.accent || '#c46a2b'};
-  const r = FX.build(e, {}, pal);
+  const r = FX.build(e, {}, pal, buildOpts);
   const on = (() => { const c = [1, 3, 5].map(i => { const v = parseInt(pal.accent.slice(i, i + 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] > 0.4 ? '#111111' : '#ffffff'; })();
   const vars = `--p-dark:${pal.dark};--p-light:${pal.light};--p-accent:${pal.accent};--p-on:${on};--kit-dark:${pal.dark};--kit-light:${pal.light};--kit-accent:${pal.accent};--kit-on:${on};--fx-bg-a:${pal.dark};--fx-bg-b:${pal.light};`;
   return `<!doctype html><html style="${vars}"><head><meta charset="utf-8"><style>${baseCss}#bar{display:none}#area{bottom:0}</style><style>${r.css}</style></head><body>

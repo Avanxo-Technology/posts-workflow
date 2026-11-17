@@ -35,6 +35,68 @@ test('api: parámetros a medida, paleta, errores y efecto antiguo', async () => 
   assert.equal((await get('/api/v1/effects/nope')).r.status, 404);
 });
 
+test('api: textos y colores de los elementos de muestra, con etiqueta genérica y validación', async () => {
+  const d = (await get('/api/v1/effects/slam?el_text=Hola&el_color=%23ffffff&el_bg=%23112233&el_size=120')).j;
+  assert.ok(d.code.html.includes('<div class="fx-slam"') && !/<h[1-6]/.test(d.code.html) && d.code.html.includes('>Hola</div>'));
+  assert.ok(d.code.html.includes('background:#112233;color:#ffffff;font-size:120px'));
+  assert.ok((await get('/api/v1/effects/slam?el_w=70&el_pad=40')).j.code.html.includes('width:70%;padding:40px'));
+  assert.deepEqual(d.elements.editable, [{id: 's', kind: 'sample', text: 'Título'}]);
+  const sc = (await get('/api/v1/effects/scene-push?el_a_text=Inicio&el_b_bg=%23ff0000')).j;
+  assert.ok(sc.code.html.includes('>Inicio</div>') && sc.code.html.includes('background:#ff0000'));
+  for (const bad of ['el_color=rojo', 'el_size=9999', 'el_w=500', 'el_pad=-1', 'el_zzz=1', 'el_x_text=a', 'el_text=' + 'x'.repeat(81)]) {
+    const r = await get('/api/v1/effects/slam?' + bad);
+    assert.equal(r.r.status, 400, bad); assert.equal(r.r.headers.get('cache-control'), 'no-store');   // los errores no se cachean
+  }
+});
+
+test('api: elementos que añade el usuario (posición, origen y tiempos) y varios textos', async () => {
+  const q = '/api/v1/effects/fly-elements?el_e1_text=Hola&el_e1_x=20&el_e1_y=70&el_e1_from=left&el_e1_delay=1&el_e2_text=Dos&el_e2_x=70&el_e2_y=30&el_e2_from=custom&el_e2_fx=95&el_e2_fy=5';
+  const d = (await get(q)).j;
+  assert.ok(d.code.html.includes('left:20%;top:70%') && d.code.html.includes('--dx:-916px') && d.code.html.includes('--dx:270px;--dy:-480px'));
+  assert.equal((d.code.html.match(/fx-fly-pos/g) || []).length, 2);
+  assert.equal(d.elements.items.max, 8); assert.ok(d.elements.items.samples.e1 && d.elements.items.howTo.includes('el_e1_x'));
+  for (const bad of ['el_e1_x=500', 'el_e9_text=a', 'el_e1_from=zzz', 'el_x=5']) assert.equal((await get('/api/v1/effects/fly-elements?' + bad)).r.status, 400, bad);
+  const t = (await get('/api/v1/effects/title-stack?el_s2_text=Linea%202&el_s3_bg=%2300ff00')).j;
+  assert.ok(t.code.html.includes('>Linea 2</div>') && t.code.html.includes('background:#00ff00'));
+  assert.deepEqual(t.elements.editable.map(x => x.id).sort(), ['s', 's2', 's3']);
+});
+
+test('api: propiedades de aspecto de los elementos (opacidad, esquinas, giro, escala, sombra…)', async () => {
+  const d = (await get('/api/v1/effects/slam?el_opacity=40&el_radius=12&el_rot=-8&el_scale=120&el_shadow=0&el_ls=3&el_weight=700&el_bw=4&el_bc=%23ff0000&el_bg=%23112233&el_bga=60')).j;
+  for (const frag of ['filter:opacity(40%)', 'border-radius:12px', 'rotate:-8deg', 'scale:1.2', 'box-shadow:none', 'letter-spacing:3px', 'font-weight:700', 'border:4px solid #ff0000', 'color-mix(in srgb,#112233 60%,transparent)'])
+    assert.ok(d.code.html.includes(frag), frag);
+  const it = (await get('/api/v1/effects/fly-elements?el_e1_text=Hola&el_e1_opacity=50&el_e1_rot=10')).j;
+  assert.ok(it.code.html.includes('filter:opacity(50%)') && it.code.html.includes('rotate:10deg'));
+  for (const bad of ['el_opacity=101', 'el_rot=200', 'el_scale=1', 'el_bc=rojo', 'el_weight=50']) assert.equal((await get('/api/v1/effects/slam?' + bad)).r.status, 400, bad);
+});
+
+test('api: fuentes de los elementos y lista de fuentes (marcas y generales)', async () => {
+  const d = (await get('/api/v1/effects/slam?el_font=Oswald')).j;
+  assert.ok(d.code.html.includes("font-family:'Oswald',sans-serif") && d.code.css.startsWith('@import url('));
+  assert.equal((await get('/api/v1/effects/slam?el_font=' + encodeURIComponent("a');}"))).r.status, 400);
+  const f = (await get('/api/v1/fonts')).j;
+  assert.ok(f.general.google.includes('Poppins') && f.general.system.includes('Georgia') && Array.isArray(f.brands));   // el catálogo local (con marcas) devuelve `brands`
+  assert.ok(f.brands.every(b => b.heading || b.body));
+});
+
+test('api: crear kit por POST y por GET ?kit= (JSON legible), con errores claros', async () => {
+  const kit = {name: 'Mi reel', palette: 'oceano', items: [{effect: 'slam', label: 'Hola', params: {delay: 0.3}, elements: {el_text: 'Nuevo'}}, {effect: 'screen-shake', params: {delay: 1}}]};
+  const post = await get('/api/v1/kit', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(kit)});
+  assert.equal(post.r.status, 200); assert.equal(post.j.totalSeconds, 1.5);
+  assert.ok(post.j.code.html.includes('>Nuevo</div>') && post.j.kitUrl.startsWith('https://site.test/#/kit?k='));
+  const viaGet = (await get('/api/v1/kit?kit=' + encodeURIComponent(JSON.stringify(kit)))).j;
+  assert.equal(viaGet.code.html, post.j.code.html);
+  const viaK = (await get('/api/v1/kit?k=' + post.j.k)).j;                           // el k devuelto reabre el mismo kit
+  assert.equal(viaK.code.html, post.j.code.html);
+  const bad = await get('/api/v1/kit', {method: 'POST', body: JSON.stringify({items: [{effect: 'nope'}, {effect: 'slam', elements: {el_zzz: 'x'}}]})});
+  assert.equal(bad.r.status, 400); assert.ok(bad.j.details.length >= 2);
+  assert.equal((await get('/api/v1/kit', {method: 'POST', body: 'no es json'})).r.status, 400);
+  assert.equal((await get('/api/v1/kit', {method: 'POST', body: JSON.stringify({items: 'x'})})).r.status, 400);
+  assert.equal((await get('/api/v1/kit', {method: 'POST', body: 'x'.repeat(70000)})).r.status, 413);
+  assert.equal((await get('/api/v1/kit?kit=' + 'a'.repeat(17000))).r.status, 400);
+  assert.equal((await get('/api/v1/effects', {method: 'POST', body: '{}'})).r.status, 405);   // el único POST es el del kit
+});
+
 test('api: kits (JSON y página HTML con CSP), límites y métodos', async () => {
   const E = {}; for (const e of data.effects) if (e.fx) E[e.id] = e;
   const k = FX.encodeKit({name: 'K', palette: 'oceano', items: [{effect: 'slam', label: 'Hola', params: {delay: 0.3}}, {effect: 'screen-shake', params: {delay: 1}}]}, E);
@@ -84,14 +146,32 @@ test('build público: sin marcas, rutas, posts ni efectos no autocontenidos', as
     const rx = new RegExp((PRIV.length ? `\\b(${PRIV.join('|')})\\b|` : '') + 'brands/|engine\\.js|postVideo|video-template|catalog/posts|/home/', 'i');
     for (const f of walk(dist)) { const m = rx.exec(readFileSync(f, 'utf8')); assert.ok(!m, `rastro interno «${m && m[0]}» en ${f}`); }
     const cat = JSON.parse(readFileSync(join(dist, 'public/data/catalog.json'), 'utf8'));
-    assert.deepEqual(cat.posts, []); assert.ok(cat.effects.every(e => e.fx && !e.uses.length && !e.brands.length && !e.source));
-    assert.ok(Object.keys(cat.brands).includes('oceano') && !Object.keys(cat.brands).some(b => PRIV.includes(b)));
+    assert.deepEqual(cat.posts, []); assert.ok(cat.effects.every(e => e.fx && !e.uses.length && !e.brands && !e.source));
+    assert.ok(Object.keys(cat.palettes).includes('oceano') && !Object.keys(cat.palettes).some(b => PRIV.includes(b)) && !('brands' in cat), 'lo público habla de paletas, no de marcas');
     const d = JSON.parse(readFileSync(join(dist, 'public/api/v1/effects/slam.json'), 'utf8'));
     assert.ok(!('usedIn' in d) && !('brands' in d));
     const index = readFileSync(join(dist, 'public/index.html'), 'utf8');
     assert.ok(!index.includes('#/posts') && index.includes('#/guardadas') && index.includes('#/kit'));
     const llms = readFileSync(join(dist, 'public/llms.txt'), 'utf8');
     assert.ok(llms.includes('palette=oceano') && !llms.includes('brand='));
+  } finally { rmSync(out, {recursive: true, force: true}); }
+});
+
+test('build público: la API y los datos hablan de paletas y fuentes sugeridas, no de marcas', async () => {
+  const out = mkdtempSync(join(tmpdir(), 'posts-site-'));
+  try {
+    const dist = join(out, 'dist'); await buildSite({TOOL, out: dist});
+    const imp = f => import(pathToFileURL(join(dist, f)).href);
+    const cf = await imp('functions/api/v1/[[path]].js');
+    const f = await (await cf.onRequest({request: new Request('https://x.test/api/v1/fonts')})).json();
+    assert.ok(Array.isArray(f.suggested) && f.suggested.length >= 8 && !('brands' in f));
+    assert.ok(f.suggested.every(p => p.palette && (p.heading || p.body)));
+    const data = (await imp('lib/data.mjs')).default;
+    assert.ok(data.palettes && !('brands' in data));
+    const llms = readFileSync(join(dist, 'public/llms.txt'), 'utf8');
+    assert.ok(!/\bmarcas?\b|\bbrands?\b/i.test(llms), 'llms.txt público sin marcas');
+    const app = readFileSync(join(dist, 'public/data/catalog.json'), 'utf8');
+    assert.ok(!/"brands"/.test(app));
   } finally { rmSync(out, {recursive: true, force: true}); }
 });
 

@@ -1,0 +1,8 @@
+/* list-stagger — cuatro filas entran desde la izquierda, una tras otra. Parámetros: --fx-duration, --fx-delay, --fx-gap, --fx-distance, --fx-ease */
+.fx-list{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px}
+.fx-list>*{font-size:68px;animation:fx-list var(--fx-duration,.5s) var(--fx-ease,cubic-bezier(.2,.8,.2,1)) both}
+.fx-list>*:nth-child(1){animation-delay:var(--fx-delay,0s)}
+.fx-list>*:nth-child(2){animation-delay:calc(var(--fx-delay,0s) + var(--fx-gap,.15s))}
+.fx-list>*:nth-child(3){animation-delay:calc(var(--fx-delay,0s) + var(--fx-gap,.15s) * 2)}
+.fx-list>*:nth-child(4){animation-delay:calc(var(--fx-delay,0s) + var(--fx-gap,.15s) * 3)}
+@keyframes fx-list{from{opacity:0;transform:translateX(calc(var(--fx-distance,520px) * -1))}to{opacity:1;transform:none}}

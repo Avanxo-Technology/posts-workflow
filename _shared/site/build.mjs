@@ -30,7 +30,7 @@ export async function buildSite({TOOL, out, base = ''}) {
     else if (readdirSync(out).length) throw new Error(`"${out}" ya existe y no es un build anterior (falta ${MARKER}): elige otra carpeta o bórrala tú.`);
   }
   const data = publicBundle(TOOL, catalogData(TOOL, ''));   // solo efectos autocontenidos y paletas neutras: sin marcas, rutas ni posts (falla si queda algún rastro)
-  const bundle = {effects: data.effects, brands: data.palettes, public: true};
+  const bundle = {effects: data.effects, palettes: data.palettes, public: true};
   const pub = join(out, 'public');
   const stats = {effects: data.effects.length, demos: 0, apiFiles: 0};
 
@@ -45,7 +45,7 @@ export async function buildSite({TOOL, out, base = ''}) {
     .replace('<a class="logo" href="#/">Posts</a>', `<a class="logo" href="#/">${SITE_NAME}</a>`);
   write(join(pub, 'index.html'), index);
   for (const f of ['app.js', 'kit.js', 'style.css', 'fx-core.js', 'fx-preview.html']) copyFileSync(join(UI, f), join(pub, f));
-  write(join(pub, 'data', 'catalog.json'), JSON.stringify({effects: data.effects, posts: [], brands: data.palettes, public: true}));
+  write(join(pub, 'data', 'catalog.json'), JSON.stringify({effects: data.effects, posts: [], palettes: data.palettes, public: true}));
 
   // ---- miniaturas de la galería ----
   const baseCss = previewBaseCss(readFileSync(join(UI, 'fx-preview.html'), 'utf8'));
@@ -69,7 +69,7 @@ export async function buildSite({TOOL, out, base = ''}) {
     const fxSrc = readFileSync(join(UI, 'fx-core.js'), 'utf8');
     write(join(out, 'lib', 'fx-core.mjs'), `// Generado por \`posts site build\` a partir de fx-core.js\nconst module = {exports: {}};\n(function () {\n${fxSrc}\n})();\nexport default module.exports;\n`);
     copyFileSync(join(HERE, 'api-core.mjs'), join(out, 'lib', 'api-core.mjs'));
-    write(join(out, 'lib', 'data.mjs'), `// Generado por \`posts site build\`: efectos y marcas del catálogo\nexport default ${JSON.stringify(bundle)};\n`);
+    write(join(out, 'lib', 'data.mjs'), `// Generado por \`posts site build\`: efectos y paletas del catálogo\nexport default ${JSON.stringify(bundle)};\n`);
     const adapterBody = (rel) => `import {createApi} from '${rel}/lib/api-core.mjs';\nimport FX from '${rel}/lib/fx-core.mjs';\nimport data from '${rel}/lib/data.mjs';\n\nconst handle = createApi({getBundle: () => data, FX});\n`;
     write(join(out, 'functions', 'api', 'v1', '[[path]].js'), `// Cloudflare Pages Functions: /api/v1/*\n${adapterBody('../../..')}\nexport async function onRequest(context) {\n  return (await handle(context.request)) || new Response('No encontrado', {status: 404});\n}\n`);
     write(join(out, 'functions', 'llms.txt.js'), `// Cloudflare Pages Functions: /llms.txt (con el origen real del sitio)\n${adapterBody('..')}\nexport async function onRequest(context) {\n  return (await handle(context.request)) || new Response('No encontrado', {status: 404});\n}\n`);

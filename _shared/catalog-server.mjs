@@ -10,6 +10,13 @@ import {loadCatalog} from './catalog.mjs';
 import {brandRoot, brandIds} from './brands-dirs.mjs';
 import {createFileStore, BrandError, LIMITS} from './brand-store.mjs';
 import {createApi} from './site/api-core.mjs';
+
+const readApiBody = (req, max = 70000) => new Promise((ok, fail) => {   // cuerpo de POST /api/v1/kit (la API aplica su tope)
+  const chunks = []; let n = 0;
+  req.on('data', c => { n += c.length; if (n <= max) chunks.push(c); });
+  req.on('end', () => ok(Buffer.concat(chunks)));
+  req.on('error', fail);
+});
 import {fxCardPage, previewBaseCss} from './site/card-page.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -21,7 +28,7 @@ const readIf = p => (existsSync(p) ? readFileSync(p, 'utf8') : null);
 function brandsOf(TOOL) {
   const out = {};
   for (const id of brandIds(TOOL)) {
-    try { const b = JSON.parse(readFileSync(join(brandRoot(TOOL, id), id + '.json'), 'utf8')); out[id] = {id, name: b.name || id, dark: b.dark, light: b.light, accent: b.accent}; } catch { /* marca ilegible: se omite */ }
+    try { const b = JSON.parse(readFileSync(join(brandRoot(TOOL, id), id + '.json'), 'utf8')); out[id] = {id, name: b.name || id, dark: b.dark, light: b.light, accent: b.accent, headFont: b.headFont, bodyFont: b.bodyFont}; } catch { /* marca ilegible: se omite */ }
   }
   return out;
 }
@@ -138,7 +145,8 @@ export function startCatalogServer({TOOL, POSTS, port = 4747, host = '127.0.0.1'
 
       // ---- API v1 (agentes): misma implementación que la función del sitio publicado ----
       {
-        const apiRes = await api(new Request(`http://${req.headers.host}${req.url}`, {method: req.method}));
+        const hasBody = req.method === 'POST' && url.pathname === '/api/v1/kit';
+        const apiRes = await api(new Request(`http://${req.headers.host}${req.url}`, {method: req.method, headers: hasBody ? {'content-type': 'application/json'} : undefined, body: hasBody ? await readApiBody(req) : undefined}));
         if (apiRes) {
           const headers = {};
           apiRes.headers.forEach((v, k) => { headers[k] = v; });

@@ -109,7 +109,26 @@ En la pestaña **Kit** de `posts catalog` se reúnen varios efectos spec 1 para 
 **API del kit** (para agentes), con `k` = el valor del enlace del kit:
 - `GET /api/v1/kit?k=<kit>`: JSON con `items[]` (inicio, duración, marcadores y HTML de cada uno), `code.css`, `code.html`, `markers` y `howTo`. Un kit no válido devuelve 400 con el detalle.
 - `GET /api/v1/kit?k=<kit>&format=html`: la página autónoma (con política de seguridad restrictiva).
-Solo admiten efectos spec 1 (parametrizados) y hasta 40 elementos. Las etiquetas se escapan siempre.
+- **Crear un kit sin la UI** (para que la IA decida sola): `POST /api/v1/kit` con cuerpo JSON, o `GET /api/v1/kit?kit=<JSON urlencoded>` si solo puede leer URLs (hasta ~16000 caracteres). Forma: `{"name","palette","items":[{"effect","label","params":{…},"elements":{"el_text":…}}]}` (hasta 60 ítems; `elements` admite las claves `el_*` de la API). No guarda nada: compone y devuelve lo mismo que `?k=` más `k`, `kitUrl` (abre el kit en la web para retocarlo) y `page`. Errores: 400 con `details` por elemento; 413 si el cuerpo pasa de 64 KB. Es el único POST de la API.
+- `llms.txt` incluye la **receta de pieza**: elegir efectos, componer el kit, comprobar y aplicar en la pieza del usuario.
+Solo admiten efectos spec 1 (parametrizados) y hasta 60 elementos. Las etiquetas se escapan siempre.
+
+## Elementos de muestra editables
+Un efecto puede marcar sus elementos de muestra en `fx.html`: `data-fx-sample` (texto de muestra, con `{{label}}`), `data-fx-scene="a|b"` (escenas) y `data-fx-media` (foto o video). Las escenas dentro de `<!--fx-demo-->…<!--/fx-demo-->` solo existen en la vista previa.
+- **Texto, color del texto, fondo y tamaños** (`el_text`, `el_color`, `el_bg`, `el_size` = tamaño del texto en px, `el_w` = ancho del elemento en %, `el_pad` = relleno en px; `el_a_*` / `el_b_*` para las escenas, que admiten texto, colores y tamaño del texto) **sí cambian el código**: se aplican como `style` inline del elemento. Valen en la URL de la UI, en la API (`/api/v1/effects/<id>?el_text=Hola&el_bg=%23112233`) y en el kit.
+- **Aspecto** (también en los elementos añadidos y, la mayoría, en las escenas): `el_opacity` (transparencia, 0-100 %), `el_bga` (opacidad del color de fondo), `el_radius` (esquinas, px), `el_rot` (giro, grados), `el_scale` (escala, %), `el_shadow` (sombra, 0-100), `el_ls` (espaciado de letras, px), `el_weight` (grosor, 100-900), `el_bw` y `el_bc` (borde). Van como `style` inline y **no pisan las animaciones**: la transparencia usa `filter:opacity()`, el giro `rotate` y la escala `scale` (propiedades CSS independientes de `transform`; navegadores actuales).
+- **La fuente** (`el_font`, `el_a_font`, `el_b_font`) puede ser una de las marcas disponibles, una de Google Fonts o una del sistema (`/api/v1/fonts` las lista). El código lleva `font-family` y, si es de Google Fonts, el CSS empieza con su `@import`; en un kit, cada fuente se importa una sola vez.
+- **La imagen** que el visitante pone en un elemento es **solo para la vista previa**: vive en memoria, no se guarda ni viaja en enlaces, kit, API ni código.
+- **El código no se ata a una etiqueta**: el elemento de muestra sale como `<div>` con un comentario («aplica esta clase y el style a TU elemento»); `h1`, `h2`, `section`… del fx.html solo se usan en la vista previa. Las escenas del código salen como `<div>` con `<!-- tu escena A -->`.
+- `FX.elementsOf(efecto)` lista los elementos editables y `FX.cleanElements` valida lo que llega de fuera (hex o `palette.*`, texto de hasta 80 caracteres, tamaño del texto de 10 a 600, ancho de 10 a 100, relleno de 0 a 300).
+
+## Efectos con varios elementos
+- **Plantillas con varios textos** (`title-stack`, `split-cards`, `list-stagger`, `badge-burst`, `curtain-title`): cada texto de muestra se marca con `data-fx-sample="2"`, `"3"`… (el primero sin número) y, si quieres, `data-fx-name="Subtítulo"` para su nombre en el panel. En la API se editan con `el_s2_text`, `el_s3_bg`…
+- **Escena con tus elementos** (`fly-elements`): el efecto declara `fx.items` (`max` y `defaults`) y su `fx.html` lleva `{{items}}`. El usuario añade hasta 8 elementos (`e1`…`e8`) y para cada uno elige **dónde termina** (`x`, `y` en % de la pantalla, el punto es el centro del elemento), **de dónde sale** (`from`: `bottom`, `top`, `left`, `right`, `center`, `fade` o `custom` con `fx`, `fy`) y **cuándo entra** (`delay`, `duration`, `ease`), además de texto, fuente, colores y tamaños. Si se envía algún `e*`, sustituyen a los de muestra. Por la API: `el_e1_text`, `el_e1_x`, `el_e1_from`…
+- **Fondo de la vista previa**: imagen o color solo para ver el efecto sobre algo distinto de la paleta, con ajustes (cubrir o contener, zoom para acercar y alejar, posición, opacidad, desenfoque y oscurecer). Nunca va al código, la URL ni la API.
+
+## Comprobar que los efectos se ven y se mueven
+`node _shared/site/qa-effects.mjs [id …] [--out carpeta]` renderiza cada efecto en Chrome, toma fotogramas en varios instantes y mide cuánto cambia la imagen. Marca como **SIN MOVIMIENTO VISIBLE** los que no cambian de forma perceptible (p. ej. un degradado liso que se desplaza) y como **NO SE VE NADA** los que no dibujan contenido. Con `--out` guarda los fotogramas como PNG para revisarlos. Requiere Chrome. Córrelo tras crear o cambiar un efecto.
 
 ## Sitio público (`posts site build`)
 El sitio es lo que usa el visitante; GitHub guarda la fuente y publica. `posts site build [--out dist] [--base https://mi-sitio.com]` genera una carpeta lista para publicar (se ignora en git):

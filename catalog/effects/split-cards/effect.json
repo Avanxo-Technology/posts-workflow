@@ -1,0 +1,94 @@
+{
+  "id": "split-cards",
+  "name": "Dos tarjetas que se encuentran",
+  "kind": "overlay",
+  "medium": "video",
+  "tags": [
+    "varios-elementos",
+    "tarjetas",
+    "lados",
+    "entrada"
+  ],
+  "snippet": "fx.css",
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración de cada tarjeta",
+        "type": "number",
+        "unit": "s",
+        "default": 0.6,
+        "min": 0.1,
+        "max": 3,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 30,
+        "step": 0.05
+      },
+      "gap": {
+        "label": "Retraso entre tarjetas",
+        "type": "number",
+        "unit": "s",
+        "default": 0.12,
+        "min": 0,
+        "max": 1.5,
+        "step": 0.02
+      },
+      "distance": {
+        "label": "Distancia de entrada",
+        "type": "number",
+        "unit": "px",
+        "default": 900,
+        "min": 100,
+        "max": 1600,
+        "step": 20
+      },
+      "ease": {
+        "label": "Curva",
+        "type": "enum",
+        "default": "suave",
+        "options": [
+          {
+            "value": "suave",
+            "label": "Rebote suave",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.2,.8,.2,1)"
+            }
+          },
+          {
+            "value": "lineal",
+            "label": "Lineal",
+            "vars": {
+              "--fx-ease": "linear"
+            }
+          },
+          {
+            "value": "in-out",
+            "label": "Entrada y salida",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.65,0,.35,1)"
+            }
+          },
+          {
+            "value": "brusco",
+            "label": "Brusco",
+            "vars": {
+              "--fx-ease": "cubic-bezier(.7,0,.3,1)"
+            }
+          }
+        ]
+      }
+    },
+    "label": "Antes",
+    "total": "delay + gap + duration",
+    "markers": []
+  }
+}

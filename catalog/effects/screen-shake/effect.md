@@ -4,7 +4,7 @@ En cada instante de `HITS` el contenedor del video se desplaza con una oscilaci�
 ## Cómo aplicarlo
 1. Copia `fx.css` en el CSS de la pieza (una sola vez).
 2. Usa el marcado de `fx.html` y fija los parámetros como variables en su `style`; `--fx-delay` es el segundo del video en que empieza.
-3. Envuelve el contenido de la escena. Pon un golpe de audio en `--fx-delay` (con `hit=True` en `gen_audio.py`). Para varios golpes, usa un envoltorio por golpe.
+3. Envuelve el contenido de la escena. Pon un golpe de audio en `--fx-delay` (un golpe fuerte). Para varios golpes, usa un envoltorio por golpe.
 
 ## Notas
 - Reproduce la fórmula de `shake()` del reproductor (oscilación amortiguada de ~18 px durante .5 s, con un zoom mínimo para que no asomen los bordes). En un kit envuelve a todos los demás elementos.

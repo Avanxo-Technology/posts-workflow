@@ -11,7 +11,7 @@
   "snippet": "fx.css",
   "audio": {
     "sfx": "explosión / estallido",
-    "sync": "mismo `--s` en gen_audio.py (hit=True si debe sacudir)"
+    "sync": "sincroniza el sonido con el instante en que la luz cubre la pantalla (golpe fuerte si debe sacudir)"
   },
   "spec": 1,
   "fx": {

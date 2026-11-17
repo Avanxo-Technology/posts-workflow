@@ -11,7 +11,7 @@
   "snippet": "fx.css",
   "audio": {
     "sfx": "whoosh de transición + golpe (hit)",
-    "sync": "el golpe en el instante de cierre total (~`--s1`+.56); añádelo a HITS y a gen_audio.py"
+    "sync": "el golpe en el instante de cierre total (~`--s1`+.56); sincroniza ahí el sonido (ver los marcadores de la ficha)"
   },
   "spec": 1,
   "fx": {

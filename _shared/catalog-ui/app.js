@@ -90,6 +90,19 @@
   }
 
   // ---- vista: galería de efectos ----
+  // Bloque «Cómo usarlo con tu IA» (sitio público): dos caminos, con un prompt listo para copiar.
+  function aiGuide() {
+    var origin = location.origin;
+    var freePrompt = 'Quiero hacer [describe tu pieza: formato, duración, mensaje]. Te paso mis textos e imágenes. Lee ' + origin + '/llms.txt, elige del catálogo los efectos que mejor encajen, créalos como kit con la API (POST ' + origin + '/api/v1/kit, o GET con ?kit= si no puedes hacer POST), corrige los errores que devuelva y aplícalo todo en mi pieza con mis textos. Usa solo mis datos, no inventes nada.';
+    return h('details', {class: 'note', style: 'margin:0 0 16px'},
+      h('summary', {style: 'cursor:pointer;font-weight:600', text: 'Cómo usarlo con tu IA'}),
+      h('p', {style: 'margin:10px 0 4px'}, h('b', {text: 'Tú eliges: '}), 'arma un kit en la pestaña Kit (efectos, colores, textos, tiempos), pulsa «Copiar prompt para Claude» y pégalo en tu IA junto con tus recursos.'),
+      h('p', {style: 'margin:4px 0'}, h('b', {text: 'Tu IA decide: '}), 'dale tu idea, tus textos e imágenes, y que ella explore el sitio, elija los efectos y los una. Copia este prompt y rellena lo que va entre corchetes:'),
+      h('pre', {class: 'mono', style: 'white-space:pre-wrap;margin:6px 0', text: freePrompt}),
+      h('div', {class: 'actions'}, h('button', {text: 'Copiar prompt', onclick: function () { copy(freePrompt, 'Prompt copiado'); }})),
+      h('p', {style: 'margin:8px 0 0;font-size:12px;color:var(--mut)', text: 'Tu IA necesita poder abrir enlaces. Si no puede, usa «Copiar código» en cada efecto o kit. Tus imágenes nunca se suben al sitio: tu IA las enlaza en tu proyecto.'}));
+  }
+
   function viewEffects() {
     var term = norm(q.value), brands = {}, kinds = {};
     data.effects.forEach(function (e) {
@@ -106,6 +119,7 @@
       h('h1', {text: 'Efectos'}),
       h('p', {class: 'sub', text: STATIC ? data.effects.length + ' transiciones y efectos para videos de redes. Elige uno, ajusta tiempos y colores sin escribir código, guarda tu configuración o añádelo al kit y pásale el enlace a Claude.'
         : data.effects.length + ' efectos · ' + data.posts.length + ' posts registrados. Haz clic en un efecto para ver cómo está hecho y dónde se usó.'}),
+      STATIC ? aiGuide() : null,
       h('div', {class: 'filters'},
         STATIC ? null : h('div', {class: 'grp'}, h('b', {text: 'Marca'}), Object.keys(brands).sort().map(function (b) { return chip((data.brands[b] || {}).name || b, filters.brand === b, set('brand', b), brandDot(b)); })),
         h('div', {class: 'grp'}, h('b', {text: 'Tipo'}), Object.keys(kinds).sort().map(function (k) { return chip(KIND[k] || k, filters.kind === k, set('kind', k)); }))),
@@ -160,14 +174,34 @@
     return {el: h('div', {class: 'ctl'}, h('label', {text: p.label || k}), body, reset), sync: sync};
   }
 
-  // ---- kit (carrito): se guarda en este navegador ----
-  var KIT_KEY = 'posts-kit-v1', kitListeners = [];
+  // ---- kits (carritos): varios, con nombre, guardados en este navegador. Uno está "activo": es el que recibe «Añadir al kit». ----
+  var KITS_KEY = 'posts-kits-v2', KIT_KEY_OLD = 'posts-kit-v1', KITS_MAX = 30, kitListeners = [];
+  var uid = function () { return 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); };
+  function loadKits() {
+    try { var s = JSON.parse(localStorage.getItem(KITS_KEY)); if (s && Array.isArray(s.kits) && s.kits.length) { if (!s.kits.some(function (k) { return k.id === s.active; })) s.active = s.kits[0].id; return s; } } catch (e) { /* ilegible: se parte de cero */ }
+    var first = {id: uid(), name: 'Mi kit', palette: '', items: []};
+    try { var old = JSON.parse(localStorage.getItem(KIT_KEY_OLD)); if (old && Array.isArray(old.items)) first = {id: first.id, name: old.name || 'Mi kit', palette: old.palette || '', items: old.items}; } catch (e) { /* sin kit anterior */ }   // migra el kit único de la versión anterior
+    return {active: first.id, kits: [first]};
+  }
   var kitStore = {
-    get: function () {
-      try { var k = JSON.parse(localStorage.getItem(KIT_KEY)); if (k && Array.isArray(k.items)) return k; } catch (e) { /* kit ilegible: se ignora */ }
-      return {name: 'Mi kit', palette: '', items: []};
+    write: function (s) { try { localStorage.setItem(KITS_KEY, JSON.stringify(s)); } catch (e) { /* sin almacenamiento */ } kitListeners.forEach(function (f) { f(kitStore.get()); }); },
+    get: function () { var s = loadKits(), k = s.kits.filter(function (x) { return x.id === s.active; })[0]; return {name: k.name, palette: k.palette, items: k.items}; },
+    set: function (k) { var s = loadKits(); s.kits.forEach(function (x) { if (x.id === s.active) { x.name = k.name; x.palette = k.palette; x.items = k.items; } }); kitStore.write(s); },
+    list: function () { var s = loadKits(); return {active: s.active, kits: s.kits.map(function (x) { return {id: x.id, name: x.name || 'Sin nombre', n: x.items.length}; })}; },
+    select: function (id) { var s = loadKits(); if (s.kits.some(function (k) { return k.id === id; })) { s.active = id; kitStore.write(s); } },
+    create: function (name, data) {
+      var s = loadKits();
+      if (s.kits.length >= KITS_MAX) { toast('Hasta ' + KITS_MAX + ' kits: elimina alguno antes'); return null; }
+      var k = {id: uid(), name: name || 'Kit nuevo', palette: (data && data.palette) || '', items: (data && data.items) || []};
+      s.kits.push(k); s.active = k.id; kitStore.write(s); return k.id;
     },
-    set: function (k) { try { localStorage.setItem(KIT_KEY, JSON.stringify(k)); } catch (e) { /* sin almacenamiento */ } kitListeners.forEach(function (f) { f(k); }); },
+    duplicate: function () { var c = kitStore.get(); return kitStore.create((c.name || 'Kit') + ' (copia)', JSON.parse(JSON.stringify(c))); },
+    remove: function (id) {
+      var s = loadKits(); s.kits = s.kits.filter(function (k) { return k.id !== id; });
+      if (!s.kits.length) s.kits.push({id: uid(), name: 'Mi kit', palette: '', items: []});
+      if (s.active === id || !s.kits.some(function (k) { return k.id === s.active; })) s.active = s.kits[0].id;
+      kitStore.write(s);
+    },
     add: function (item, palette) {
       var k = kitStore.get();
       if (k.items.length >= FX.KIT_MAX) { toast('El kit admite hasta ' + FX.KIT_MAX + ' elementos'); return k; }
@@ -176,8 +210,267 @@
     },
     onChange: function (f) { kitListeners.push(f); },
   };
+  // Elemento del kit a partir de un efecto: el texto del elemento de texto pasa a ser su «label»; el resto de cambios van en elements.
+  function kitItem(e, vals, els) {
+    var x = JSON.parse(JSON.stringify(els || {})), label = (x.s && x.s.text) || e.fx.label || '';
+    if (x.s) { delete x.s.text; if (!Object.keys(x.s).length) delete x.s; }
+    return {effect: e.id, label: label, params: Object.assign({}, vals), elements: x};
+  }
   function kitBadge() { var n = kitStore.get().items.length, b = document.getElementById('kitbadge'); if (b) { b.textContent = n ? String(n) : ''; b.style.display = n ? '' : 'none'; } }
   kitStore.onChange(kitBadge);
+
+
+  // ---- elementos de muestra: texto, colores y tamaño (SÍ van al código) e imagen (solo vista previa, nunca va al código) ----
+  function elsFromQuery(p) {
+    var els = {};
+    p.forEach(function (v, k) {
+      var m = /^el_(?:(s[1-9]?|a|b|e[1-8])_)?(text|color|bg|font|size|w|pad|x|y|fx|fy|from|delay|duration|ease|opacity|bga|radius|rot|scale|shadow|ls|weight|bw|bc)$/.exec(k);
+      if (m) { var id = m[1] || 's'; (els[id] = els[id] || {})[m[2]] = /^(size|w|pad|x|y|fx|fy|delay|duration|opacity|bga|radius|rot|scale|shadow|ls|weight|bw)$/.test(m[2]) ? parseFloat(v) : v; }
+    });
+    return els;
+  }
+  function elsToQuery(els, qs) {
+    Object.keys(els).forEach(function (id) { Object.keys(els[id]).forEach(function (k) { qs.set('el_' + (id === 's' ? '' : id + '_') + k, els[id][k]); }); });
+    return qs;
+  }
+  function readImage(file, done) {
+    if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) { toast('Usa una imagen PNG, JPG, WebP o GIF'); return; }
+    if (file.size > 8 * 1024 * 1024) { toast('La imagen pesa más de 8 MB'); return; }
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function () {
+      var k = Math.min(1, 1080 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      done(c.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.85));
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); toast('No se pudo leer la imagen'); };
+    img.src = url;
+  }
+
+  // ---- controles reutilizables ----
+  function fontSelect(value, onChange) {
+    var brands = (PW.data().brands || {}), seenB = {}, bopts = [];
+    Object.keys(brands).sort().forEach(function (bid) {
+      [brands[bid].headFont, brands[bid].bodyFont].forEach(function (f) {
+        if (f && !seenB[bid + '|' + f]) { seenB[bid + '|' + f] = 1; bopts.push(h('option', {value: f, text: f + ' · ' + (STATIC ? 'paleta ' : '') + (brands[bid].name || bid)})); }
+      });
+    });
+    var sel = h('select', {class: 'in'}, h('option', {value: '', text: 'La del efecto'}),
+      bopts.length ? h('optgroup', {label: STATIC ? 'Sugeridas con cada paleta' : 'Fuentes de las marcas'}, bopts) : null,
+      h('optgroup', {label: 'Google Fonts'}, FX.FONTS.google.map(function (f) { return h('option', {value: f, text: f}); })),
+      h('optgroup', {label: 'Del sistema'}, FX.FONTS.system.map(function (f) { return h('option', {value: f, text: f}); })));
+    sel.value = value || '';
+    sel.addEventListener('change', function () { onChange(sel.value); });
+    return sel;
+  }
+  function colorRow(label, value, onSet) {
+    var inp = h('input', {type: 'color', value: /^#[0-9a-f]{6}$/i.test(value || '') ? value : '#888888'}), tag = h('span', {class: 'val mono', text: value || 'auto'});
+    inp.addEventListener('input', function () { tag.textContent = inp.value; onSet(inp.value); });
+    return h('div', {class: 'ctl'}, h('label', {text: label}), h('div', {class: 'rg'}, inp, tag),
+      h('button', {class: 'mini', title: 'Volver al valor del efecto', text: '↺', onclick: function () { tag.textContent = 'auto'; inp.value = '#888888'; onSet(''); }}));
+  }
+  function sliderRow(label, value, min, max, step, unit, shown, onSet) {
+    var rng = h('input', {type: 'range', min: min, max: max, step: step, value: value != null ? value : shown}), out = h('span', {class: 'val mono', text: value != null ? value + unit : 'auto'});
+    rng.addEventListener('input', function () { out.textContent = rng.value + unit; onSet(parseFloat(rng.value)); });
+    return h('div', {class: 'ctl'}, h('label', {text: label}), h('div', {class: 'rg'}, rng, out),
+      h('button', {class: 'mini', title: 'Volver al valor del efecto', text: '↺', onclick: function () { out.textContent = 'auto'; onSet(''); }}));
+  }
+  // Cuadro 9:16 en miniatura: se hace clic o se arrastra para elegir una posición (X, Y en % de la pantalla)
+  function pad2d(x, y, onChange) {
+    var pad = h('div', {class: 'pad2d'}), dot = h('i'), read = h('span', {class: 'mono'});
+    pad.appendChild(dot);
+    var place = function (px, py) { dot.style.left = px + '%'; dot.style.top = py + '%'; read.textContent = px + '%, ' + py + '%'; };
+    place(x, y);
+    function at(ev) { var r = pad.getBoundingClientRect(), px = Math.round(Math.max(0, Math.min(100, (ev.clientX - r.left) / r.width * 100))), py = Math.round(Math.max(0, Math.min(100, (ev.clientY - r.top) / r.height * 100))); place(px, py); onChange(px, py); }
+    pad.addEventListener('pointerdown', function (ev) { pad.setPointerCapture(ev.pointerId); at(ev); pad.onpointermove = at; });
+    pad.addEventListener('pointerup', function () { pad.onpointermove = null; });
+    return {pad: pad, read: read};
+  }
+  // Fondo de la vista previa: imagen o color, con ajustes. Solo se ve en la vista previa; nunca va al código, a la URL ni a la API.
+  // assets guarda bg (imagen), bgColor y los ajustes bgFit, bgZoom, bgX, bgY, bgBlur, bgOpacity, bgDim.
+  function bgMsg(assets) {
+    return {bgImage: assets.bg || null, bgColor: assets.bgColor || null,
+      bgProps: {fit: assets.bgFit || 'cover', zoom: assets.bgZoom != null ? assets.bgZoom : 100, x: assets.bgX != null ? assets.bgX : 50, y: assets.bgY != null ? assets.bgY : 50, blur: assets.bgBlur || 0, opacity: assets.bgOpacity != null ? assets.bgOpacity : 100, dim: assets.bgDim || 0}};
+  }
+  function bgControl(assets, onChange) {
+    var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: ''}), adj = h('div');
+    var col = h('input', {type: 'color', value: assets.bgColor || '#202830'});
+    function status() { state.textContent = assets.bg ? 'imagen puesta' : assets.bgColor ? assets.bgColor : 'el de la paleta'; }
+    function ctl(label, key, min, max, step, unit, def) {
+      var cur = assets[key], rng = h('input', {type: 'range', min: min, max: max, step: step, value: cur != null ? cur : def}), out = h('span', {class: 'val mono', text: (cur != null ? cur : def) + unit});
+      rng.addEventListener('input', function () { assets[key] = parseFloat(rng.value); out.textContent = rng.value + unit; onChange(); });
+      return h('div', {class: 'ctl'}, h('label', {text: label}), h('div', {class: 'rg'}, rng, out),
+        h('button', {class: 'mini', title: 'Valor por defecto', text: '↺', onclick: function () { delete assets[key]; rng.value = def; out.textContent = def + unit; onChange(); }}));
+    }
+    function drawAdj() {
+      adj.replaceChildren();
+      if (!assets.bg) return;
+      var fit = h('select', {class: 'in'}, [['cover', 'Cubrir toda la pantalla'], ['contain', 'Contener (se ve entera)']].map(function (o) { return h('option', {value: o[0], text: o[1]}); }));
+      fit.value = assets.bgFit || 'cover';
+      fit.addEventListener('change', function () { assets.bgFit = fit.value; onChange(); });
+      adj.appendChild(h('label', {class: 'f', style: 'margin:8px 0'}, 'Ajuste de la imagen', fit));
+      // zoom siempre visible: acercar (+) y alejar (−) además del deslizador
+      var zoom = ctl('Zoom (acercar / alejar)', 'bgZoom', 50, 400, 5, '%', 100), zr = zoom.querySelector('input[type=range]');
+      var step = function (d) { zr.value = Math.max(50, Math.min(400, (parseFloat(zr.value) || 100) + d)); zr.dispatchEvent(new Event('input', {bubbles: true})); };
+      zoom.querySelector('.rg').insertBefore(h('button', {class: 'mini', title: 'Alejar', text: '−', onclick: function () { step(-10); }}), zr);
+      zoom.querySelector('.rg').appendChild(h('button', {class: 'mini', title: 'Acercar', text: '+', onclick: function () { step(10); }}));
+      adj.appendChild(zoom);
+      adj.appendChild(ctl('Posición horizontal', 'bgX', 0, 100, 1, '%', 50));
+      adj.appendChild(ctl('Posición vertical', 'bgY', 0, 100, 1, '%', 50));
+      adj.appendChild(ctl('Opacidad (transparencia)', 'bgOpacity', 0, 100, 1, '%', 100));
+      adj.appendChild(ctl('Desenfoque', 'bgBlur', 0, 40, 1, 'px', 0));
+      adj.appendChild(ctl('Oscurecer', 'bgDim', 0, 90, 1, '%', 0));
+    }
+    file.addEventListener('change', function () { var f = file.files && file.files[0]; if (!f) return; readImage(f, function (d) { assets.bg = d; status(); drawAdj(); onChange(); }); file.value = ''; });
+    col.addEventListener('input', function () { assets.bgColor = col.value; status(); onChange(); });
+    status(); drawAdj();
+    return h('div', {class: 'panel', style: 'margin-top:10px'}, h('div', {class: 'ctl'}, h('label', {text: 'Fondo (solo vista previa)'}),
+      h('div', {class: 'rg'}, h('button', {text: 'Imagen…', onclick: function () { file.click(); }}), col, state, file),
+      h('button', {class: 'mini', title: 'Quitar el fondo y sus ajustes', text: '✕', onclick: function () { ['bg', 'bgColor', 'bgFit', 'bgZoom', 'bgX', 'bgY', 'bgBlur', 'bgOpacity', 'bgDim'].forEach(function (k) { delete assets[k]; }); status(); drawAdj(); onChange(); }})), adj);
+  }
+
+  // Propiedades de aspecto de un elemento (todas van al código como style). level 'sample': completas; 'scene': solo las del texto.
+  function appearanceRows(vals, setProp, level) {
+    var rows = [], full = level !== 'scene';
+    var sl = function (label, k, min, max, step, unit, shown) { rows.push(sliderRow(label, vals[k], min, max, step, unit, shown, function (v) { setProp(k, v); })); };
+    sl('Opacidad (transparencia)', 'opacity', 0, 100, 1, '%', 100);
+    if (full) {
+      sl('Opacidad del fondo', 'bga', 0, 100, 1, '%', 100);
+      sl('Esquinas redondeadas', 'radius', 0, 200, 2, 'px', 44);
+      sl('Giro', 'rot', -180, 180, 1, '°', 0);
+      sl('Escala', 'scale', 20, 300, 5, '%', 100);
+      sl('Sombra', 'shadow', 0, 100, 1, '', 50);
+    }
+    sl('Grosor del texto', 'weight', 100, 900, 100, '', 900);
+    sl('Espaciado entre letras', 'ls', -10, 40, 1, 'px', 0);
+    if (full) {
+      sl('Grosor del borde', 'bw', 0, 30, 1, 'px', 0);
+      rows.push(colorRow('Color del borde', vals.bc && !/^palette\./.test(vals.bc) ? vals.bc : '', function (v) { setProp('bc', v); }));
+    }
+    return rows;
+  }
+
+  var FROM_LABEL = {bottom: 'Abajo', top: 'Arriba', left: 'La izquierda', right: 'La derecha', center: 'El centro (crece)', fade: 'Solo aparece (fundido)', custom: 'Un punto de la pantalla…'};
+  var EASE_LABEL = {suave: 'Rebote suave', lineal: 'Lineal', 'in-out': 'Entrada y salida', brusco: 'Brusco'};
+  // Efectos con elementos añadidos por el usuario ({{items}}): para cada uno se elige dónde termina, de dónde sale y cuándo entra.
+  function itemsPanel(e, o, cfg) {
+    var box = h('div', {class: 'panel'}), list = h('div'), isE = function (id) { return /^e[1-8]$/.test(id); };
+    box.appendChild(h('p', {class: 'hint', style: 'color:var(--mut);margin:0 0 10px;font-size:12px', text: 'Añade los elementos que quieras. Para cada uno elige dónde termina, de dónde sale y cuándo entra: todo va al código. La imagen es solo para la vista previa.'}));
+    var clone = function (x) { return JSON.parse(JSON.stringify(x)); };
+    function materialize() { var all = o.get(); if (!Object.keys(all).some(isE)) Object.keys(cfg.defaults).forEach(function (id) { all[id] = clone(cfg.defaults[id]); }); return all; }
+    function current() { var all = o.get(), ids = Object.keys(all).filter(isE).sort(); return ids.length ? ids.map(function (id) { return [id, all[id]]; }) : Object.keys(cfg.defaults).sort().map(function (id) { return [id, cfg.defaults[id]]; }); }
+    function setItem(id, k, v) { var all = materialize(), c = Object.assign({x: 50, y: 50, from: 'bottom', size: 90}, all[id]); if (v === '' || v == null || (typeof v === 'number' && !isFinite(v))) delete c[k]; else c[k] = v; all[id] = c; o.set(all); }
+    function draw() {
+      list.replaceChildren();
+      var rows = current();
+      rows.forEach(function (row, n) {
+        var id = row[0], it = Object.assign({x: 50, y: 50, from: 'bottom'}, row[1]), item = h('div', {class: 'item'});
+        item.appendChild(h('header', null, h('b', {text: 'Elemento ' + (n + 1)}),
+          h('button', {class: 'mini', title: 'Quitar este elemento', text: '✕', disabled: rows.length < 2, onclick: function () { var all = materialize(); delete all[id]; o.set(all); draw(); }})));
+        var t = h('input', {type: 'text', maxlength: 80, value: it.text || '', placeholder: 'Texto'});
+        t.addEventListener('input', function () { setItem(id, 'text', t.value); });
+        item.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Texto', t));
+        item.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Fuente', fontSelect(it.font, function (v) { setItem(id, 'font', v); })));
+        item.appendChild(colorRow('Color del texto', it.color && !/^palette\./.test(it.color) ? it.color : '', function (v) { setItem(id, 'color', v); }));
+        item.appendChild(colorRow('Fondo', it.bg && !/^palette\./.test(it.bg) ? it.bg : '', function (v) { setItem(id, 'bg', v); }));
+        item.appendChild(sliderRow('Tamaño del texto', it.size, 20, 400, 5, 'px', 90, function (v) { setItem(id, 'size', v); }));
+        appearanceRows(it, function (k, v) { setItem(id, k, v); }, 'sample').forEach(function (r) { item.appendChild(r); });
+        var endPad = pad2d(it.x, it.y, function (px, py) { all2(id, {x: px, y: py}); });
+        var pads = h('div', {class: 'pads'}, h('div', null, h('span', {text: 'Termina en (centro)'}), endPad.pad, endPad.read));
+        var fromSel = h('select', {class: 'in'}, cfg && ['bottom', 'top', 'left', 'right', 'center', 'fade', 'custom'].map(function (k) { return h('option', {value: k, text: FROM_LABEL[k]}); }));
+        fromSel.value = it.from || 'bottom';
+        fromSel.addEventListener('change', function () { setItem(id, 'from', fromSel.value); draw(); });
+        if ((it.from || 'bottom') === 'custom') {
+          var sp = pad2d(it.fx != null ? it.fx : it.x, it.fy != null ? it.fy : it.y, function (px, py) { all2(id, {fx: px, fy: py}); });
+          pads.appendChild(h('div', null, h('span', {text: 'Sale desde (centro)'}), sp.pad, sp.read));
+        }
+        item.appendChild(pads);
+        item.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Sale desde', fromSel));
+        item.appendChild(sliderRow('Entra en el segundo', it.delay, 0, 10, 0.05, 's', 0, function (v) { setItem(id, 'delay', v); }));
+        item.appendChild(sliderRow('Duración', it.duration, 0.1, 3, 0.05, 's', 0.7, function (v) { setItem(id, 'duration', v); }));
+        var easeSel = h('select', {class: 'in'}, h('option', {value: '', text: 'La del efecto'}), Object.keys(EASE_LABEL).map(function (k) { return h('option', {value: k, text: EASE_LABEL[k]}); }));
+        easeSel.value = it.ease || '';
+        easeSel.addEventListener('change', function () { setItem(id, 'ease', easeSel.value); });
+        item.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Curva', easeSel));
+        var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: o.assets[id] ? 'imagen puesta' : 'sin imagen'});
+        file.addEventListener('change', function () { var f = file.files && file.files[0]; if (!f) return; readImage(f, function (d) { o.assets[id] = d; state.textContent = 'imagen puesta'; o.onAsset(); }); file.value = ''; });
+        item.appendChild(h('div', {class: 'ctl'}, h('label', {text: 'Imagen (solo vista previa)'}), h('div', {class: 'rg'}, h('button', {text: 'Elegir imagen…', onclick: function () { file.click(); }}), state, file),
+          h('button', {class: 'mini', title: 'Quitar la imagen', text: '✕', onclick: function () { delete o.assets[id]; state.textContent = 'sin imagen'; o.onAsset(); }})));
+        list.appendChild(item);
+      });
+    }
+    function all2(id, props) { var all = materialize(), c = Object.assign({x: 50, y: 50, from: 'bottom', size: 90}, all[id], props); all[id] = c; o.set(all); }
+    box.appendChild(list);
+    box.appendChild(h('div', {class: 'actions'}, h('button', {class: 'primary', text: '+ Agregar elemento', onclick: function () {
+      var all = materialize(), ids = Object.keys(all).filter(isE).sort();
+      if (ids.length >= cfg.max) { toast('Hasta ' + cfg.max + ' elementos'); return; }
+      var n = 1; while (all['e' + n]) n++;
+      all['e' + n] = {text: 'Nuevo elemento', x: 50, y: Math.min(90, 18 + ids.length * 14), from: 'bottom', size: 70, color: 'palette.light'};
+      o.set(all); draw();
+    }})));
+    draw();
+    return box;
+  }
+
+  // o: {get() -> els, set(els), assets: {id: dataURL}, onAsset(), kit: bool}. En el kit el texto del elemento de texto se edita en su propio campo «Texto».
+  function elementsPanel(e, o) {
+    var cfg = FX.itemsConfig(e);
+    if (cfg) return itemsPanel(e, o, cfg);
+    var seen = {}, rows = FX.elementsOf(e).filter(function (el) { if (seen[el.id]) return false; seen[el.id] = 1; return true; });
+    if (!rows.length) return null;
+    var NAME = {s: 'Elemento de texto', a: 'Escena A', b: 'Escena B', m: 'Foto o video de muestra'};
+    var nameOf = function (el) { return el.name || NAME[el.id] || ('Elemento de texto ' + el.id.slice(1)); };
+    var box = h('div', {class: 'panel'});
+    box.appendChild(h('p', {class: 'hint', style: 'color:var(--mut);margin:0 0 10px;font-size:12px', text: 'El texto, los colores y el tamaño se incluyen en el código. La imagen es solo para la vista previa: no va en el código ni en la API.'}));
+    rows.forEach(function (el) {
+      var id = el.id;
+      var setProp = function (k, v) {
+        var all = o.get(), c = Object.assign({}, all[id] || {});
+        if (v === '' || v == null || (typeof v === 'number' && !isFinite(v))) delete c[k]; else c[k] = v;
+        if (Object.keys(c).length) all[id] = c; else delete all[id];
+        o.set(all);
+      };
+      var cur = function () { return o.get()[id] || {}; };
+      var section = h('div', {class: 'elrow'}, h('h3', {text: nameOf(el)}, ' ', h('small', {text: el.kind === 'media' ? '(el marcador va en el código; la imagen, no)' : el.inCode ? '(va en el código)' : '(solo vista previa)'})));
+      if (el.hasText && !(o.kit && id === 's')) {
+        var t = h('input', {type: 'text', maxlength: 80, value: cur().text || '', placeholder: el.text || 'Texto'});
+        t.addEventListener('input', function () { setProp('text', t.value); });
+        section.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Texto', t));
+      }
+      if (el.kind === 'sample' || el.kind === 'scene') {
+        section.appendChild(h('label', {class: 'f', style: 'margin:0 0 8px'}, 'Fuente', fontSelect(cur().font, function (v) { setProp('font', v); })));
+        [['color', 'Color del texto'], ['bg', 'Fondo']].forEach(function (cp) {
+          var k = cp[0], inp = h('input', {type: 'color', value: cur()[k] || '#888888'}), tag = h('span', {class: 'val mono', text: cur()[k] || 'auto'});
+          inp.addEventListener('input', function () { tag.textContent = inp.value; setProp(k, inp.value); });
+          var auto = h('button', {class: 'mini', title: 'Volver al color del efecto', text: '↺', onclick: function () { tag.textContent = 'auto'; inp.value = '#888888'; setProp(k, ''); }});
+          section.appendChild(h('div', {class: 'ctl'}, h('label', {text: cp[1]}), h('div', {class: 'rg'}, inp, tag), auto));
+        });
+        // tamaños: texto (todos), ancho y relleno del elemento (solo el elemento de texto de muestra)
+        var sliders = [['size', 'Tamaño del texto', 20, 400, 5, 'px', el.kind === 'sample' ? 130 : 190]];
+        if (el.kind === 'sample') sliders.push(['w', 'Ancho del elemento', 10, 100, 1, '%', 80], ['pad', 'Relleno interior', 0, 300, 5, 'px', 50]);
+        sliders.forEach(function (sd) {
+          var k = sd[0], rng = h('input', {type: 'range', min: sd[2], max: sd[3], step: sd[4], value: cur()[k] != null ? cur()[k] : sd[6]}), out = h('span', {class: 'val mono', text: cur()[k] != null ? cur()[k] + sd[5] : 'auto'});
+          rng.addEventListener('input', function () { out.textContent = rng.value + sd[5]; setProp(k, parseFloat(rng.value)); });
+          section.appendChild(h('div', {class: 'ctl'}, h('label', {text: sd[1]}), h('div', {class: 'rg'}, rng, out),
+            h('button', {class: 'mini', title: 'Volver al tamaño del efecto', text: '↺', onclick: function () { out.textContent = 'auto'; setProp(k, ''); }})));
+        });
+        appearanceRows(cur(), setProp, el.kind).forEach(function (r) { section.appendChild(r); });
+      }
+      if (el.kind === 'label') { box.appendChild(section); return; }   // sin elemento de muestra que sustituir: solo texto
+      var file = h('input', {type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', style: 'display:none'}), state = h('span', {class: 'val', text: o.assets[id] ? 'imagen puesta' : 'sin imagen'});
+      file.addEventListener('change', function () {
+        var f = file.files && file.files[0]; if (!f) return;
+        readImage(f, function (data) { o.assets[id] = data; state.textContent = 'imagen puesta'; o.onAsset(); });
+        file.value = '';
+      });
+      section.appendChild(h('div', {class: 'ctl'}, h('label', {text: 'Imagen (solo vista previa)'}),
+        h('div', {class: 'rg'}, h('button', {text: 'Elegir imagen…', onclick: function () { file.click(); }}), state, file),
+        h('button', {class: 'mini', title: 'Quitar la imagen', text: '✕', onclick: function () { delete o.assets[id]; state.textContent = 'sin imagen'; o.onAsset(); }})));
+      box.appendChild(section);
+    });
+    return box;
+  }
 
   // ---- configuraciones guardadas (en este navegador): efecto + valores + paleta, como un enlace de la propia página ----
   var SAVE_KEY = 'posts-saved-v1';
@@ -193,9 +486,9 @@
       saved.all().filter(function (s) { return s.effect === e.id; }).forEach(function (s) {
         list.appendChild(h('div', {class: 'srow'}, h('b', {text: s.name}),
           h('button', {text: 'Aplicar', onclick: function () { routeQuery = new URLSearchParams(s.qs); location.hash = '#/efecto/' + e.id + (s.qs ? '?' + s.qs : ''); render(); }}),
-          h('button', {text: 'Al kit', onclick: function () { var p = new URLSearchParams(s.qs), r = FX.resolve(e.fx, Object.fromEntries(Array.from(p).filter(function (kv) { return e.fx.params[kv[0]]; })));
+          h('button', {text: 'Al kit', onclick: function () { var p = new URLSearchParams(s.qs), r = FX.resolve(e.fx, Object.fromEntries(Array.from(p).filter(function (kv) { return e.fx.params[kv[0]]; }))), sel = elsFromQuery(p);
             var pal = p.get('palette') === 'custom' ? {dark: p.get('c_dark'), light: p.get('c_light'), accent: p.get('c_accent')} : (p.get('palette') || '');
-            toast('Añadido al kit (' + kitStore.add({effect: e.id, label: e.fx.label || '', params: Object.assign(FX.defaults(e.fx), r.errors.length ? {} : r.values)}, pal).items.length + ')'); }}),
+            toast('Añadido al kit (' + kitStore.add(kitItem(e, Object.assign(FX.defaults(e.fx), r.errors.length ? {} : r.values), sel), pal).items.length + ')'); }}),
           h('button', {class: 'mini', title: 'Borrar', text: '✕', onclick: function () { saved.put(saved.all().filter(function (x) { return x !== undefined && !(x.effect === s.effect && x.name === s.name && x.at === s.at); })); draw(); }})));
       });
       list.style.display = list.children.length ? '' : 'none';
@@ -225,7 +518,7 @@
   // ---- vista: efecto con contrato spec 1 (controles + vista previa + código listo) ----
   function viewEffectFx(e) {
     if (cleanup) { cleanup(); cleanup = null; }
-    var fx = e.fx, pr = routeQuery, vals = FX.defaults(fx);
+    var fx = e.fx, pr = routeQuery, vals = FX.defaults(fx), els = elsFromQuery(pr), assets = {};   // els: texto/colores/tamaño (van al código); assets: imágenes solo de la vista previa
     var brandIds = Object.keys(data.brands).sort(), custom = {dark: '#14181c', light: '#f4f1ea', accent: '#c46a2b'};
     var palId = pr.get('palette') && (data.brands[pr.get('palette')] || pr.get('palette') === 'custom') ? pr.get('palette') : ((e.brands || []).filter(function (b) { return data.brands[b]; })[0] || brandIds[0] || 'custom');
     ['dark', 'light', 'accent'].forEach(function (k) { if (/^#[0-9a-fA-F]{6}$/.test(pr.get('c_' + k) || '')) custom[k] = pr.get('c_' + k); });
@@ -242,12 +535,13 @@
     function query() {
       var d = FX.defaults(fx), qs = new URLSearchParams();
       Object.keys(fx.params).forEach(function (k) { if (vals[k] !== d[k]) qs.set(k, vals[k]); });
+      elsToQuery(els, qs);
       return qs;
     }
     function update() {
-      var p = palette(), r = FX.build(e, vals, p);
+      var p = palette(), r = FX.build(e, vals, p, {elements: els, assets: assets});
       current = r;
-      if (ready) frame.contentWindow.postMessage({type: 'fx', css: r.css, html: r.previewHtml, total: r.total, markers: r.markers, palette: p}, '*');
+      if (ready) frame.contentWindow.postMessage(Object.assign({type: 'fx', css: r.css, html: r.previewHtml, total: r.total, markers: r.markers, palette: p}, bgMsg(assets)), '*');
       htmlPre.textContent = r.html; cssPre.textContent = r.css;
       var qs = query(), local = new URLSearchParams(qs.toString());
       if (palId !== 'custom') local.set('palette', palId); else ['dark', 'light', 'accent'].forEach(function (k) { local.set(k, custom[k]); });
@@ -288,14 +582,16 @@
       h('a', {class: 'back', href: '#/', text: '← Todos los efectos'}),
       h('div', {class: 'detail'},
         h('div', {class: 'stagebox'}, frame,
-          h('div', {class: 'bar', style: 'margin-top:10px'}, 'Paleta', palSel), customBox,
-          h('p', {style: 'color:var(--mut);font-size:12px;margin:10px 0 0', text: 'La barra inferior de la vista previa permite pausar y mover el instante. Las marcas amarillas indican momentos clave.'})),
+          h('div', {class: 'bar', style: 'margin-top:10px'}, 'Paleta', palSel), customBox, bgControl(assets, function () { update(); }),
+          h('p', {style: 'color:var(--mut);font-size:12px;margin:10px 0 0', text: 'La barra inferior de la vista previa permite pausar y mover el instante. Los puntos amarillos indican momentos clave.'})),
         h('div', null,
           h('h1', {text: e.name}),
           h('div', {class: 'idline'}, h('code', {text: e.id}), h('span', {class: 'kind k-' + e.kind, text: KIND[e.kind] || e.kind}),
             h('button', {onclick: function () { copy(e.id, 'id copiado'); }, text: 'Copiar id'}),
-            h('button', {class: 'primary', text: '+ Añadir al kit', onclick: function () { var n = kitStore.add({effect: e.id, label: fx.label || '', params: Object.assign({}, vals)}, palId === 'custom' ? custom : palId).items.length; toast('Añadido al kit (' + n + ')'); }})),
+            h('button', {class: 'primary', text: '+ Añadir al kit', onclick: function () { var n = kitStore.add(kitItem(e, vals, els), palId === 'custom' ? custom : palId).items.length; toast('Añadido a «' + kitStore.get().name + '» (' + n + ')'); }})),
           md(e.md),
+          FX.elementsOf(e).length ? h('h2', {text: 'Elementos de la vista previa'}) : null,
+          elementsPanel(e, {get: function () { return els; }, set: function (a) { els = a; update(); }, assets: assets, onAsset: function () { update(); }}),
           h('h2', {text: 'Controles'}),
           saveBox(e),
           h('div', {class: 'panel'}, Object.keys(fx.params).map(function (k) { return control(k, fx.params[k]); }),
@@ -430,7 +726,7 @@
     app.replaceChildren(h('a', {class: 'back', href: '#/', text: '← Volver'}), h('div', {class: 'empty', text: 'No existe ' + what + ' "' + id + '" en el catálogo.'}));
   }
 
-  window.PW = {h: h, toast: toast, copy: copy, app: app, search: q, reload: function () { return load(true); }, data: function () { return data; }, makeControl: makeControl, kit: kitStore, KIND: KIND, routeQuery: function () { return routeQuery; }};
+  window.PW = {h: h, toast: toast, copy: copy, app: app, search: q, reload: function () { return load(true); }, data: function () { return data; }, makeControl: makeControl, bgControl: bgControl, bgMsg: bgMsg, elementsPanel: elementsPanel, elsFromQuery: elsFromQuery, elsToQuery: elsToQuery, kit: kitStore, KIND: KIND, routeQuery: function () { return routeQuery; }};
 
   // ---- router ----
   function render() {
@@ -455,6 +751,7 @@
   }
   function load(keepScroll) {
     return fetch(STATIC ? '/data/catalog.json' : '/api/catalog').then(function (r) { return r.json(); }).then(function (d) {
+      if (d.palettes && !d.brands) d.brands = d.palettes;   // el sitio público trae paletas; la UI las trata igual que las marcas del catálogo local
       data = d; var y = window.scrollY; render(); if (keepScroll) window.scrollTo(0, y);
     }).catch(function (err) { app.replaceChildren(h('div', {class: 'empty', text: 'No se pudo leer el catálogo: ' + err.message})); });
   }

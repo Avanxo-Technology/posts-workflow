@@ -12,6 +12,19 @@
   var kitUrl = function (kit) { return location.origin + '/#/kit?k=' + FX.encodeKit(kit, effectsMap()); };
   var apiUrl = function (kit, extra) { return location.origin + '/api/v1/kit?k=' + FX.encodeKit(kit, effectsMap()) + (extra || ''); };
 
+  // Barra de kits: elegir el activo, crear, duplicar y eliminar
+  function kitBar() {
+    var L = store.list(), cur = L.kits.filter(function (k) { return k.id === L.active; })[0];
+    var sel = h('select', {class: 'in'}, L.kits.map(function (k) { return h('option', {value: k.id, text: k.name + ' (' + k.n + ')'}); }));
+    sel.value = L.active;
+    var again = function () { sessionStorage.setItem('posts-kit-sel', '0'); render(); };
+    sel.addEventListener('change', function () { store.select(sel.value); again(); });
+    return h('div', {class: 'bar', style: 'margin:0 0 14px;flex-wrap:wrap;gap:8px'}, 'Mis kits', sel,
+      h('button', {text: '+ Nuevo kit', onclick: function () { if (store.create('Kit ' + (L.kits.length + 1))) again(); }}),
+      h('button', {text: 'Duplicar', onclick: function () { if (store.duplicate()) again(); }}),
+      h('button', {class: 'danger', text: 'Eliminar kit', onclick: function () { if (confirm('¿Eliminar el kit «' + cur.name + '»? No se puede deshacer.')) { store.remove(L.active); again(); } }}));
+  }
+
   function render() {
     if (disposer) { disposer(); disposer = null; }
     var data = PW.data(), shared = PW.routeQuery().get('k');
@@ -23,15 +36,16 @@
     var kit = store.get();
     if (incoming) {
       app.replaceChildren(h('h1', {text: 'Kit compartido'}),
-        h('div', {class: 'note'}, 'Este enlace trae un kit' + (incoming.name ? ' («' + incoming.name + '»)' : '') + ' con ' + incoming.items.length + ' elementos. Ya tienes un kit en este navegador con ' + kit.items.length + '.'),
-        h('div', {class: 'actions'}, h('button', {class: 'primary', text: 'Cargar este kit (reemplaza el mío)', onclick: function () { store.set(incoming); location.hash = '#/kit'; }}),
-          h('button', {text: 'Seguir con el mío', onclick: function () { location.hash = '#/kit'; }})));
+        h('div', {class: 'note'}, 'Este enlace trae un kit' + (incoming.name ? ' («' + incoming.name + '»)' : '') + ' con ' + incoming.items.length + ' elementos. Tu kit activo («' + kit.name + '») ya tiene ' + kit.items.length + '.'),
+        h('div', {class: 'actions'}, h('button', {class: 'primary', text: 'Guardar como kit nuevo', onclick: function () { store.create(incoming.name || 'Kit compartido', incoming); location.hash = '#/kit'; }}),
+          h('button', {text: 'Reemplazar mi kit activo', onclick: function () { store.set(incoming); location.hash = '#/kit'; }}),
+          h('button', {text: 'Cancelar', onclick: function () { location.hash = '#/kit'; }})));
       return;
     }
     if (!kit.items.length) {
-      app.replaceChildren(h('h1', {text: 'Kit'}),
+      app.replaceChildren(h('h1', {text: 'Kit'}), kitBar(),
         h('p', {class: 'sub', text: 'Reúne varios efectos para usarlos en una misma pieza: ordénalos en la línea de tiempo, ajusta cada uno y copia el paquete (o pásale el enlace a Claude).'}),
-        h('div', {class: 'empty'}, 'Tu kit está vacío. Abre un efecto y pulsa «+ Añadir al kit».', h('div', {style: 'margin-top:14px'}, h('a', {href: '#/'}, h('button', {class: 'primary', text: 'Ver efectos'})))));
+        h('div', {class: 'empty'}, 'Este kit está vacío. Abre un efecto y pulsa «+ Añadir al kit».', h('div', {style: 'margin-top:14px'}, h('a', {href: '#/'}, h('button', {class: 'primary', text: 'Ver efectos'})))));
       return;
     }
 
@@ -42,10 +56,12 @@
     var ctlBox = h('div'), tlBox = h('div'), sumBox = h('div'), errBox = h('div'), linkBox = h('div', {class: 'cmd'}), totalEl = h('span', {class: 'mono'});
 
     function save() { store.set(kit); }
-    function rebuild() { built = FX.buildKit(effects, kit, brands); return built; }
+    var kitBg = {};   // fondo de la vista previa del kit (imagen o color): solo en memoria
+    var assets = new Map();   // imágenes de la vista previa por elemento del kit: solo en memoria, nunca van al código, al enlace ni al navegador
+    function rebuild() { built = FX.buildKit(effects, {name: kit.name, palette: kit.palette, items: kit.items.map(function (it) { var c = Object.assign({}, it); c.assets = assets.get(it) || null; return c; })}, brands); return built; }
     function push(keepTime) {
       if (!ready || !built) return;
-      frame.contentWindow.postMessage({type: 'fx', css: built.css, html: built.html, total: Math.max(built.total, 0.1), markers: built.markers, palette: built.palette, keepTime: !!keepTime}, '*');
+      frame.contentWindow.postMessage(Object.assign({type: 'fx', css: built.css, html: built.previewHtml || built.html, total: Math.max(built.total, 0.1), markers: built.markers, palette: built.palette, keepTime: !!keepTime}, PW.bgMsg(kitBg)), '*');
     }
     function changed(keepTime, skipTimeline) {
       rebuild(); save(); schedulePush(keepTime);
@@ -145,6 +161,7 @@
       Array.prototype.forEach.call(tlBox.querySelectorAll('.kt-row'), function (b, k) { b.classList.toggle('on', k === i); });
       drawControls();
     }
+    function assetsOf(it) { var a = assets.get(it); if (!a) { a = {}; assets.set(it, a); } return a; }
     function drawControls() {
       syncs = [];
       var it = kit.items[sel], e = it && effects[it.effect];
@@ -162,7 +179,10 @@
             h('button', {text: '↑ Subir', title: 'Se apila antes (queda debajo)', disabled: sel === 0, onclick: function () { move(-1); }}),
             h('button', {text: '↓ Bajar', title: 'Se apila después (queda encima)', disabled: sel === kit.items.length - 1, onclick: function () { move(1); }}),
             h('button', {text: 'Duplicar', onclick: function () { kit.items.splice(sel + 1, 0, JSON.parse(JSON.stringify(it))); sel++; full(); }}),
-            h('button', {class: 'danger', text: 'Quitar', onclick: function () { removeAt(sel); }}))));
+            h('button', {class: 'danger', text: 'Quitar', onclick: function () { removeAt(sel); }}))),
+        h('h2', {text: 'Elementos de la vista previa'}),
+        PW.elementsPanel(e, {kit: true, get: function () { return it.elements || (it.elements = {}); }, set: function (all) { it.elements = all; changed(true, true); },
+          assets: assetsOf(it), onAsset: function () { changed(true, true); }}) || null);
       void palette;
     }
     function move(d) { var j = sel + d; if (j < 0 || j >= kit.items.length) return; var t = kit.items[sel]; kit.items[sel] = kit.items[j]; kit.items[j] = t; sel = j; full(); }
@@ -206,12 +226,12 @@
     window.addEventListener('resize', onResize);
 
     app.replaceChildren(
-      h('h1', {text: 'Kit'}),
+      h('h1', {text: 'Kit'}), kitBar(),
       h('p', {class: 'sub'}, 'Arrastra los bloques para cambiar cuándo empieza cada efecto y estira el borde derecho para cambiar su duración. Todo se guarda en este navegador. Duración total: ', totalEl),
       h('div', {class: 'detail', style: 'grid-template-columns:340px 1fr'},
         h('div', {class: 'stagebox'}, frame,
           h('label', {class: 'f', style: 'margin-top:10px'}, 'Nombre del kit', nameIn),
-          h('div', {class: 'bar', style: 'margin-top:10px'}, 'Paleta', palSel), customBox),
+          h('div', {class: 'bar', style: 'margin-top:10px'}, 'Paleta', palSel), customBox, PW.bgControl(kitBg, function () { schedulePush(true); })),
         h('div', null,
           errBox,
           h('div', {class: 'panel', style: 'padding:12px 12px 14px'}, h('h2', {text: 'Línea de tiempo'}), tlBox),
@@ -221,7 +241,7 @@
           h('div', {class: 'actions', style: 'margin:0 0 8px'},
             h('button', {class: 'primary', text: 'Copiar código (CSS + HTML)', onclick: function () { copy(allCode(), 'Código copiado'); }}),
             h('button', {text: 'Descargar kit.html', onclick: download}),
-            h('button', {text: 'Copiar JSON', onclick: function () { copy(JSON.stringify({name: built.name, palette: built.palette, totalSeconds: built.total, items: built.items.map(function (i) { return {effect: i.effect, label: i.label, start: i.start, duration: i.duration, values: i.values}; })}, null, 2), 'JSON copiado'); }})),
+            h('button', {text: 'Copiar JSON', onclick: function () { copy(JSON.stringify({name: built.name, palette: built.palette, totalSeconds: built.total, items: built.items.map(function (i) { return {effect: i.effect, label: i.label, elements: i.elements, start: i.start, duration: i.duration, values: i.values}; })}, null, 2), 'JSON copiado'); }})),
           h('h2', {text: 'Para tu agente'}),
           h('p', {style: 'color:var(--mut);margin:0 0 8px;font-size:13px', text: 'Esta URL devuelve el kit compuesto en JSON (código listo, tiempos y marcadores). Pégala en el prompt de Claude.'}), linkBox,
           h('div', {class: 'actions'},

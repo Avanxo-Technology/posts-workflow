@@ -1,0 +1,10 @@
+/* curtain-title — dos cortinas cubren la pantalla y se abren hacia arriba y hacia abajo revelando un título y un subtítulo. Parámetros: --fx-duration, --fx-delay, --fx-color1, --fx-color2, --fx-ease */
+.fx-curt{position:absolute;inset:0;overflow:hidden}
+.fx-curt-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;animation:fx-curt-text var(--fx-duration,1s) var(--fx-ease,cubic-bezier(.65,0,.35,1)) var(--fx-delay,0s) both}
+.fx-curt-text>:nth-child(2){font-size:56px}
+.fx-curt-a,.fx-curt-b{position:absolute;left:0;right:0;height:50%;display:block}
+.fx-curt-a{top:0;background:var(--fx-color1,#14181c);animation:fx-curt-a var(--fx-duration,1s) var(--fx-ease,cubic-bezier(.65,0,.35,1)) var(--fx-delay,0s) both}
+.fx-curt-b{bottom:0;background:var(--fx-color2,#c46a2b);animation:fx-curt-b var(--fx-duration,1s) var(--fx-ease,cubic-bezier(.65,0,.35,1)) var(--fx-delay,0s) both}
+@keyframes fx-curt-a{from{transform:none}to{transform:translateY(-101%)}}
+@keyframes fx-curt-b{from{transform:none}to{transform:translateY(101%)}}
+@keyframes fx-curt-text{0%,30%{opacity:0;transform:scale(.9)}100%{opacity:1;transform:none}}
