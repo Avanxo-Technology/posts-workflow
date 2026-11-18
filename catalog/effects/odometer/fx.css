@@ -1,0 +1,5 @@
+/* odometer — cada cifra es una columna 0-9 que rueda hasta su valor. Marcado: .fx-odo > .fx-od[--fx-to = cifra + 10] con 20 <i>. Los símbolos van en .fx-odc. Parámetros: --fx-duration, --fx-delay, --fx-lh (alto de línea, em) */
+@keyframes fx-odo{from{transform:translateY(0)}to{transform:translateY(calc(var(--fx-to) * var(--fx-lh,.86em) * -1))}}
+.fx-odo{display:inline-flex;height:var(--fx-lh,.86em);overflow:hidden;line-height:var(--fx-lh,.86em);vertical-align:top}
+.fx-od{display:block;animation:fx-odo var(--fx-duration,1.4s) cubic-bezier(.15,.8,.2,1) var(--fx-delay,0s) both}
+.fx-od>i,.fx-odc{display:block;font-style:normal;height:var(--fx-lh,.86em);line-height:var(--fx-lh,.86em)}

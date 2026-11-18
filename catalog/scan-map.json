@@ -3,7 +3,14 @@
   "ignore": [
     "sc",
     "grpIn",
-    "grpOut"
+    "grpOut",
+    "fxo-none",
+    "fxo-zoom",
+    "fxo-tilt",
+    "fxo-shrink",
+    "fxo-up",
+    "vx-iris",
+    "vx-punch"
   ],
   "hits": "screen-shake",
   "transitions": {
@@ -340,6 +347,111 @@
     "spin": [
       {
         "effect": "rays-spin"
+      }
+    ],
+    "fx-ht": [
+      {
+        "effect": "halftone-reveal"
+      }
+    ],
+    "fx-ck": [
+      {
+        "effect": "clock-wipe"
+      }
+    ],
+    "fx-st": [
+      {
+        "effect": "stripe-wipe"
+      }
+    ],
+    "fx-sw": [
+      {
+        "effect": "saw-wipe"
+      }
+    ],
+    "fx-door-y": [
+      {
+        "effect": "door-swing"
+      }
+    ],
+    "fx-door-x": [
+      {
+        "effect": "door-swing"
+      }
+    ],
+    "fx-drop": [
+      {
+        "effect": "drop-bounce"
+      }
+    ],
+    "fx-sp": [
+      {
+        "effect": "spot-reveal"
+      }
+    ],
+    "fx-tpm": [
+      {
+        "effect": "text-photo-mask"
+      }
+    ],
+    "fx-ch": [
+      {
+        "effect": "char-roll"
+      }
+    ],
+    "fx-odo": [
+      {
+        "effect": "odometer"
+      }
+    ],
+    "fx-shine": [
+      {
+        "effect": "shine-text"
+      }
+    ],
+    "fx-tk-l": [
+      {
+        "effect": "ticker-band"
+      }
+    ],
+    "fx-tk-r": [
+      {
+        "effect": "ticker-band"
+      }
+    ],
+    "fx-mo": [
+      {
+        "effect": "photo-mosaic"
+      }
+    ],
+    "fx-sc-y": [
+      {
+        "effect": "photo-strips"
+      }
+    ],
+    "fx-wg": [
+      {
+        "effect": "wave-grid"
+      }
+    ],
+    "fx-drum3": [
+      {
+        "effect": "drum-3d"
+      }
+    ],
+    "fx-drum4": [
+      {
+        "effect": "drum-3d"
+      }
+    ],
+    "fx-drum5": [
+      {
+        "effect": "drum-3d"
+      }
+    ],
+    "fx-drum6": [
+      {
+        "effect": "drum-3d"
       }
     ]
   },

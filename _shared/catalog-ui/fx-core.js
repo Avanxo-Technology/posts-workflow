@@ -322,7 +322,7 @@
 
   // ================= KIT (carrito): varios efectos en una misma pieza =================
   // kit = {name, palette: '<marca>' | {dark,light,accent}, items: [{effect, label, params}]}; params incluye delay (inicio) y duration.
-  var KIT_MAX = 60, ELEMENT_KINDS = ['entrance', 'text', 'loop'];
+  var KIT_MAX = 100, ELEMENT_KINDS = ['entrance', 'text', 'loop'];
   var KIT_CSS = '/* kit: posiciones de ejemplo de los elementos; sustitúyelas por tu diseño */\n' +
     '.kit-slot{position:absolute;left:0;right:0;display:flex;justify-content:center;transform:translateY(-50%)}\n' +
     '.kit-slot>*{margin:0;padding:40px 90px;border-radius:40px;text-align:center;max-width:calc(100% - 120px);box-sizing:border-box;overflow-wrap:anywhere;background:var(--kit-accent);color:var(--kit-on);font:900 110px/1 system-ui,sans-serif;letter-spacing:-.03em}\n';

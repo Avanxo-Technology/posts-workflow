@@ -1,0 +1,4 @@
+/* door-swing — la escena entra girando en 3D como una puerta o una pantalla que cae. Parámetros: --fx-duration, --fx-delay, --fx-origin, --fx-deg, --fx-mode (fx-door-y | fx-door-x), --fx-ease */
+@keyframes fx-door-y{from{transform:perspective(1800px) rotateY(var(--fx-deg,-100deg));filter:brightness(.35)}to{transform:perspective(1800px) rotateY(0deg);filter:brightness(1)}}
+@keyframes fx-door-x{from{transform:perspective(1800px) rotateX(var(--fx-deg,100deg));filter:brightness(.35)}to{transform:perspective(1800px) rotateX(0deg);filter:brightness(1)}}
+.fx-door{transform-origin:var(--fx-origin,0% 50%);animation:var(--fx-mode,fx-door-y) var(--fx-duration,.9s) var(--fx-ease,cubic-bezier(.6,0,.3,1)) var(--fx-delay,0s) both}

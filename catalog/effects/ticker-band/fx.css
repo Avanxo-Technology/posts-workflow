@@ -1,0 +1,5 @@
+/* ticker-band — cinta de texto que se desplaza sin parar (marquesina). Marcado: .fx-tk con el texto repetido DOS veces (la mitad se desplaza). Parámetros: --fx-duration (lo que tarda en recorrer media cinta), --fx-delay, --fx-mode (fx-tk-l | fx-tk-r) */
+@keyframes fx-tk-l{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes fx-tk-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.fx-tk{display:flex;width:max-content;white-space:nowrap;animation:var(--fx-mode,fx-tk-l) var(--fx-duration,8s) linear var(--fx-delay,0s) both}
+.fx-tk>span{flex:none;padding-right:.5em}

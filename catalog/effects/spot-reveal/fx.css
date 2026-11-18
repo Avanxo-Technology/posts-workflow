@@ -1,0 +1,5 @@
+/* spot-reveal — un foco de borde suave crece y descubre la escena. Parámetros: --fx-duration, --fx-delay, --fx-x, --fx-y, --fx-feather (suavidad), --fx-ease */
+@property --fx-sp-r{syntax:'<length>';inherits:false;initial-value:0px}
+@keyframes fx-sp{from{--fx-sp-r:0px}to{--fx-sp-r:2100px}}
+.fx-sp{-webkit-mask-image:radial-gradient(circle at var(--fx-x,50%) var(--fx-y,50%),#000 var(--fx-sp-r),transparent calc(var(--fx-sp-r) + var(--fx-feather,260px)));mask-image:radial-gradient(circle at var(--fx-x,50%) var(--fx-y,50%),#000 var(--fx-sp-r),transparent calc(var(--fx-sp-r) + var(--fx-feather,260px)));
+  animation:fx-sp var(--fx-duration,.9s) var(--fx-ease,cubic-bezier(.6,0,.3,1)) var(--fx-delay,0s) both}

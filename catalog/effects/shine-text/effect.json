@@ -1,0 +1,50 @@
+{
+  "id": "shine-text",
+  "name": "Brillo que recorre el texto",
+  "kind": "text",
+  "medium": "video",
+  "tags": [
+    "texto",
+    "brillo",
+    "degradado"
+  ],
+  "snippet": "fx.css",
+  "audio": null,
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración",
+        "type": "number",
+        "unit": "s",
+        "default": 1.8,
+        "min": 0.1,
+        "max": 8,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 60,
+        "step": 0.05
+      },
+      "c1": {
+        "label": "Color base",
+        "type": "color",
+        "default": "palette.light"
+      },
+      "c2": {
+        "label": "Color del brillo",
+        "type": "color",
+        "default": "palette.accent"
+      }
+    },
+    "markers": [],
+    "label": "Brillo"
+  }
+}

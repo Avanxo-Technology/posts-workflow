@@ -1,0 +1,5 @@
+/* wave-grid — una cuadrícula de celdas aparece en ola desde un punto (calendario, mosaico de datos). Marcado: .fx-wg > b[--fx-d = retraso según la distancia al origen]. Parámetros: --fx-duration, --fx-delay, --fx-cols, --fx-gap */
+@keyframes fx-wg{0%{opacity:0;transform:scale(.15) rotate(-14deg)}65%{opacity:1;transform:scale(1.14) rotate(2deg)}100%{opacity:1;transform:none}}
+.fx-wg{display:grid;grid-template-columns:repeat(var(--fx-cols,7),1fr);gap:var(--fx-gap,10px)}
+.fx-wg>b{display:flex;align-items:center;justify-content:center;aspect-ratio:1;border-radius:18px;background:rgba(255,255,255,.12);font:700 28px sans-serif;
+  animation:fx-wg var(--fx-duration,.5s) cubic-bezier(.2,.9,.3,1.2) calc(var(--fx-delay,0s) + var(--fx-d,0s)) both}

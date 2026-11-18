@@ -1,0 +1,5 @@
+/* saw-wipe — un borde dentado cruza la pantalla de izquierda a derecha. Parámetros: --fx-duration, --fx-delay, --fx-tooth (profundidad del diente), --fx-ease */
+@property --fx-sw-p{syntax:'<percentage>';inherits:false;initial-value:-14%}
+@keyframes fx-sw{from{--fx-sw-p:-14%}to{--fx-sw-p:116%}}
+.fx-sw{clip-path:polygon(0 0,var(--fx-sw-p) 0%,calc(var(--fx-sw-p) - var(--fx-tooth,12%)) 5%,var(--fx-sw-p) 10%,calc(var(--fx-sw-p) - var(--fx-tooth,12%)) 15%,var(--fx-sw-p) 20%,calc(var(--fx-sw-p) - var(--fx-tooth,12%)) 25%,var(--fx-sw-p) 30%,calc(var(--fx-sw-p) - var(--fx-tooth,12%)) 35%,var(--fx-sw-p) 40%,calc(var(--fx-sw-p) - var(--fx-tooth,12%)) 45%,var(--fx-sw-p) 50%,calc(var(--fx-sw-p) - var(--fx-tooth,12%)) 55%,var(--fx-sw-p) 60%,calc(var(--fx-sw-p) - var(--fx-tooth,12%)) 65%,var(--fx-sw-p) 70%,calc(var(--fx-sw-p) - var(--fx-tooth,12%)) 75%,var(--fx-sw-p) 80%,calc(var(--fx-sw-p) - var(--fx-tooth,12%)) 85%,var(--fx-sw-p) 90%,calc(var(--fx-sw-p) - var(--fx-tooth,12%)) 95%,var(--fx-sw-p) 100%,0 100%);
+  animation:fx-sw var(--fx-duration,.9s) var(--fx-ease,cubic-bezier(.6,0,.3,1)) var(--fx-delay,0s) both}

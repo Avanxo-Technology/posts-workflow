@@ -1,0 +1,6 @@
+/* halftone-reveal — la escena se revela con una trama de puntos que crecen hasta fundirse. Parámetros: --fx-duration, --fx-delay, --fx-size (paso de la trama), --fx-ease */
+@property --fx-ht-r{syntax:'<length>';inherits:false;initial-value:0px}
+@keyframes fx-ht{from{--fx-ht-r:0px}to{--fx-ht-r:calc(var(--fx-size,54px) * .75)}}
+.fx-ht{-webkit-mask-image:radial-gradient(circle,#000 var(--fx-ht-r),transparent calc(var(--fx-ht-r) + 1px));mask-image:radial-gradient(circle,#000 var(--fx-ht-r),transparent calc(var(--fx-ht-r) + 1px));
+  -webkit-mask-size:var(--fx-size,54px) var(--fx-size,54px);mask-size:var(--fx-size,54px) var(--fx-size,54px);
+  animation:fx-ht var(--fx-duration,.9s) var(--fx-ease,cubic-bezier(.6,0,.3,1)) var(--fx-delay,0s) both}

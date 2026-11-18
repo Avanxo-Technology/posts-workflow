@@ -1,0 +1,5 @@
+/* drum-3d — un cilindro de caras que gira para mostrar una cara a la vez (alternativa a una lista que aparece de uno en uno). Parámetros: --fx-duration, --fx-delay, --fx-n (caras), --fx-h (alto de cara), --fx-r (radio = h / 2 / tan(180/n)). Los @keyframes dependen del número de caras: fx-drum5 va incluido; para otro n generar fx-drum<n> (ver effect.md). */
+.fx-drum{position:absolute;perspective:1500px}
+.fx-drum-in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transform:translateZ(calc(var(--fx-r,165px) * -1));animation:fx-drum5 var(--fx-duration,5s) cubic-bezier(.5,0,.2,1) var(--fx-delay,0s) both}
+.fx-face{position:absolute;inset:0;backface-visibility:hidden;transform:rotateX(calc(var(--i) * var(--fx-a,-72deg))) translateZ(var(--fx-r,165px));display:flex;align-items:center;justify-content:center}
+@keyframes fx-drum5{0.00%,13.20%{transform:rotateX(0.0deg)}20.00%,33.20%{transform:rotateX(72.0deg)}40.00%,53.20%{transform:rotateX(144.0deg)}60.00%,73.20%{transform:rotateX(216.0deg)}80.00%,100.00%{transform:rotateX(288.0deg)}}

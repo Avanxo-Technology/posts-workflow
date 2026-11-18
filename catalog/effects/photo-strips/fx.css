@@ -1,0 +1,6 @@
+/* photo-strips — columnas de fotos que se deslizan en sentidos opuestos (película en paralaje). Marcado: .fx-ss > .fx-sc[--fx-dir=±1] > div > b (fotos con style background-image). Parámetros: --fx-duration, --fx-delay, --fx-gap, --fx-axis (fx-sc-y | fx-sc-x) */
+@keyframes fx-sc-y{from{transform:translateY(0)}to{transform:translateY(calc(var(--fx-dir,-1) * -25%))}}
+.fx-ss{position:relative;display:flex;gap:var(--fx-gap,14px);overflow:hidden}
+.fx-sc{flex:1;position:relative;overflow:hidden}
+.fx-sc>div{display:flex;flex-direction:column;gap:var(--fx-gap,14px);width:100%;height:200%;margin-top:var(--fx-top,-30%);animation:fx-sc-y var(--fx-duration,6s) cubic-bezier(.3,.1,.3,1) var(--fx-delay,0s) both}
+.fx-sc>div>b{flex:1;display:block;border-radius:22px;background-size:cover;background-position:center;background-image:var(--fx-img,linear-gradient(135deg,#e86a1a,#0f2440))}

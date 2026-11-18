@@ -1,0 +1,4 @@
+/* char-roll — cada letra gira desde abajo en 3D con un pequeño desfase. Marcado: <span class="fx-ch"><i style="--i:0">H</i><i style="--i:1">O</i>…</span>. Parámetros: --fx-duration, --fx-delay, --fx-step (desfase entre letras) */
+@keyframes fx-ch{0%{opacity:0;transform:perspective(500px) rotateX(-105deg) translateY(.55em)}100%{opacity:1;transform:none}}
+.fx-ch{display:inline-block}
+.fx-ch>i{display:inline-block;font-style:normal;white-space:pre;animation:fx-ch var(--fx-duration,.55s) cubic-bezier(.2,.9,.3,1.25) calc(var(--fx-delay,0s) + var(--i,0) * var(--fx-step,.035s)) both}

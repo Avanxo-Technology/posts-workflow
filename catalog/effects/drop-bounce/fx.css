@@ -1,0 +1,3 @@
+/* drop-bounce — la escena cae desde arriba y rebota al tocar. Parámetros: --fx-duration, --fx-delay */
+@keyframes fx-drop{0%{transform:translateY(-105%)}58%{transform:translateY(0)}72%{transform:translateY(-4.5%)}86%{transform:translateY(0)}94%{transform:translateY(-1.2%)}100%{transform:translateY(0)}}
+.fx-drop{animation:fx-drop var(--fx-duration,.9s) cubic-bezier(.5,0,.9,.6) var(--fx-delay,0s) both}

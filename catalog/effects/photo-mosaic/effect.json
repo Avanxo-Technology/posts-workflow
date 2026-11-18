@@ -1,0 +1,40 @@
+{
+  "id": "photo-mosaic",
+  "name": "Mosaico de fotos que se voltea",
+  "kind": "entrance",
+  "medium": "video",
+  "tags": [
+    "foto",
+    "mosaico",
+    "3d",
+    "cuadricula"
+  ],
+  "snippet": "fx.css",
+  "audio": null,
+  "spec": 1,
+  "fx": {
+    "css": "fx.css",
+    "html": "fx.html",
+    "params": {
+      "duration": {
+        "label": "Duración",
+        "type": "number",
+        "unit": "s",
+        "default": 0.6,
+        "min": 0.1,
+        "max": 3,
+        "step": 0.05
+      },
+      "delay": {
+        "label": "Retraso (segundo de entrada)",
+        "type": "number",
+        "unit": "s",
+        "default": 0,
+        "min": 0,
+        "max": 60,
+        "step": 0.05
+      }
+    },
+    "markers": []
+  }
+}

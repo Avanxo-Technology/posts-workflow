@@ -1,0 +1,5 @@
+/* stripe-wipe — franjas que engordan hasta unirse (persianas con ángulo libre). Parámetros: --fx-duration, --fx-delay, --fx-angle, --fx-pitch (paso), --fx-ease */
+@property --fx-st-w{syntax:'<length>';inherits:false;initial-value:0px}
+@keyframes fx-st{from{--fx-st-w:0px}to{--fx-st-w:calc(var(--fx-pitch,90px) + 2px)}}
+.fx-st{-webkit-mask-image:repeating-linear-gradient(var(--fx-angle,135deg),#000 0,#000 var(--fx-st-w),transparent var(--fx-st-w),transparent var(--fx-pitch,90px));mask-image:repeating-linear-gradient(var(--fx-angle,135deg),#000 0,#000 var(--fx-st-w),transparent var(--fx-st-w),transparent var(--fx-pitch,90px));
+  animation:fx-st var(--fx-duration,.9s) var(--fx-ease,cubic-bezier(.6,0,.3,1)) var(--fx-delay,0s) both}

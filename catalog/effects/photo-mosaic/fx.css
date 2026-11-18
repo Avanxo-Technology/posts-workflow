@@ -1,0 +1,6 @@
+/* photo-mosaic — la foto se arma con teselas que se voltean en 3D en diagonal. Marcado: .fx-mo > b[--c,--r,--fx-d]. Parámetros: --fx-duration, --fx-delay, --fx-img (url), --fx-cols, --fx-rows */
+@keyframes fx-mo{0%{opacity:0;transform:perspective(700px) rotateY(95deg) scale(.7)}60%{opacity:1}100%{opacity:1;transform:none}}
+.fx-mo{position:relative;display:grid;grid-template-columns:repeat(var(--fx-cols,4),1fr);grid-template-rows:repeat(var(--fx-rows,4),1fr);overflow:hidden}
+.fx-mo>b{display:block;background-image:var(--fx-img,linear-gradient(135deg,#e86a1a,#0f2440));background-size:calc(var(--fx-cols,4) * 100%) calc(var(--fx-rows,4) * 100%);
+  background-position:calc(var(--c) * 100% / (var(--fx-cols,4) - 1)) calc(var(--r) * 100% / (var(--fx-rows,4) - 1));
+  animation:fx-mo var(--fx-duration,.6s) cubic-bezier(.2,.8,.2,1) calc(var(--fx-delay,0s) + var(--fx-d,0s)) both}

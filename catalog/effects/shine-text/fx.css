@@ -1,0 +1,4 @@
+/* shine-text — una franja de luz recorre el texto. Parámetros: --fx-duration, --fx-delay, --fx-c1 (color base), --fx-c2 (color del brillo) */
+@keyframes fx-shine{from{background-position:100% 0}to{background-position:0% 0}}
+.fx-shine{background-image:linear-gradient(100deg,var(--fx-c1,#fff) 38%,var(--fx-c2,#f6a35e) 50%,var(--fx-c1,#fff) 62%);background-size:300% 100%;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  animation:fx-shine var(--fx-duration,1.8s) ease-in-out var(--fx-delay,0s) both}

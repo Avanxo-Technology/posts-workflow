@@ -83,7 +83,7 @@ Un efecto «spec 1» (`"spec": 1` en su `effect.json`) es un módulo portable y 
 - Los efectos funcionan por tiempo (animaciones CSS que se pueden pausar y mover con `seek`), así que sirven para renderizar video.
 - `_shared/catalog-ui/fx-core.js` valida y genera el código; lo usan la UI, la API y las pruebas (`node --test _shared/fx-core.test.mjs`). `posts effect check` comprueba que cada parámetro se use en el CSS.
 
-Todos los efectos del repo (39) están en spec 1. Los efectos con varias piezas (p. ej. `lower-third`, `venetian-bars`) y los envoltorios (`screen-shake`) también cumplen el contrato.
+Todos los efectos del repo (61) están en spec 1. Los efectos con varias piezas (p. ej. `lower-third`, `venetian-bars`) y los envoltorios (`screen-shake`) también cumplen el contrato.
 
 Campos opcionales de `fx` para los casos complejos:
 - `total`: fórmula del tiempo total cuando no es `delay + duration` (p. ej. `"delay + duration * count"`). Solo admite números, nombres de parámetros, `+ - * /` y paréntesis; no ejecuta código.
@@ -109,9 +109,9 @@ En la pestaña **Kit** de `posts catalog` se reúnen varios efectos spec 1 para 
 **API del kit** (para agentes), con `k` = el valor del enlace del kit:
 - `GET /api/v1/kit?k=<kit>`: JSON con `items[]` (inicio, duración, marcadores y HTML de cada uno), `code.css`, `code.html`, `markers` y `howTo`. Un kit no válido devuelve 400 con el detalle.
 - `GET /api/v1/kit?k=<kit>&format=html`: la página autónoma (con política de seguridad restrictiva).
-- **Crear un kit sin la UI** (para que la IA decida sola): `POST /api/v1/kit` con cuerpo JSON, o `GET /api/v1/kit?kit=<JSON urlencoded>` si solo puede leer URLs (hasta ~16000 caracteres). Forma: `{"name","palette","items":[{"effect","label","params":{…},"elements":{"el_text":…}}]}` (hasta 60 ítems; `elements` admite las claves `el_*` de la API). No guarda nada: compone y devuelve lo mismo que `?k=` más `k`, `kitUrl` (abre el kit en la web para retocarlo) y `page`. Errores: 400 con `details` por elemento; 413 si el cuerpo pasa de 64 KB. Es el único POST de la API.
+- **Crear un kit sin la UI** (para que la IA decida sola): `POST /api/v1/kit` con cuerpo JSON, o `GET /api/v1/kit?kit=<JSON urlencoded>` si solo puede leer URLs (hasta ~16000 caracteres). Forma: `{"name","palette","items":[{"effect","label","params":{…},"elements":{"el_text":…}}]}` (hasta 100 ítems; `elements` admite las claves `el_*` de la API). No guarda nada: compone y devuelve lo mismo que `?k=` más `k`, `kitUrl` (abre el kit en la web para retocarlo) y `page`. Errores: 400 con `details` por elemento; 413 si el cuerpo pasa de 64 KB. Es el único POST de la API.
 - `llms.txt` incluye la **receta de pieza**: elegir efectos, componer el kit, comprobar y aplicar en la pieza del usuario.
-Solo admiten efectos spec 1 (parametrizados) y hasta 60 elementos. Las etiquetas se escapan siempre.
+Solo admiten efectos spec 1 (parametrizados) y hasta 100 elementos. Las etiquetas se escapan siempre.
 
 ## Elementos de muestra editables
 Un efecto puede marcar sus elementos de muestra en `fx.html`: `data-fx-sample` (texto de muestra, con `{{label}}`), `data-fx-scene="a|b"` (escenas) y `data-fx-media` (foto o video). Las escenas dentro de `<!--fx-demo-->…<!--/fx-demo-->` solo existen en la vista previa.

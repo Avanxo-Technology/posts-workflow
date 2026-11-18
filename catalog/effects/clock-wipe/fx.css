@@ -1,0 +1,5 @@
+/* clock-wipe — la escena se descubre girando como las agujas de un reloj. Parámetros: --fx-duration, --fx-delay, --fx-x, --fx-y (centro), --fx-from (ángulo de partida), --fx-ease */
+@property --fx-ck-a{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes fx-ck{from{--fx-ck-a:0deg}to{--fx-ck-a:360deg}}
+.fx-ck{-webkit-mask-image:conic-gradient(from var(--fx-from,0deg) at var(--fx-x,50%) var(--fx-y,50%),#000 var(--fx-ck-a),transparent calc(var(--fx-ck-a) + .4deg));mask-image:conic-gradient(from var(--fx-from,0deg) at var(--fx-x,50%) var(--fx-y,50%),#000 var(--fx-ck-a),transparent calc(var(--fx-ck-a) + .4deg));
+  animation:fx-ck var(--fx-duration,.9s) var(--fx-ease,cubic-bezier(.6,0,.3,1)) var(--fx-delay,0s) both}

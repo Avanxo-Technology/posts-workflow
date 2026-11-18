@@ -1,0 +1,5 @@
+/* text-photo-mask — letras gigantes rellenas con una foto que se mueve (zoom y paneo). Parámetros: --fx-duration, --fx-delay, --fx-img (imagen con url o degradado), --fx-stroke, --fx-stroke-color, --fx-z0/--fx-z1 (zoom), --fx-p0/--fx-p1 (posición) */
+@keyframes fx-tpm{from{background-size:var(--fx-z0,260%);background-position:var(--fx-p0,15% 35%)}to{background-size:var(--fx-z1,170%);background-position:var(--fx-p1,80% 60%)}}
+.fx-tpm{background-image:var(--fx-img,linear-gradient(120deg,#e86a1a,#f6c28b,#ffffff));background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  -webkit-text-stroke:var(--fx-stroke,3px) var(--fx-stroke-color,#fff);
+  animation:fx-tpm var(--fx-duration,6s) linear var(--fx-delay,0s) both}

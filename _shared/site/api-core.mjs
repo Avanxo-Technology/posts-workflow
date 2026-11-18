@@ -147,7 +147,7 @@ Describe los efectos en JSON y el sitio los compone (código unido, tiempos, mar
   {"name":"Mi reel","palette":"${pal}","items":[
     {"effect":"title-stack","label":"Intro","params":{"delay":0.3,"duration":0.8},"elements":{"el_text":"Nuevo","el_s2_text":"Colección"}},
     {"effect":"slam","params":{"delay":2}}]}
-  - items: lista ordenada (hasta 60). effect = id; params = los de la ficha del efecto (valores por defecto si se omiten); elements = los mismos el_* de arriba.
+  - items: lista ordenada (hasta 100). effect = id; params = los de la ficha del efecto (valores por defecto si se omiten); elements = los mismos el_* de arriba.
   - palette: id de ${pub ? 'paleta' : 'marca'} o {"dark":"#112233","light":"#ffffff","accent":"#ff5500"}.
   - Si algo no es válido responde 400 con "details" por elemento: corrige y repite.
   - La respuesta es la del kit (items[].start, code.css, code.html, howTo) más "kitUrl" (ábrelo en la web para que la persona lo retoque) y "page" (reproductor).
